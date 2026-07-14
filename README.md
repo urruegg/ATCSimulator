@@ -81,6 +81,7 @@ flowchart LR
 | **Backlog** | Epics/Stories with acceptance criteria, MoSCoW, roadmap | [docs/BACKLOG.md](./docs/BACKLOG.md) |
 | **GitHub Copilot Build Guide** | How the agents design/build/validate the demo with "superpowers"; traceability | [docs/COPILOT-BUILD-GUIDE.md](./docs/COPILOT-BUILD-GUIDE.md) |
 | **Agent Registry** | Runtime agents (AG-F-##) + engineering agents (AG-E-##) | [AGENTS.md](./AGENTS.md) |
+| **Superpowers workflow folders** | Idea intake, specifications, plans, sprint delegation, and review evidence | [docs/ideas/](./docs/ideas/) · [docs/specs/](./docs/specs/) · [docs/plans/](./docs/plans/) · [docs/sprints/](./docs/sprints/) · [docs/reviews/](./docs/reviews/) |
 | **Copilot custom agents** | Product Owner, Developer, Enterprise Architect, SecDevOps, ATC SME, RAI Officer | [.github/agents/](./.github/agents/) |
 | **Copilot repo instructions** | Repo-wide Copilot custom instructions & guardrails | [.github/copilot-instructions.md](./.github/copilot-instructions.md) |
 | **Superpowers Contract** | Operating rules every Copilot agent must obey | [SUPERPOWERS_CONTRACT.md](./SUPERPOWERS_CONTRACT.md) |
@@ -129,7 +130,8 @@ README.md                      AGENTS.md   SUPERPOWERS_CONTRACT.md
 .github/agents/*.agent.md
 docs/  PRD · SD · BOM · BVA · AI · COMPLIANCE · SECURITY · DATA
        DESIGN-PRINCIPLES · PERSONAS-JOURNEY · OPERATIONS · TEST
-       BACKLOG · COPILOT-BUILD-GUIDE · adr/
+    BACKLOG · COPILOT-BUILD-GUIDE · adr/
+    ideas · specs · plans · sprints · reviews
 data/scenarios/sample-scenario.json
 api/openapi.yaml
 ```
@@ -138,6 +140,7 @@ api/openapi.yaml
 1. **Read** [docs/PRD.md](./docs/PRD.md) → [docs/SD.md](./docs/SD.md) → [docs/BOM.md](./docs/BOM.md).
 2. **Open the custom agents** in [.github/agents/](./.github/agents/) in VS Code with GitHub Copilot; start with the Product Owner to shape the backlog, then the Enterprise Architect for sign-off, then the Developer to build.
 3. **Follow** [docs/COPILOT-BUILD-GUIDE.md](./docs/COPILOT-BUILD-GUIDE.md) to build the demo, honoring the guardrails in [.github/copilot-instructions.md](./.github/copilot-instructions.md) and [SUPERPOWERS_CONTRACT.md](./SUPERPOWERS_CONTRACT.md).
+4. **Use the workflow folders** under `docs/ideas`, `docs/specs`, `docs/plans`, `docs/sprints`, and `docs/reviews` to track ideation through sprint delivery and stakeholder review.
 
 ## Provenance & disclaimers
 - Built from the Customer's two use-case decks (**UC2 — Virtual Simulation Pilot Agent**, primary; **UC1 — Report Summarization**, challenger) and the discovery call of 9 June 2026.
