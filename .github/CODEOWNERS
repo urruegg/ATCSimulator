@@ -1,0 +1,21 @@
+# Superpowers ownership and review gates for ATCSimulator
+# Replace/extend owners as your team grows.
+
+* @urruegg
+
+# Enterprise architecture and contract-critical paths
+/api/openapi.yaml @urruegg
+/docs/adr/ @urruegg
+/SUPERPOWERS_CONTRACT.md @urruegg
+/AGENTS.md @urruegg
+
+# Responsible AI and compliance critical paths
+/docs/AI.md @urruegg
+/docs/COMPLIANCE.md @urruegg
+/docs/SECURITY.md @urruegg
+/data/scenarios/ @urruegg
+
+# Copilot governance and agent behavior
+/.github/copilot-instructions.md @urruegg
+/.github/chatmodes/ @urruegg
+/.github/instructions/ @urruegg

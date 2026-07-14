@@ -1,20 +1,20 @@
-﻿# OS
-.DS_Store
-Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-
-# Node
-node_modules/
-
-# Build artifacts
+# Build / deploy
+.azure/
+bin/
+obj/
 dist/
-build/
-
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+# Secrets — never commit
+*.env
+.env*
+*.pfx
+*.key
+azd.env
+# IDE
+.vscode/*.local
+.idea/
+# Local scratch
+*.local.md

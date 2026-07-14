@@ -1,0 +1,569 @@
+openapi: 3.0.3
+info:
+  title: ATCSimulator Agnostic API
+  version: 0.1.0
+  description: >-
+    Simulator-vendor-independent ("Agnostic API") façade for the ATCSimulator
+    virtual-pilot services. Fronts the runtime agents (ASR/STT, NLP/intent &
+    phraseology, simulator-command mapping, virtual-pilot read-back generation,
+    TTS, transcription — AG-F-01..AG-F-07) behind a single, versioned contract so
+    that any simulator vendor can integrate without coupling to a specific speech
+    or model vendor (design principle DP-20).
+
+
+    Scope note: this stub covers the DEMO / MVP (Scope 2). In the demo the API
+    handles ONLY public live-flight data and synthetic virtual-pilot voices — NO
+    personal data — and is NEVER connected to live/operational ATC (CON-01,
+    CON-03). See ../docs/DATA.md §5 (data contracts) and ../docs/SECURITY.md §3/§9
+    (APIM boundary, threat model). Availability/region facts are "as of Jul 2026;
+    verify at design time".
+  contact:
+    name: Cloud Solution Architect (CSA), Microsoft
+  license:
+    name: Confidential — anonymized (internal draft)
+servers:
+  - url: https://apim.atcsimulator.example/agnostic/v1
+    description: Agnostic API via Azure API Management (demo plane, Sweden Central)
+tags:
+  - name: scenarios
+    description: Scenario catalogue (authored exercises)
+  - name: flights
+    description: Aircraft selection from the public live-flight feed (demo)
+  - name: sessions
+    description: Real-time simulation session lifecycle
+  - name: audio
+    description: Streaming audio in/out (real-time voice loop)
+  - name: instructions
+    description: ATC instruction submission and virtual-pilot read-back
+  - name: transcript
+    description: Conversation transcript retrieval
+security:
+  - entraOAuth2: []
+paths:
+  /scenarios:
+    get:
+      tags: [scenarios]
+      summary: List available scenarios
+      operationId: listScenarios
+      parameters:
+        - name: airportIcao
+          in: query
+          required: false
+          schema: { type: string, example: LSZH }
+        - name: difficulty
+          in: query
+          required: false
+          schema: { type: string, enum: [beginner, intermediate, advanced] }
+      responses:
+        "200":
+          description: Scenario list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Scenario" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /scenarios/{scenarioId}:
+    get:
+      tags: [scenarios]
+      summary: Get a scenario definition
+      operationId: getScenario
+      parameters:
+        - $ref: "#/components/parameters/ScenarioId"
+      responses:
+        "200":
+          description: Scenario
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Scenario" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /flights:
+    get:
+      tags: [flights]
+      summary: Query the public live-flight feed for candidate aircraft
+      description: >-
+        Read-only projection of a public flight feed (FlightAware AeroAPI /
+        Flightradar24), ingested via APIM only. Returns non-personal aircraft
+        state usable to seed a demo scenario.
+      operationId: listFlights
+      parameters:
+        - name: boundingBox
+          in: query
+          description: "lat1,lon1,lat2,lon2 geographic filter"
+          required: false
+          schema: { type: string, example: "47.2,8.3,47.7,8.9" }
+        - name: nearIcao
+          in: query
+          required: false
+          schema: { type: string, example: LSZH }
+      responses:
+        "200":
+          description: Candidate aircraft from the public feed
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Aircraft" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+  /flights/{callsign}:
+    get:
+      tags: [flights]
+      summary: Get a single aircraft's current public state
+      operationId: getFlight
+      parameters:
+        - name: callsign
+          in: path
+          required: true
+          schema: { type: string, example: SWR456 }
+      responses:
+        "200":
+          description: Aircraft state
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Aircraft" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /sessions:
+    post:
+      tags: [sessions]
+      summary: Start a simulation session (start scenario)
+      description: >-
+        Creates a real-time session for a scenario and (optionally) a selected
+        aircraft. Returns audio-channel negotiation details for the streaming
+        voice loop.
+      operationId: startSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StartSessionRequest" }
+      responses:
+        "201":
+          description: Session created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /sessions/{sessionId}:
+    get:
+      tags: [sessions]
+      summary: Get session state
+      operationId: getSession
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: Session
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /sessions/{sessionId}/stop:
+    post:
+      tags: [sessions]
+      summary: Stop a simulation session (stop scenario)
+      operationId: stopSession
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: Session stopped
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /sessions/{sessionId}/aircraft:
+    post:
+      tags: [flights, sessions]
+      summary: Select an aircraft from the flight feed into the session
+      operationId: selectAircraft
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [callsign]
+              properties:
+                callsign: { type: string, example: SWR456 }
+                source:
+                  type: string
+                  enum: [public-feed, scenario]
+                  default: public-feed
+      responses:
+        "200":
+          description: Aircraft attached to session
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Aircraft" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /sessions/{sessionId}/audio/negotiate:
+    post:
+      tags: [audio]
+      summary: Negotiate the real-time audio channel (WebSocket / WebRTC)
+      description: >-
+        Returns connection details for the bidirectional streaming audio loop
+        (trainee mic in -> ASR/real-time model -> virtual-pilot TTS out). The
+        media plane itself is a persistent WebSocket/WebRTC connection documented
+        under `x-websocket` below; this HTTPS endpoint performs auth-bound
+        signalling (token + SDP/offer exchange) so the stream inherits Entra
+        authorization and APIM policy.
+      operationId: negotiateAudio
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sdpOffer: { type: string, description: "WebRTC SDP offer (optional; omit for WebSocket transport)" }
+                codec: { type: string, enum: [opus, pcm16], default: opus }
+      responses:
+        "200":
+          description: Audio channel connection descriptor
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AudioChannel" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /sessions/{sessionId}/audio/stream:
+    get:
+      tags: [audio]
+      summary: "Streaming audio in/out (documented WebSocket endpoint)"
+      description: >-
+        WebSocket upgrade endpoint for the real-time voice loop. OpenAPI 3.0 does
+        not natively model WebSockets, so the channel is documented here and in
+        the `x-websocket` extension. Client connects with
+        `Sec-WebSocket-Protocol: atcsim.audio.v1` and the session bearer token;
+        binary frames carry inbound trainee audio and outbound synthetic
+        virtual-pilot audio; JSON control frames carry transcript deltas,
+        command-dispatch events, and read-back events.
+      operationId: streamAudio
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "101":
+          description: Switching Protocols (WebSocket upgrade)
+        "401": { $ref: "#/components/responses/Unauthorized" }
+      x-websocket:
+        subprotocol: atcsim.audio.v1
+        transport: [websocket, webrtc]
+        direction: bidirectional
+        inboundFrames:
+          - { type: binary, description: "trainee microphone audio (opus/pcm16)" }
+        outboundFrames:
+          - { type: binary, description: "synthetic virtual-pilot audio (opus/pcm16)" }
+          - { type: json, schema: "#/components/schemas/Transcript", description: "transcript delta events" }
+          - { type: json, schema: "#/components/schemas/ReadBack", description: "read-back events" }
+  /sessions/{sessionId}/instructions:
+    post:
+      tags: [instructions]
+      summary: Submit an ATC instruction (text or recognized transcript)
+      description: >-
+        Submits a controller instruction for a target aircraft. The service maps
+        it to deterministic, schema-validated simulator commands (AG-F-04) and
+        generates the virtual-pilot read-back (AG-F-01/AG-F-05). Free-text input
+        is validated and grounded; ambiguous/low-confidence input is rejected with
+        a "say again" style response rather than guessed.
+      operationId: submitInstruction
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Instruction" }
+      responses:
+        "202":
+          description: Instruction accepted; commands dispatched and read-back generated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReadBack" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "422":
+          description: Ambiguous / unmappable instruction (virtual pilot responds "say again")
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    get:
+      tags: [instructions]
+      summary: List instructions issued in the session
+      operationId: listInstructions
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: Instruction history
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Instruction" }
+  /sessions/{sessionId}/instructions/{instructionId}/readback:
+    get:
+      tags: [instructions]
+      summary: Retrieve the virtual-pilot read-back for an instruction
+      operationId: getReadBack
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+        - name: instructionId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Read-back
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReadBack" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /sessions/{sessionId}/transcript:
+    get:
+      tags: [transcript]
+      summary: Fetch the session transcript
+      description: >-
+        Returns the time-aligned R/T transcript (trainee + virtual pilot). In the
+        demo this contains no personal data. In production, transcripts are
+        personal data stored in Switzerland North (DATA.md D5); this endpoint is
+        subject to the personal-plane residency and access controls.
+      operationId: getTranscript
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+        - name: format
+          in: query
+          required: false
+          schema: { type: string, enum: [json, vtt, text], default: json }
+      responses:
+        "200":
+          description: Transcript
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Transcript" }
+        "404": { $ref: "#/components/responses/NotFound" }
+components:
+  securitySchemes:
+    entraOAuth2:
+      type: oauth2
+      description: >-
+        Microsoft Entra ID (OAuth2 / OpenID Connect). JWT validated at the APIM
+        façade (SECURITY.md NFR-08). External simulator vendors additionally
+        present a per-vendor subscription key/cert. Replace placeholder tenant/URLs
+        at design time.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize
+          tokenUrl: https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token
+          scopes:
+            "api://atcsimulator/Session.ReadWrite": Manage simulation sessions
+            "api://atcsimulator/Scenario.Read": Read scenarios
+            "api://atcsimulator/Transcript.Read": Read transcripts
+        clientCredentials:
+          tokenUrl: https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token
+          scopes:
+            "api://atcsimulator/.default": Service-to-service (simulator adapter)
+  parameters:
+    ScenarioId:
+      name: scenarioId
+      in: path
+      required: true
+      schema: { type: string, example: SCEN-LSZH-0001 }
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  responses:
+    Unauthorized:
+      description: Missing or invalid credentials
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    BadRequest:
+      description: Invalid request / schema validation failed
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    RateLimited:
+      description: Rate limit / quota exceeded (APIM policy)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+  schemas:
+    Scenario:
+      type: object
+      required: [id, name, airportIcao, difficulty]
+      properties:
+        id: { type: string, example: SCEN-LSZH-0001 }
+        name: { type: string }
+        airportIcao: { type: string, example: LSZH }
+        difficulty: { type: string, enum: [beginner, intermediate, advanced] }
+        estimatedDurationMinutes: { type: integer }
+        scope: { type: string, enum: [demo, production], default: demo }
+        personalData: { type: boolean, default: false }
+        phraseologyStandard: { type: string }
+        primaryAircraft: { $ref: "#/components/schemas/Aircraft" }
+        waypoints:
+          type: array
+          items: { $ref: "#/components/schemas/Waypoint" }
+    Waypoint:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, example: GERSA }
+        type: { type: string, example: fix }
+        latitude: { type: number, format: double }
+        longitude: { type: number, format: double }
+        sequence: { type: integer }
+    Aircraft:
+      type: object
+      required: [callsign]
+      properties:
+        callsign: { type: string, example: SWR456 }
+        telephony: { type: string, example: "Swiss 456" }
+        registration: { type: string, example: HB-IJW }
+        typeIcao: { type: string, example: A320 }
+        wakeCategory: { type: string, enum: [L, M, H, J] }
+        operator: { type: string, example: SWR }
+        origin: { type: string, example: LSZH }
+        destination: { type: string, example: LEBL }
+        squawk: { type: string, example: "1000" }
+        onGround: { type: boolean, default: false }
+        position:
+          type: object
+          properties:
+            latitude: { type: number, format: double }
+            longitude: { type: number, format: double }
+        altitudeFt: { type: integer, example: 6000 }
+        headingDegrees: { type: integer, minimum: 0, maximum: 360, example: 275 }
+        groundSpeedKnots: { type: integer, example: 220 }
+        verticalRateFpm: { type: integer, example: 1800 }
+        flightPhase: { type: string, enum: [ground, climb, cruise, descent, approach], example: climb }
+        source: { type: string, enum: [public-feed, scenario], default: public-feed }
+    StartSessionRequest:
+      type: object
+      required: [scenarioId]
+      properties:
+        scenarioId: { type: string, example: SCEN-LSZH-0001 }
+        aircraftCallsign:
+          type: string
+          description: Optional aircraft selected from the public feed to seed the session
+          example: SWR456
+        voiceProfile:
+          type: string
+          description: Synthetic virtual-pilot voice profile (standard neural voice)
+          enum: [male-neutral, female-neutral, mixed]
+          default: mixed
+        language:
+          type: string
+          example: en
+    Session:
+      type: object
+      required: [sessionId, scenarioId, status]
+      properties:
+        sessionId: { type: string, format: uuid }
+        scenarioId: { type: string, example: SCEN-LSZH-0001 }
+        status: { type: string, enum: [starting, active, stopped, error], example: active }
+        aircraftCallsign: { type: string, example: SWR456 }
+        scope: { type: string, enum: [demo, production], default: demo }
+        personalData: { type: boolean, default: false }
+        region: { type: string, example: swedencentral }
+        audioChannel: { $ref: "#/components/schemas/AudioChannel" }
+        startedUtc: { type: string, format: date-time }
+        stoppedUtc: { type: string, format: date-time }
+    AudioChannel:
+      type: object
+      properties:
+        transport: { type: string, enum: [websocket, webrtc], example: websocket }
+        url: { type: string, example: "wss://apim.atcsimulator.example/agnostic/v1/sessions/{sessionId}/audio/stream" }
+        subprotocol: { type: string, example: atcsim.audio.v1 }
+        codec: { type: string, enum: [opus, pcm16], default: opus }
+        token: { type: string, description: "Short-lived, session-bound bearer token (Entra-derived)" }
+        expiresUtc: { type: string, format: date-time }
+    Instruction:
+      type: object
+      required: [targetCallsign]
+      properties:
+        instructionId: { type: string, format: uuid, readOnly: true }
+        targetCallsign: { type: string, example: SWR456 }
+        text:
+          type: string
+          description: Raw or recognized ATC transmission text
+          example: "Swiss 456, turn right heading 290 degrees, and climb flight level 370."
+        sttConfidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.94
+        commands:
+          type: array
+          description: Deterministic, schema-validated commands mapped from the instruction (AG-F-04)
+          items: { $ref: "#/components/schemas/Command" }
+        issuedUtc: { type: string, format: date-time, readOnly: true }
+    Command:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [SELECT_AIRCRAFT, SET_HEADING, SET_FLIGHT_LEVEL, SET_ALTITUDE, SET_SPEED, SET_QNH, REPORT_POINT, TRAFFIC_INFO]
+        callsign: { type: string, example: SWR456 }
+        direction: { type: string, enum: [LEFT, RIGHT] }
+        degrees: { type: integer, minimum: 0, maximum: 360 }
+        value: { type: integer, description: "Flight level or QNH value depending on type" }
+        feet: { type: integer, description: "Altitude in feet for SET_ALTITUDE" }
+        knots: { type: integer, description: "Speed for SET_SPEED" }
+        reportName: { type: string }
+        status: { type: string, enum: [OK, REJECTED, ERROR], readOnly: true }
+    ReadBack:
+      type: object
+      required: [sessionId, speaker, text]
+      properties:
+        sessionId: { type: string, format: uuid }
+        instructionId: { type: string, format: uuid }
+        speaker: { type: string, enum: [VIRTUAL_PILOT], default: VIRTUAL_PILOT }
+        text:
+          type: string
+          example: "Turning right heading 290 degrees and climbing to flight level 370, Swiss 456."
+        phraseologyValid: { type: boolean, example: true }
+        grounded:
+          type: boolean
+          description: True when the read-back mirrors the actually dispatched & acknowledged command (AI.md §4.3)
+          example: true
+        audioAvailable: { type: boolean, example: true }
+        timestampUtc: { type: string, format: date-time }
+    Transcript:
+      type: object
+      required: [sessionId, entries]
+      properties:
+        sessionId: { type: string, format: uuid }
+        scope: { type: string, enum: [demo, production], default: demo }
+        personalData: { type: boolean, default: false }
+        entries:
+          type: array
+          items:
+            type: object
+            required: [speaker, text, timestampUtc]
+            properties:
+              speaker: { type: string, enum: [ATC_TRAINEE, VIRTUAL_PILOT] }
+              text: { type: string }
+              phraseologyValid: { type: boolean }
+              startMs: { type: integer }
+              endMs: { type: integer }
+              timestampUtc: { type: string, format: date-time }
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string, example: AMBIGUOUS_INSTRUCTION }
+        message: { type: string, example: "Instruction could not be mapped to a valid command; virtual pilot requested 'say again'." }
+        correlationId: { type: string, format: uuid }

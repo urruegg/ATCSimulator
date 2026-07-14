@@ -1,0 +1,263 @@
+{
+  "$schema": "https://atcsimulator.example/schemas/scenario/v0.1.json",
+  "schemaVersion": "0.1",
+  "metadata": {
+    "id": "SCEN-LSZH-0001",
+    "name": "Zurich departure — radar vectors, climb and traffic",
+    "description": "Demo/MVP scenario: an ATC trainee selects a live aircraft departing Zurich from a public flight feed and runs a real-time voice exercise with a virtual pilot. Seeded with the reference R/T phraseology fixtures (golden set G-01..G-04).",
+    "airportIcao": "LSZH",
+    "airportName": "Zurich Airport",
+    "controlPosition": "Zurich Departure (DEP)",
+    "difficulty": "intermediate",
+    "estimatedDurationMinutes": 12,
+    "primaryLanguage": "en",
+    "supportedLanguages": ["en", "de-CH", "fr-CH", "it-CH"],
+    "phraseologyStandard": "ICAO Annex 10 Vol II / ICAO Doc 9432 (Manual of Radiotelephony)",
+    "scope": "demo",
+    "personalData": false,
+    "operationalUse": false,
+    "author": "Scenario Designer / Training Content Author (P-03)",
+    "createdUtc": "2026-07-14T08:45:00Z",
+    "version": "0.1",
+    "tags": ["departure", "radar-vectors", "swiss-toponyms", "traffic-advisory", "helicopter", "golden-set"],
+    "relatedDocuments": {
+      "goldenSet": "../../docs/AI.md#71-golden-phraseology-test-set-fixtures",
+      "dataContracts": "../../docs/DATA.md#5-data-contracts-for-the-agnostic-api-high-level",
+      "api": "../../api/openapi.yaml",
+      "backlog": "../../docs/BACKLOG.md"
+    }
+  },
+  "disclosure": {
+    "syntheticVoices": true,
+    "publicDataOnly": true,
+    "noPersonalData": true,
+    "notForOperationalAtc": true,
+    "notice": "Virtual-pilot voices are machine-generated (standard neural voices). Aircraft data is derived from a public live-flight feed. This scenario contains no personal data and MUST NOT be connected to live/operational ATC (CON-01, CON-03)."
+  },
+  "dataSource": {
+    "type": "public-live-flight-feed",
+    "provider": "FlightAware AeroAPI | Flightradar24 (configurable)",
+    "access": "read-only",
+    "ingress": "via Agnostic API (APIM facade) only",
+    "fetchedUtc": "2026-07-14T08:40:12Z",
+    "termsOfServiceValidated": false,
+    "note": "Confirm feed ToS permits demo/eval use (RISK-13). [validate with Customer legal]"
+  },
+  "environment": {
+    "qnhHpa": 1019,
+    "transitionAltitudeFt": 7000,
+    "activeRunway": "28",
+    "surfaceWind": { "directionDegrees": 260, "speedKnots": 8 },
+    "visibilityMeters": 9999,
+    "metar": "LSZH 140820Z 26008KT 9999 FEW035 SCT070 18/09 Q1019 NOSIG",
+    "timeOfDay": "day"
+  },
+  "primaryAircraft": {
+    "callsign": "SWR456",
+    "telephony": "Swiss 456",
+    "registration": "HB-IJW",
+    "typeIcao": "A320",
+    "wakeCategory": "M",
+    "operator": "SWR",
+    "origin": "LSZH",
+    "destination": "LEBL",
+    "squawk": "1000",
+    "onGround": false,
+    "position": { "latitude": 47.4915, "longitude": 8.5210 },
+    "altitudeFt": 6000,
+    "headingDegrees": 275,
+    "groundSpeedKnots": 220,
+    "verticalRateFpm": 1800,
+    "flightPhase": "climb",
+    "source": "public-feed",
+    "selectedByTrainee": true
+  },
+  "trafficAircraft": [
+    {
+      "callsign": "N123AB",
+      "telephony": "November 123 Alpha Bravo",
+      "registration": "N123AB",
+      "typeIcao": "BE58",
+      "wakeCategory": "L",
+      "position": { "latitude": 46.9800, "longitude": 8.0100 },
+      "altitudeFt": 7500,
+      "headingDegrees": 210,
+      "groundSpeedKnots": 160,
+      "flightPhase": "cruise",
+      "source": "public-feed"
+    },
+    {
+      "callsign": "HELINA",
+      "telephony": "Heli-NA",
+      "registration": "HB-ZNA",
+      "typeIcao": "H125",
+      "wakeCategory": "L",
+      "position": { "latitude": 46.1120, "longitude": 7.4990 },
+      "altitudeFt": 6200,
+      "headingDegrees": 150,
+      "groundSpeedKnots": 90,
+      "flightPhase": "climb",
+      "source": "public-feed"
+    },
+    {
+      "callsign": "NJE396J",
+      "telephony": "Fraction 396J",
+      "registration": "CS-DTA",
+      "typeIcao": "C68A",
+      "wakeCategory": "M",
+      "position": { "latitude": 47.3200, "longitude": 8.7100 },
+      "altitudeFt": 4900,
+      "headingDegrees": 95,
+      "groundSpeedKnots": 250,
+      "flightPhase": "climb",
+      "source": "public-feed"
+    }
+  ],
+  "waypoints": [
+    { "name": "KLO", "type": "vor-dme", "latitude": 47.4577, "longitude": 8.5455, "sequence": 1 },
+    { "name": "GERSA", "type": "fix", "latitude": 47.3050, "longitude": 8.7220, "sequence": 2 },
+    { "name": "RILAX", "type": "fix", "latitude": 47.1600, "longitude": 8.9000, "sequence": 3 },
+    { "name": "WIL", "type": "vor-dme", "latitude": 47.2400, "longitude": 9.0100, "sequence": 4 },
+    { "name": "ZUE", "type": "vor-dme", "latitude": 47.5920, "longitude": 8.8180, "sequence": 5 }
+  ],
+  "script": [
+    {
+      "stepId": "STEP-01",
+      "goldenId": "G-01",
+      "order": 1,
+      "type": "atc_instruction",
+      "targetCallsign": "SWR456",
+      "expectedAtcTransmission": "Swiss 456, turn right heading 290 degrees, and climb flight level 370.",
+      "expectedCommands": [
+        { "type": "SELECT_AIRCRAFT", "callsign": "SWR456" },
+        { "type": "SET_HEADING", "direction": "RIGHT", "degrees": 290 },
+        { "type": "SET_FLIGHT_LEVEL", "value": 370 }
+      ],
+      "expectedReadBack": "Turning right heading 290 degrees and climbing to flight level 370, Swiss 456.",
+      "phraseologyPoints": ["callsign echo", "heading with turn direction", "level change (flight level)"],
+      "exercises": "Standard vector + climb; callsign read-back discipline."
+    },
+    {
+      "stepId": "STEP-02",
+      "goldenId": "G-02",
+      "order": 2,
+      "type": "atc_instruction",
+      "targetCallsign": "N123AB",
+      "expectedAtcTransmission": "N123AB, crossing to Schrattenfluh approved, descend 5'000 feet, QNH 1019, report crossing completed.",
+      "expectedCommands": [
+        { "type": "SELECT_AIRCRAFT", "callsign": "N123AB" },
+        { "type": "SET_ALTITUDE", "feet": 5000 },
+        { "type": "SET_QNH", "value": 1019 },
+        { "type": "REPORT_POINT", "reportName": "CROSSING_COMPLETED" }
+      ],
+      "expectedReadBack": "Crossing to Schrattenfluh approved and descending to 5,000 feet, QNH 1019, call you completed N123AB.",
+      "phraseologyPoints": ["Swiss toponym (Schrattenfluh)", "altitude in feet with QNH", "conditional report read-back"],
+      "exercises": "Toponym recognition; QNH; conditional report."
+    },
+    {
+      "stepId": "STEP-03",
+      "goldenId": "G-03",
+      "order": 3,
+      "type": "atc_instruction",
+      "targetCallsign": "HELINA",
+      "expectedAtcTransmission": "Heli-NA, Report HE, QNH 1023, look out for opposite helicopter just departed FATO climbing direction Evolène.",
+      "expectedCommands": [
+        { "type": "SELECT_AIRCRAFT", "callsign": "HELINA" },
+        { "type": "SET_QNH", "value": 1023 },
+        { "type": "REPORT_POINT", "reportName": "HE" },
+        { "type": "TRAFFIC_INFO", "description": "opposite helicopter departing FATO climbing towards Evolène", "movement": "climbing", "reference": "Evolène" }
+      ],
+      "expectedReadBack": "Call you HE, QNH 1023, looking out for traffic Heli-NA.",
+      "phraseologyPoints": ["helicopter R/T", "reporting point HE", "Swiss municipality (Evolène)", "traffic look-out"],
+      "exercises": "Helicopter phraseology; FATO; municipality name; partial read-back of traffic."
+    },
+    {
+      "stepId": "STEP-04",
+      "goldenId": "G-04",
+      "order": 4,
+      "type": "atc_instruction",
+      "targetCallsign": "NJE396J",
+      "expectedAtcTransmission": "NJE396J, opposite traffic 11 o'clock position 6 miles 4'900 feet climbing eastbound, maintain south of the IGS axis.",
+      "expectedCommands": [
+        { "type": "SELECT_AIRCRAFT", "callsign": "NJE396J" },
+        { "type": "TRAFFIC_INFO", "clockPosition": 11, "distanceNm": 6, "altitudeFt": 4900, "movement": "climbing eastbound" },
+        { "type": "REPORT_POINT", "reportName": "MAINTAIN_SOUTH_OF_IGS_AXIS" }
+      ],
+      "expectedReadBack": "Looking out NJE396J.",
+      "phraseologyPoints": ["traffic advisory (clock/distance/level/movement)", "spatial constraint (IGS axis)", "minimal correct read-back"],
+      "exercises": "Traffic advisory; acceptable partial read-back."
+    }
+  ],
+  "surpriseEvents": [
+    {
+      "id": "SEV-01",
+      "name": "Pop-up conflicting traffic",
+      "type": "traffic-conflict",
+      "enabled": true,
+      "difficultyGate": "intermediate",
+      "trigger": { "afterStepId": "STEP-01", "probability": 0.3, "minElapsedSeconds": 45 },
+      "inject": {
+        "kind": "TRAFFIC_INFO",
+        "targetCallsign": "SWR456",
+        "params": { "clockPosition": 1, "distanceNm": 4, "altitudeFt": 6500, "movement": "opposite direction, same level" }
+      },
+      "approvedBy": "Coach/Instructor (P-02)",
+      "note": "Exercises collision-avoidance phraseology and controller re-prioritisation."
+    },
+    {
+      "id": "SEV-02",
+      "name": "Virtual-pilot weather-deviation request",
+      "type": "pilot-initiated-request",
+      "enabled": true,
+      "difficultyGate": "intermediate",
+      "trigger": { "afterStepId": "STEP-02", "probability": 0.25 },
+      "inject": {
+        "kind": "PILOT_REQUEST",
+        "targetCallsign": "SWR456",
+        "utterance": "Swiss 456, request heading 10 degrees right for weather."
+      },
+      "approvedBy": "Coach/Instructor (P-02)",
+      "note": "Tests unscripted pilot request handling and clearance issuance."
+    },
+    {
+      "id": "SEV-03",
+      "name": "Blocked transmission / read-back error",
+      "type": "communication-degradation",
+      "enabled": false,
+      "difficultyGate": "advanced",
+      "trigger": { "afterStepId": "STEP-03", "probability": 0.2 },
+      "inject": {
+        "kind": "READBACK_ERROR",
+        "targetCallsign": "HELINA",
+        "params": { "errorType": "wrong-qnh", "wrongValue": 1013 }
+      },
+      "approvedBy": "Coach/Instructor (P-02)",
+      "note": "Virtual pilot deliberately reads back an incorrect QNH; trainee must catch and correct (hear-back error)."
+    },
+    {
+      "id": "SEV-04",
+      "name": "Simulated PAN-PAN (urgency)",
+      "type": "emergency",
+      "enabled": false,
+      "difficultyGate": "advanced",
+      "trigger": { "afterStepId": "STEP-04", "probability": 0.15 },
+      "inject": {
+        "kind": "PILOT_REQUEST",
+        "targetCallsign": "N123AB",
+        "utterance": "PAN PAN, PAN PAN, PAN PAN, N123AB, rough running engine, request descent and vectors to nearest suitable airfield."
+      },
+      "approvedBy": "Coach/Instructor (P-02)",
+      "note": "Advanced emergency-communication drill; instructor-gated only."
+    }
+  ],
+  "evaluation": {
+    "goldenSetRef": "docs/AI.md §7.1 (G-01..G-04)",
+    "assertPerStep": ["commandMapping", "readBack", "phraseology"],
+    "metrics": {
+      "commandMappingAccuracyTarget": ">= 0.98",
+      "readBackCorrectnessTarget": ">= 0.98",
+      "latencyP95MsTarget": 1000,
+      "note": "Targets illustrative — validate with the Academy (AI.md §7.2, DP-11)."
+    }
+  }
+}
