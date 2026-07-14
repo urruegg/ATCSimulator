@@ -1,7 +1,7 @@
 # ATCSimulator — GitHub Copilot Custom Instructions
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Product | ATCSimulator |
 | Document | Repo-wide Copilot Custom Instructions |
 | Version | 0.1 (Draft) |

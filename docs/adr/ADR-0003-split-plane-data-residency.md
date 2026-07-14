@@ -1,7 +1,7 @@
 # ADR-0003: Split-plane data residency (Switzerland North vs EU Data Zone / US)
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Product | ATCSimulator |
 | Document | ADR-0003 — Split-plane data residency |
 | Version | 0.1 (Draft) |
@@ -33,13 +33,14 @@
 Adopt a **split-plane pattern**: choose data location **by data classification**, not by convenience.
 
 | Plane / workload | Data class | Region | Boundary outcome |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Production personal/sensitive plane** — trainee voice, transcripts, identity, performance; classic **Azure AI Speech STT/TTS**; storage; Key Vault; Purview | Personal / Sensitive | **Switzerland North** (Switzerland West for DR) | **In-country (Swiss)** |
 | **Production reasoning / command-mapping** — GPT-4.1 / GPT-5.x-class | Transcripts (personal) | **Switzerland North** if the model is in-country; else **EU Data Zone (`data-zone-standard (EU)`)** | Swiss-preferred, **EU fallback** |
 | **Demo real-time speech-to-speech** — `gpt-realtime`/`gpt-4o-realtime` family | **Synthetic + public only — NO personal data** | **Sweden Central (EU)** default; **East US 2 (US)** only if a Preview is US-only | EU (or US, demo-only) |
 | **US region** | Demo, non-personal only | **East US 2** | **US — never personal data** |
 
 **Rules of the road (`CON-03`):**
+
 1. Personal/sensitive → **Switzerland North** by default; **Switzerland West** for DR pairing.
 2. If a required model is not in Switzerland → **EU Data Zone**, only after DPO confirms EU processing is acceptable for that data class.
 3. **US regions carry demo/synthetic/public data only — never personal data.**
@@ -48,13 +49,15 @@ Adopt a **split-plane pattern**: choose data location **by data classification**
 
 ## Consequences
 
-**Positive**
+### Positive
+
 - **Sovereignty-by-design** (`DP-18`): the Customer gets in-country residency for everything that legally matters, while still accessing cutting-edge capability where it exists.
 - Turns an availability gap into a **deliberate, documented trade-off** rather than an accidental data-egress (`RISK-03` mitigated).
 - The demo can move fast on GA/Preview AI **because** it holds no personal data; the heavy controls attach only when real voice enters production.
 - Clean alignment with the segregation boundary to operational ATC (`CON-01`).
 
-**Negative / trade-offs**
+### Negative / trade-offs
+
 - **Operational complexity:** two planes, two regions, distinct pipelines (single-loop real-time demo vs decomposed STT+reason+TTS production).
 - **Feature divergence:** the in-country production path may lag the flagship model features available in EU/US — must be managed via the reasoning-model EU Data Zone fallback and periodic re-verification.
 - Requires disciplined **region tagging** and policy enforcement to prevent drift; a mis-scoped deployment is the top residual risk (`RISK-03`).

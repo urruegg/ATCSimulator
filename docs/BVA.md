@@ -1,7 +1,7 @@
 # Business Value Assessment (BVA)
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Product | ATCSimulator |
 | Document | Business Value Assessment (BVA) |
 | Version | 0.1 (Draft) |
@@ -58,7 +58,7 @@ The Customer's Academy runs simulator training with a fixed, labor-heavy staffin
 This model has four structural cost and capacity problems, all confirmed in the source material:
 
 | # | Constraint | Economic effect |
-|---|---|---|
+| --- | --- | --- |
 | C1 | **High personnel cost per unit** — every seat is a qualified ATS specialist | Directly caps the **number of training units** trainees can receive. |
 | C2 | **Many people per session** | Complex, inflexible **planning and coordination**; scheduling overhead; idle time when any role is unavailable. |
 | C3 | **High staffing → many workstations → large physical footprint** | Limits **scalability of simulation stations**; real-estate and facility cost. |
@@ -92,7 +92,7 @@ flowchart LR
 Five levers move value. Lever 1 is the **hard, quantified** saving in the ROM model; levers 2–5 are quantifiable over time but are treated as **strategic / secondary** here to avoid double-counting and keep the core case conservative.
 
 | Lever | Description | Value type | Quantified in §5? |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **L1 — Labor substitution** | Virtual pilots replace **1–5 human sim pilots per session**; instructor retained | Hard cost-out | **Yes (core)** |
 | **L2 — Throughput / capacity & self-service** | Removes the roster bottleneck; enables autonomous, "anytime & anywhere" training and more units per trainee | Capacity / revenue-enabling | Secondary (KPI-tracked) |
 | **L3 — Scenario quality & safety uplift** | Surprise-injection (scenario-variability) engine raises realism and difficulty → better prepared controllers → safety contribution | Risk-reduction / quality | Intangible (see §6) |
@@ -108,7 +108,7 @@ Five levers move value. Lever 1 is the **hard, quantified** saving in the ROM mo
 ### 5.1 Assumptions table (base case)
 
 | ID | Parameter | Illustrative value | Note |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | ASS-01 | Fully-loaded ATS **simulation-pilot** cost | `[assumption: ≈ CHF 120 / hour]` | Salary + social + overhead + facility; sim pilots are qualified ATS staff. |
 | ASS-02 | Simulator **training sessions per year** (Academy-wide) | `[assumption: ≈ 3,000 sessions / yr]` | Ab-initio + recurrent/refresher across centers and airports. |
 | ASS-03 | **Simulation pilots per session** | `[assumption: 3]` | Midpoint of the documented 1–5 range. |
@@ -120,7 +120,7 @@ Five levers move value. Lever 1 is the **hard, quantified** saving in the ROM mo
 
 ### 5.2 Baseline annual training-labor cost (sim-pilots only)
 
-```
+```text
 Baseline sim-pilot labor
   = sessions/yr × sim-pilots/session × hours/session × loaded CHF/hour
   = 3,000 × 3 × 3 × 120
@@ -130,7 +130,7 @@ Baseline sim-pilot labor
 
 ### 5.3 Automated scenario — gross saving
 
-```
+```text
 Gross annual saving
   = Baseline sim-pilot labor × substitution rate
   = CHF 3,240,000 × 70 %
@@ -144,7 +144,7 @@ Interpreted physically: of 27,000 sim-pilot-hours/yr, **~18,900 hours** are hand
 Cost drivers map directly to the architecture in [SD.md](./SD.md) and the line items in [BOM.md](./BOM.md).
 
 | Cost driver | Basis | ROM CHF / yr |
-|---|---|---:|
+| --- | --- | ---: |
 | Real-time audio model minutes | ~567,000 billable min/yr @ ≈ CHF 0.35/min (18,900 substituted h × 50 % active-audio streaming × 60) | 200,000 |
 | Speech STT / TTS + Custom Speech | full-session transcription + custom model hosting | 25,000 |
 | Compute & integration | Container Apps/AKS, Functions, API Management (agnostic API), Web PubSub, Service Bus | 70,000 |
@@ -157,7 +157,7 @@ Cost drivers map directly to the architecture in [SD.md](./SD.md) and the line i
 
 ### 5.5 Net benefit, payback, 3-year, ROI (base case)
 
-```
+```text
 Net annual benefit  = Gross saving − Annual run cost
                     = 2,268,000 − 390,000
                     = CHF 1,878,000 / year
@@ -184,7 +184,7 @@ Simple payback      = One-time build ÷ Net annual benefit
 Each column is a **coherent scenario**, not a single-variable sweep: the "low" case stacks conservative demand, a lower substitution rate, and higher build/run cost; "high" does the reverse.
 
 | Parameter | Low (conservative) | Base | High (optimistic) |
-|---|---:|---:|---:|
+| --- | ---: | ---: | ---: |
 | Sessions / yr (ASS-02) | 2,500 | 3,000 | 4,000 |
 | Sim-pilots / session (ASS-03) | 2.5 | 3 | 3.5 |
 | Hours / session (ASS-04) | 3 | 3 | 3 |
@@ -206,7 +206,7 @@ Each column is a **coherent scenario**, not a single-variable sweep: the "low" c
 ## 6. Non-financial / strategic benefits & intangible value
 
 | Theme | Benefit |
-|---|---|
+| --- | --- |
 | **Workforce leverage** | Releases scarce ATS specialists from repetitive sim-pilot duty back to operational control and higher-value coaching; mitigates specialist-staffing scarcity. |
 | **Throughput & flexibility** | Removes the multi-person scheduling bottleneck; enables **self-service, autonomous training** with no pressure and no constant observation; **location-independent** practice. |
 | **Training quality & safety** | Surprise-injection scenario engine produces **more demanding, realistic** exercises; systematic, automated **R/T phraseology checking** raises correctness. Long-term this contributes to the **safety and efficiency of air navigation**. |
@@ -222,7 +222,7 @@ Each column is a **coherent scenario**, not a single-variable sweep: the "low" c
 The run-rate in §5.4 is dominated by usage-based AI services; understanding these drivers is essential to protecting the value case. Cross-reference [BOM.md](./BOM.md) (line-item pricing & region availability) and [SD.md](./SD.md) (where each driver sits in the architecture).
 
 | Driver | Scales with | Optimization levers |
-|---|---|---|
+| --- | --- | --- |
 | **Real-time audio model minutes** | Automated conversation minutes | Voice-activity streaming (bill only on speech), model right-sizing, session length caps, region/SKU choice. |
 | **Speech STT / TTS minutes** | Session transcription volume; read-back synthesis | Batch vs real-time transcription; standard neural voice vs Custom Neural Voice (RAI-gated); selective retention. |
 | **Compute** | Concurrent sessions | Scale-to-zero (Container Apps), autoscale, reserved capacity once demand is known. |
@@ -239,7 +239,7 @@ Value is realized only if it is **measured**. The framework pairs **leading** in
 ### 8.1 Leading indicators
 
 | KPI | Definition | Target direction |
-|---|---|---|
+| --- | --- | --- |
 | Automated session share | % of sessions run with virtual pilots (vs human) | ↑ toward substitution-rate assumption (ASS-05) |
 | Virtual-pilot availability | % uptime of the voice service during training windows | ↑ (see Reliability, [DESIGN-PRINCIPLES.md](./DESIGN-PRINCIPLES.md)) |
 | Voice round-trip latency | ATC utterance → pilot read-back (p50/p95) | ↓ within latency budget |
@@ -249,7 +249,7 @@ Value is realized only if it is **measured**. The framework pairs **leading** in
 ### 8.2 Lagging indicators (value confirmation)
 
 | KPI | Definition | Ties to lever |
-|---|---|---|
+| --- | --- | --- |
 | **Sim-pilot hours released** | Human sim-pilot hours removed vs baseline | **L1 (hard saving)** |
 | **Net CHF saving realized** | Released hours × validated loaded cost − run cost | **L1** |
 | Training throughput | Training units delivered per trainee per period | L2 |
@@ -270,7 +270,7 @@ Value is realized only if it is **measured**. The framework pairs **leading** in
 ## 9. Risks to value realization & assumptions to validate
 
 | ID | Risk / assumption to validate | Impact | Mitigation |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | RISK-01 | **Substitution rate (ASS-05) lower than modeled** — complex multi-pilot team scenarios resist automation | High (top sensitivity) | Phase automation: start single-pilot scenarios; grow team-simulation automation over time. |
 | RISK-02 | **Loaded sim-pilot cost (ASS-01) overstated** | High | Validate with Customer finance before commitment; model is transparent to re-run. |
 | RISK-03 | **Real-time audio minutes cost overrun** | Medium–High | Voice-activity streaming, model right-sizing, region choice; monitor as a first-order FinOps metric. |
@@ -295,7 +295,7 @@ flowchart LR
 ```
 
 | Phase | Scope | Value booked | Success gate |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **PoC** | Prove real-time voice + command mapping in one sim environment; measure reliability, performance, error rate | **None** (validation only) | Latency & accuracy thresholds met; go/no-go to MVP |
 | **MVP (demo scope)** | ATC selects a public live flight and runs a real-time voice scenario with a virtual pilot; **public/synthetic data only, no personal data**; single simulator | **Partial** — first automated sessions; **establish the measurement baseline** (§8.3) | Instructor acceptance; measured substitution on pilot cohort |
 | **Production (full scope)** | Vendor-agnostic services integrated to real simulator(s) + LMS; **in-country residency**; full governance/ops; closed-loop analytics; team-simulation automation | **Full ramp** toward base/high scenario | Realized net saving converges on ROM within tolerance |

@@ -1,7 +1,7 @@
 # ADR-0002: Simulator-vendor-agnostic API façade (Azure API Management)
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Product | ATCSimulator |
 | Document | ADR-0002 — Simulator-vendor-agnostic API façade |
 | Version | 0.1 (Draft) |
@@ -40,13 +40,15 @@ Adopt **Azure API Management (APIM) as the single "Agnostic API" façade** in fr
 
 ## Consequences
 
-**Positive**
+### Positive
+
 - True **vendor independence**: simulators and speech/model vendors are swappable without changing clients.
 - A single, testable **security & governance choke point** (auth, schema validation, throttling, redaction, mTLS) — strong STRIDE coverage for the API boundary ([../SECURITY.md](../SECURITY.md) §9.2).
 - Enforces **data minimization** on the vendor path by construction (`C-04`).
 - Clean seam to keep the **demo real-time plane isolated** from the production personal plane (`NFR-19`).
 
-**Negative / trade-offs**
+### Negative / trade-offs
+
 - APIM adds a component to operate and a potential **latency hop** — must be budgeted against the real-time SLO (`DP-11`); use it for control/signalling while the media stream uses a negotiated WebSocket/WebRTC channel (see `audio/negotiate` in the OpenAPI stub).
 - Requires **contract discipline** (API-first) and adapter development per simulator vendor.
 - Cost and configuration overhead vs calling backends directly (accepted for the governance/portability benefit).

@@ -1,7 +1,7 @@
 # Copilot Build Guide — Building the ATCSimulator Demo with GitHub Copilot "Superpowers"
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Product | ATCSimulator |
 | Document | Copilot Build Guide (agent-driven build of the DEMO/MVP) |
 | Version | 0.1 (Draft) |
@@ -13,6 +13,7 @@
 **Related documents:** [BACKLOG.md](./BACKLOG.md) · [AI.md](./AI.md) · [DATA.md](./DATA.md) · [SECURITY.md](./SECURITY.md) · [COMPLIANCE.md](./COMPLIANCE.md) · [DESIGN-PRINCIPLES.md](./DESIGN-PRINCIPLES.md) · [BOM.md](./BOM.md) · [SD.md](./SD.md) · [adr/ADR-0001-realtime-model-region.md](./adr/ADR-0001-realtime-model-region.md) · [adr/ADR-0002-agnostic-api-facade.md](./adr/ADR-0002-agnostic-api-facade.md) · [adr/ADR-0003-split-plane-data-residency.md](./adr/ADR-0003-split-plane-data-residency.md) · [../AGENTS.md](../AGENTS.md) · [../SUPERPOWERS_CONTRACT.md](../SUPERPOWERS_CONTRACT.md) · [../.github/copilot-instructions.md](../.github/copilot-instructions.md) · [../api/openapi.yaml](../api/openapi.yaml) · [../data/scenarios/sample-scenario.json](../data/scenarios/sample-scenario.json)
 
 > ## ⚠️ Non-negotiable demo framing (read first)
+>
 > This guide builds the **DEMO / MVP (Scope 2)** only. The demo uses **PUBLIC live-flight data + SYNTHETIC virtual-pilot voices**. It processes **NO personal data**, and it has **NO connection to operational/live ATC** (`CON-01`, `CON-03`; [COMPLIANCE.md](./COMPLIANCE.md) §1/§9). Every agent and every pipeline in this guide inherits those guardrails from [../SUPERPOWERS_CONTRACT.md](../SUPERPOWERS_CONTRACT.md) and [../.github/copilot-instructions.md](../.github/copilot-instructions.md). Region/model availability facts are *as of Jul 2026 — verify at design time* on the live Azure model-availability page ([BOM.md](./BOM.md)).
 
 ---
@@ -35,7 +36,7 @@ We build the MVP with an **agent-driven SDLC**: a small team of **GitHub Copilot
 Each engineering agent is a custom agent file under [`../.github/agents/`](../.github/agents/) with a focused system prompt, allowed tools, and the guardrails it enforces.
 
 | Agent | Custom agent | Owns | Enforces / gate |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `AG-E-01` **Product Owner** | `product-owner.chatmode.md` | Epics/stories, acceptance criteria, MoSCoW, demo narrative ([BACKLOG.md](./BACKLOG.md)) | scope clarity |
 | `AG-E-02` **Developer** | `developer.chatmode.md` | Code, tests, IaC; drives issue → PR with the coding agent | small reviewable PRs |
 | `AG-E-03` **Enterprise Architect** | `enterprise-architect.chatmode.md` | Architecture, ADRs, API contract, split-plane residency | **Architecture approval** |
@@ -85,6 +86,7 @@ Legend: the loop is **closed** — deploy telemetry and eval results feed the PO
 **MVP goal:** *"an ATC selects an aircraft from a public live-flight feed and starts a real-time voice simulation scenario with a virtual pilot."* Sprints are 1 week (illustrative), targeting the **workshop demo (4 August 2026)**. Each sprint maps to **agents → artefacts → Azure services** and to epics/stories in [BACKLOG.md](./BACKLOG.md).
 
 ### Sprint 0 — Foundations & guardrails (`EP-01`, `EP-07`)
+
 - **Lead agents:** `AG-E-03` EA, `AG-E-04` SecDevOps (support: `AG-E-06` RAI).
 - **Do:** `azd init`; Bicep sandbox; GitHub repo + branch protection + `CODEOWNERS`; enable GHAS; author `copilot-instructions.md`, the six custom agents, ADR-0001..0003; Azure Policy allowed-regions (CH/EU) + deny-public-endpoint; AI use-case register + "no personal data" screening.
 - **Artefacts:** `infra/*.bicep`, `azure.yaml`, `.github/workflows/*`, `.github/agents/*`, `docs/adr/*`, register entry.
@@ -92,6 +94,7 @@ Legend: the loop is **closed** — deploy telemetry and eval results feed the PO
 - **Stories:** US-001, US-002, US-003, US-061, US-062.
 
 ### Sprint 1 — Flight feed & aircraft selection (`EP-02`)
+
 - **Lead agents:** `AG-E-02` Dev, `AG-E-05` ATC SME (support: `AG-E-03` EA).
 - **Do:** implement the `/flights` and `/sessions/{id}/aircraft` endpoints behind APIM; public-feed adapter (read-only, via APIM only); load & validate [../data/scenarios/sample-scenario.json](../data/scenarios/sample-scenario.json).
 - **Artefacts:** feed adapter service, `openapi.yaml` updates, scenario loader + schema test.
@@ -99,6 +102,7 @@ Legend: the loop is **closed** — deploy telemetry and eval results feed the PO
 - **Stories:** US-010, US-011, US-012, US-050.
 
 ### Sprint 2 — Real-time voice loop (`EP-03`)
+
 - **Lead agents:** `AG-E-02` Dev, `AG-E-05` ATC SME, `AG-E-06` RAI.
 - **Do:** session lifecycle (`POST /sessions`, `/stop`); audio negotiation (`/audio/negotiate`) + streaming channel; connect to the **real-time speech-to-speech** model; virtual-pilot read-back; synthetic-voice disclosure; "say again" fail-safe.
 - **Artefacts:** orchestrator service, audio gateway (Web PubSub/WebRTC signalling), disclosure UI copy, latency probe.
@@ -106,6 +110,7 @@ Legend: the loop is **closed** — deploy telemetry and eval results feed the PO
 - **Stories:** US-020, US-021, US-022, US-023.
 
 ### Sprint 3 — Command mapping & phraseology (`EP-04`, `EP-05`)
+
 - **Lead agents:** `AG-E-02` Dev, `AG-E-05` ATC SME (support: `AG-E-06` RAI).
 - **Do:** deterministic tool/function-calling command mapping (schema-validated enum); grounded read-backs; phraseology validation vs corpus; **golden-set evaluation harness** (G-01..G-04) wired into CI as a release gate.
 - **Artefacts:** command agent + JSON tool schema, phraseology validator, `evals/golden-set/*`, CI eval job.
@@ -113,6 +118,7 @@ Legend: the loop is **closed** — deploy telemetry and eval results feed the PO
 - **Stories:** US-030, US-031, US-032, US-041, US-060.
 
 ### Sprint 4 — Transcript, variability & demo hardening (`EP-05`, `EP-06`, `EP-07`)
+
 - **Lead agents:** `AG-E-02` Dev, `AG-E-01` PO, `AG-E-06` RAI, `AG-E-04` SecDevOps.
 - **Do:** transcript retrieval + store; surprise-event hooks (instructor-approved); latency/quality telemetry; finalize RAI/compliance gates; demo script + Definition-of-Done pass.
 - **Artefacts:** transcript service, `data/scenarios/*` variability config, dashboards, demo runbook, DoD checklist evidence.
@@ -133,6 +139,7 @@ flowchart LR
 ## 4. Reference tech stack & repo layout
 
 ### 4.1 Stack
+
 - **AI/Foundry:** Azure AI Foundry (project, Agent Service, Evaluations, Content Safety); Azure OpenAI **real-time audio** (demo, Sweden Central); GPT-4.1/GPT-5.x-class (reasoning/command mapping); Azure AI Speech (production in-country STT/TTS — not the demo default). See [AI.md](./AI.md), [BOM.md](./BOM.md).
 - **Compute/host:** Azure Container Apps (default), Azure Functions (event glue).
 - **Integration:** **Azure API Management** (Agnostic API façade, ADR-0002); Azure Web PubSub / Event Grid (real-time audio).
@@ -172,11 +179,13 @@ ATCSimulator/
 ```
 
 ### 4.3 azd + Bicep + CI/CD (shape)
+
 - **`azd up`** provisions the sandbox from `infra/` and deploys `src/` services defined in `azure.yaml`. Region and data-boundary are **parameters**, defaulted to Sweden Central for the demo (ADR-0001/0003).
 - **Bicep** encodes the guardrails: allowed regions (CH/EU), deny-public-endpoint on data services, managed identity, Key Vault, Private Link (production plane). IaC is **scanned before deploy** (`NFR-16`).
 - **GitHub Actions** pipeline (see §8): build → unit → GHAS (secret/CodeQL) → IaC scan/policy → **golden-set eval** → Content Safety config check → `azd deploy` to a **protected environment** via **OIDC** (no long-lived creds, `NFR-18`).
 
 ### 4.4 Evaluation harness (golden phraseology set)
+
 The **golden set** (G-01..G-04, [AI.md](./AI.md) §7.1) is the demo's quality backbone, seeded from [../data/scenarios/sample-scenario.json](../data/scenarios/sample-scenario.json). Each case asserts **(a) correct command mapping** and **(b) correct read-back**; the runner also checks **groundedness** and (production) **dialect fairness**. It runs locally (`Developer`) and in CI as a **merge-blocking gate** owned by `AG-E-06` RAI. Metrics/targets in [AI.md](./AI.md) §7.2 (command-mapping ≥ ~98%, read-back ≥ ~98%, latency p95 ≤ ~1 s — illustrative, validate with the Academy).
 
 ---
@@ -184,19 +193,23 @@ The **golden set** (G-01..G-04, [AI.md](./AI.md) §7.1) is the demo's quality ba
 ## 5. Copilot superpowers playbook
 
 ### 5.1 Prompt patterns
+
 - **Role + task + constraints + evidence.** *"As the Developer custom agent, implement `US-021` (real-time read-back). Constraints: deterministic command enum from `#file:../api/openapi.yaml`; grounded read-back; latency SLO. Produce code + unit tests + a golden-set case. Cite ADR-0001."*
 - **Spec-first.** Ask the EA/PO mode to produce the acceptance criteria and the OpenAPI delta **before** asking the Developer mode to implement.
 - **Red-team prompt.** Ask the RAI mode: *"What could make this read-back confidently wrong? Add negative golden-set cases."*
 - **Refactor-with-guardrails.** *"Refactor the feed adapter; must remain read-only and route only via APIM (`NFR-08/09`)."*
 
 ### 5.2 Using each custom agent
+
 - **PO** for backlog shaping and demo narrative; **EA** for architecture/ADR/contract/residency decisions (and the arch sign-off); **Dev** for implementation and driving the coding agent; **SecDevOps** for pipelines/policy/GHAS; **ATC SME** for phraseology truth and golden cases; **RAI** for evals/Content Safety/residency review (and the RAI sign-off). Switch agents deliberately; do not ask the Dev agent to make a residency decision — that is the EA's call.
 
 ### 5.3 `#codebase` and file grounding
+
 - Use **`#codebase`** to ground answers in the whole repo (e.g., *"Using #codebase, where is the command enum defined and validated?"*).
 - Reference specific files with **`#file:`** (e.g., `#file:../api/openapi.yaml`, `#file:../data/scenarios/sample-scenario.json`) so suggestions match the real contract and fixtures.
 
 ### 5.4 Issue → PR with the coding agent
+
 1. The PO/EA/SME modes produce a **well-formed issue**: title, story link (`US-###`), acceptance criteria (G/W/T), guardrail tags (`CON-01/03`), touched files, and the evidence required.
 2. **Assign the issue to the Copilot coding agent.** It opens a **draft PR**, implements the slice, and runs the checks.
 3. The **Developer** mode reviews/steers the PR (comments, `#codebase`), iterating until green.
@@ -204,9 +217,10 @@ The **golden set** (G-01..G-04, [AI.md](./AI.md) §7.1) is the demo's quality ba
 5. Merge only when CI is green, the eval gate passes, and the human sign-off(s) are given — **evidence-in-PR** ([../SUPERPOWERS_CONTRACT.md](../SUPERPOWERS_CONTRACT.md) §1.9).
 
 ### 5.5 Custom-instructions precedence
+
 When guidance conflicts, apply the **most specific that is still safe**:
 
-```
+```text
 explicit prompt
   > active custom agent (.github/agents/*.agent.md)
     > path-scoped instructions (.github/instructions/*.instructions.md, applyTo globs)
@@ -217,7 +231,9 @@ explicit prompt
 The **hard guardrails** (`CON-01` no operational wiring; `CON-03` no personal data in the demo / Swiss residency; RAI advisory-only; no secrets) are **non-overridable** regardless of precedence. (Precedence is a practical convention — verify current behaviour against GitHub's docs at design time.)
 
 ### 5.6 MCP tool usage
+
 Connect Copilot to real context via **MCP servers** (configure per the GitHub/VS Code MCP docs; keep credentials in the developer's own vault, never in the repo):
+
 - **GitHub MCP** — issues, PRs, Actions status (drives the issue → PR flow).
 - **Azure MCP** — read resource/region/deployment state to verify residency and wiring (`CON-03`).
 - **Flight-feed MCP** (or an APIM-fronted tool) — read-only public-feed queries for realistic fixtures.
@@ -245,7 +261,7 @@ flowchart LR
 **Worked examples:**
 
 | Requirement | Story | Issue/PR | Test / Eval | Evidence |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `FR-08` aircraft selection | `US-010`/`US-011` | Issue "Flight feed via Agnostic API" → PR | contract test on `/flights`; feed-adapter unit tests | green CI + APIM policy trace |
 | `FR-03`/`FR-04` command + read-back | `US-030` | Issue "Deterministic command mapping" → PR | golden-set G-01 (command + read-back) | Foundry eval report ≥ target |
 | `FR-01`/`FR-09` real-time loop | `US-020`/`US-021` | Issue "Real-time voice session" → PR | latency probe vs SLO | App Insights latency chart |
@@ -257,7 +273,9 @@ flowchart LR
 ## 7. Definition of Done & quality gates (demo)
 
 ### 7.1 Definition of Done (per story)
+
 A story is **Done** only when **all** hold:
+
 - [ ] Acceptance criteria (G/W/T) met and demoable.
 - [ ] Code + IaC + unit tests merged via PR; small and reviewed.
 - [ ] Traceability chain complete (`FR/NFR` → `US-###` → PR → test → evidence).
@@ -294,7 +312,7 @@ flowchart TB
 ## 8. Reference CI/CD pipeline (stages)
 
 | Stage | Tooling | Gate |
-|---|---|---|
+| --- | --- | --- |
 | Build & unit | GitHub Actions | must pass |
 | Security (SAST/secrets/deps) | GitHub Advanced Security (CodeQL, secret scanning + push protection, Dependabot) | must pass (`NFR-15`) |
 | IaC quality | Bicep build + template analyzer / PSRule + `az deployment what-if` | must pass (`NFR-16`) |

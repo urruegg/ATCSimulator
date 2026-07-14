@@ -1,7 +1,7 @@
 # Security Architecture & Zero Trust Baseline
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Product | ATCSimulator |
 | Document | Security Architecture & Zero Trust Baseline |
 | Version | 0.1 (Draft) |
@@ -21,7 +21,7 @@
 ATCSimulator adopts **Zero Trust** — *verify explicitly, use least privilege, assume breach* — across identity, network, data, application, and supply chain. Requirements are stated as `NFR-##` and traced to controls in [COMPLIANCE.md](./COMPLIANCE.md) §7.
 
 | Pillar | Intent | Key `NFR`s |
-|---|---|---|
+| --- | --- | --- |
 | Identity | No implicit trust; every principal verified, least-privileged, just-in-time. | NFR-01…04 |
 | Network | Private-by-default data plane; no public egress for personal data; single controlled façade. | NFR-05…09 |
 | Data protection | Encrypt everywhere; customer-controlled keys option; minimize & purge. | NFR-10…14 |
@@ -155,7 +155,7 @@ Two highest-value surfaces are modelled: **(A) the real-time voice pipeline** an
 ### 9.1 Real-time voice pipeline (trainee audio → STT → NLP/command → TTS → audio)
 
 | STRIDE | Threat | Mitigation | `NFR` / control |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **S**poofing | Attacker impersonates a trainee/instructor or injects audio into a session. | Entra auth + Conditional Access; per-session token bound to identity; mTLS/secure media transport; session-to-identity binding at APIM. | NFR-01/02/08/10 |
 | **T**ampering | Manipulation of audio/transcript/command in transit or of the command payload sent to the simulator. | TLS/mTLS end-to-end; schema validation of commands; deterministic tool-calling with server-side validation ([AI.md](./AI.md) §3); integrity checks on stored recordings. | NFR-08/10; AI guardrails |
 | **R**epudiation | User/operator denies an action or a data access. | Immutable, identity-attributed audit logs; consent-change and purge logs; Purview lineage. | NFR-20/21/22 |
@@ -166,7 +166,7 @@ Two highest-value surfaces are modelled: **(A) the real-time voice pipeline** an
 ### 9.2 Agnostic API (APIM boundary to simulator vendors & demo feed)
 
 | STRIDE | Threat | Mitigation | `NFR` / control |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **S**poofing | Rogue "simulator vendor" or client calls the Agnostic API. | APIM: Entra JWT validation + per-vendor subscription keys/certs; mTLS to/from backends; IP allow-listing where feasible. | NFR-08 |
 | **T**ampering | Malicious/malformed command payloads to drive the simulator or backend. | Strict OpenAPI schema validation at APIM ([DATA.md](./DATA.md) §5, `../../api/openapi.yaml`); reject unknown fields; command allow-list; server-side authorization per action. | NFR-08; AI §3 |
 | **R**epudiation | Vendor disputes a dispatched command. | APIM request/response logging (personal data redacted), correlation IDs, signed audit trail. | NFR-20/22 |
@@ -179,7 +179,7 @@ Two highest-value surfaces are modelled: **(A) the real-time voice pipeline** an
 ## 10. Demo vs full-scope security delta
 
 | Dimension | Demo / MVP (Scope 2) | Full / production (Scope 1) |
-|---|---|---|
+| --- | --- | --- |
 | **Data sensitivity** | Public + synthetic; **no personal data**. | Personal/biometric-adjacent voice + performance. |
 | **Residency** | Sweden Central (EU) / East US 2 (US) permitted (real-time model availability). | Switzerland North in-country; EU Data Zone fallback; **no US for personal data** (`CON-03`). |
 | **Network** | Sandbox VNet; APIM façade still used; public feed ingress. | Full private-endpoint mesh; no public data-plane egress; forced-tunnel egress. |
@@ -197,7 +197,7 @@ Two highest-value surfaces are modelled: **(A) the real-time voice pipeline** an
 ## 11. Security requirements index (`NFR-##`)
 
 | ID | Requirement | Pillar |
-|---|---|---|
+| --- | --- | --- |
 | NFR-01 | Single Entra ID identity plane; no local accounts on data/AI services. | Identity |
 | NFR-02 | Conditional Access (MFA, device, risk, no legacy auth). | Identity |
 | NFR-03 | Managed identities + Entra RBAC data-plane auth; disable key auth where possible. | Identity |

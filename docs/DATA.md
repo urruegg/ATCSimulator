@@ -1,7 +1,7 @@
 # Data Design & Governance
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Product | ATCSimulator |
 | Document | Data Design & Governance |
 | Version | 0.1 (Draft) |
@@ -19,7 +19,7 @@
 ## 1. Data domains
 
 | # | Domain | Description | Example content |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | D1 | **Scenario definitions** | Authored exercise scripts: aircraft, initial states, events, waypoints, surprise elements, difficulty. | `data/scenarios/sample-scenario.json` |
 | D2 | **Aircraft / flight state** | Runtime simulator state per aircraft (position, heading, level, speed, phase). | Ephemeral sim state |
 | D3 | **Live-flight public feed (demo)** | Read-only public flight data used to seed a demo scenario. | FlightAware AeroAPI / Flightradar24 records |
@@ -35,7 +35,7 @@
 Four-tier scheme shared with [COMPLIANCE.md](./COMPLIANCE.md) §3.1 and [SECURITY.md](./SECURITY.md).
 
 | Domain | Classification | Personal data? | Rationale |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | D1 Scenario definitions | **Internal** | No | Customer training IP; no personal data. |
 | D2 Aircraft/flight state | **Internal** (Public in demo) | No | Simulated/derived state. |
 | D3 Live-flight public feed | **Public** | No | Read-only public feed; demo only. |
@@ -113,7 +113,7 @@ Controls per [SECURITY.md](./SECURITY.md) §3/§4: private endpoints, encryption
 Ties to [COMPLIANCE.md](./COMPLIANCE.md) §3 (minimization, retention, DSR) and §5 (residency). **All retention periods are illustrative defaults — [validate with Customer legal/DPO] and Academy.**
 
 | Domain | Residency (production) | Residency (demo) | Minimization default | Retention (illustrative) | Erasure/DSR |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | D1 Scenario | Switzerland North | Any (non-personal) | N/A | Lifecycle of the scenario | N/A |
 | D2 Flight state | Switzerland North | EU/US demo plane | Ephemeral | Not persisted (or short debug TTL) | N/A |
 | D3 Public feed | N/A (demo only) | EU/US demo plane | Read-only, no store | Cache only | N/A |
@@ -176,7 +176,7 @@ The **Agnostic API** (APIM façade, [SECURITY.md](./SECURITY.md) §3, NFR-08) de
 ### 5.2 Contract rules
 
 | Rule | Detail |
-|---|---|
+| --- | --- |
 | **Command type enum** | `SELECT_AIRCRAFT`, `SET_HEADING`, `SET_FLIGHT_LEVEL`, `SET_ALTITUDE`, `SET_SPEED`, `SET_QNH`, `REPORT_POINT`, `TRAFFIC_INFO` … validated ranges (heading 0–360, etc.). Unknown types rejected ([AI.md](./AI.md) §4.1). |
 | **No personal data on vendor path** | Vendor/simulator integration sees callsigns, commands, session/correlation IDs — **not** trainee identity, voice, or performance data ([SECURITY.md](./SECURITY.md) §9.2; [COMPLIANCE.md](./COMPLIANCE.md) C-04). |
 | **Correlation** | `sessionId` + `correlationId` for traceability/audit (redacted logging, [SECURITY.md](./SECURITY.md) NFR-22). |

@@ -1,7 +1,7 @@
 # AI Design & Responsible AI
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Product | ATCSimulator |
 | Document | AI Design & Responsible AI |
 | Version | 0.1 (Draft) |
@@ -13,7 +13,6 @@
 **Related documents:** [COMPLIANCE.md](./COMPLIANCE.md) · [SECURITY.md](./SECURITY.md) · [DATA.md](./DATA.md) · [BOM.md](./BOM.md) · [SD.md](./SD.md) · [DESIGN-PRINCIPLES.md](./DESIGN-PRINCIPLES.md)
 
 > **Relationship to DESIGN-PRINCIPLES.md.** [DESIGN-PRINCIPLES.md](./DESIGN-PRINCIPLES.md) holds the *principles-level* view (CAF/WAF/RAI anchors). **This** document is the *detailed* AI + Responsible-AI treatment: model choices, the virtual-pilot pipeline, guardrails, the RAI six-principle deep-dive with concrete controls, a Transparency Note, fairness/dialect evaluation, human-in-the-loop, evaluation & quality, and the closed-loop lifecycle.
-
 > **Non-negotiable framing.** ATCSimulator is a **training simulator**, not an operational or safety-of-life system, and has **no connection to live/operational ATC** ([COMPLIANCE.md](./COMPLIANCE.md) §1, `CON-01`). Every AI capability here is **advisory** to a human instructor and is **out of scope for live ATC and for controller certification/pass-fail without human sign-off** (see §5.7 Transparency Note).
 
 ---
@@ -23,7 +22,7 @@
 ATCSimulator automates the **simulation-pilot** role: understand the trainee controller's spoken R/T instruction, drive the simulator, and voice a realistic virtual-pilot read-back. Two deployment profiles are used, matched to data classification and regional availability (see [COMPLIANCE.md](./COMPLIANCE.md) §5, [BOM.md](./BOM.md); availability is **as of Jul 2026 — verify at design time**).
 
 | Capability | Demo / Art-of-the-Possible (Scope 2) | In-country / production (Scope 1) | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Speech-to-speech (real-time)** | **Azure OpenAI real-time audio** (`gpt-realtime` / `gpt-4o-realtime` family) — single low-latency voice loop. | Not used as a single black-box for personal data (real-time family **not in Switzerland North**). Production decomposes into Speech + reasoning + Speech (below). | Real-time family available **Sweden Central (EU) / East US 2 (US)**; **demo only, no personal data** ([COMPLIANCE.md](./COMPLIANCE.md) `CON-03`). |
 | **Speech-to-Text (STT)** | Within the real-time model; or `gpt-4o-transcribe`/Whisper. | **Azure AI Speech STT** + **Custom Speech** (domain-adapted) — **GA in Switzerland North** → in-country. | Fine-tune on ATC vocabulary + Swiss languages/dialects + accented English (§1.1). |
 | **Text-to-Speech (TTS)** | Within the real-time model; or `gpt-4o-mini-tts`. | **Azure AI Speech Neural TTS** (standard neural voices) in Switzerland North; **Custom Neural Voice (CNV)** optional. | **CNV Pro is limited-access / RAI-gated** (application required); **CNV Lite** is Preview. Use standard neural voices for MVP. |
@@ -78,7 +77,7 @@ sequenceDiagram
 ```
 
 | Step (brief) | Component / agent | AI technique | Guardrail |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1. STT transcription | **AG-F-02 ASR/STT** | Azure AI Speech (Custom Speech) / real-time (demo) | Confidence thresholds; dialect-adapted model; N-best |
 | 2. Keyword recognition / tokenization | **AG-F-03 NLP/Intent** | LLM + grammar/phraseology parser | **Phraseology validation** against ICAO/Swiss corpus (grounded) |
 | 3. Command lookup + build + dispatch | **AG-F-04 Simulator Command Agent** | **Deterministic function/tool calling** with JSON schema | Schema validation; command allow-list; server-side authz; reject-on-ambiguity |
@@ -107,31 +106,37 @@ The core safety idea: **the LLM proposes, a deterministic layer disposes.** No f
 Concrete controls per principle. RAI ownership sits with the **Responsible-AI Lead** ([COMPLIANCE.md](./COMPLIANCE.md) §6.2).
 
 ### 5.1 Fairness
+
 - **Risk:** dialect/accent bias — the system understands standard German/French/English speakers better than Swiss-dialect, Italian, or accented speakers, disadvantaging some trainees.
 - **Controls:** dialect-stratified evaluation (§6) with **per-cohort WER parity targets**; domain adaptation on Swiss languages/dialects; fixed vocabulary/phraseology reduces long-tail errors; bias findings feed the closed loop (§8). Fairness is a **release gate**, not a report.
 
 ### 5.2 Reliability & Safety
+
 - **Risk:** wrong command dispatched; plausible-but-wrong read-back; latency breaking realism.
 - **Controls:** deterministic schema-validated command mapping (§4.1); grounded read-backs (§4.3); **latency SLO** (§7); fail-safe "say again" (§4.6); golden-set regression gates (§7). **Safety here = training fidelity**, since there is no live aircraft ([COMPLIANCE.md](./COMPLIANCE.md) §1).
 
 ### 5.3 Privacy & Security
+
 - **Risk:** trainee voice (biometric-adjacent), transcripts, performance data exposure; model memorization.
 - **Controls:** in-country residency, Private Link, encryption/CMK, minimization & purge ([SECURITY.md](./SECURITY.md) §3/§4; [DATA.md](./DATA.md) §4); no-training-on-customer-data (verify DPA); synthetic/de-identified fine-tune corpora ([COMPLIANCE.md](./COMPLIANCE.md) RISK-08); consent for voice ([COMPLIANCE.md](./COMPLIANCE.md) §3); **no speaker-identification by design** (RISK-04). CNV only with consented voice talent (§2).
 
 ### 5.4 Inclusiveness
+
 - **Risk:** trainees with non-standard speech, hearing needs, or minority language backgrounds are underserved.
 - **Controls:** multilingual support across Swiss national languages + accented English; accessible client (captions/transcripts available for review; adjustable audio); text fallback path; inclusive voice/accent variety in the virtual pilot. Inclusiveness overlaps Fairness testing (§6).
 
 ### 5.5 Transparency
+
 - **Risk:** trainees/instructors don't know they're interacting with AI, its limits, or that a voice is synthetic.
 - **Controls:** in-app **AI disclosure**; **synthetic-voice disclosure** for the virtual pilot; **Transparency Note** (§5.7); privacy notice ([COMPLIANCE.md](./COMPLIANCE.md) §3); debrief shows AI outputs **labelled as advisory**; documented intended use & out-of-scope.
 
 ### 5.6 Accountability
+
 - **Risk:** unclear who is responsible for AI-influenced assessment; silent model changes.
 - **Controls:** **human instructor retains responsibility** (§6 HITL); AI use-case register + model/prompt change control ([COMPLIANCE.md](./COMPLIANCE.md) C-13, §8); RACI ([COMPLIANCE.md](./COMPLIANCE.md) §6.2); RAI assessment signed before production; red-teaming (§7).
 
 | Principle | Primary control | Evidence artefact |
-|---|---|---|
+| --- | --- | --- |
 | Fairness | Dialect-stratified WER-parity eval gate | Fairness eval report (§6) |
 | Reliability & Safety | Deterministic command mapping + golden-set gate | Eval/golden-set results (§7) |
 | Privacy & Security | Residency + minimization + CMK + no-speaker-ID | [SECURITY.md](./SECURITY.md)/[DATA.md](./DATA.md) evidence |
@@ -148,6 +153,7 @@ Concrete controls per principle. RAI ownership sits with the **Responsible-AI Le
 **Limitations.** Speech recognition is imperfect on heavy dialect/noise; the model may misrecognize novel toponyms or callsigns; read-backs are only as correct as the dispatched command and the grounding corpus; evaluation is advisory and not a substitute for instructor judgment; performance varies by language/accent (mitigated, not eliminated, by §6).
 
 **Out-of-scope / must-not-use (hard limits).**
+
 - **NEVER** connect to or use for **live/operational ATC** or any safety-of-life function (`CON-01`).
 - **NEVER** use AI output as an **authoritative pass/fail or licensing/certification decision** for a controller **without human instructor sign-off** (RISK-05). AI-assisted assessment is **advisory only**.
 - **NEVER** use for covert monitoring, disciplinary action, or any purpose beyond training without a new lawful basis ([COMPLIANCE.md](./COMPLIANCE.md) `CON-02`, RISK-06).
@@ -173,7 +179,7 @@ Concrete controls per principle. RAI ownership sits with the **Responsible-AI Le
 The brief's example exchanges are the seed **golden set** (verbatim fixtures), chosen to exercise standard R/T, Swiss toponyms, QNH/level/heading semantics, and traffic-advisory phrasing:
 
 | # | ATC transmission (input) | Expected virtual-pilot read-back (assertion) | Exercises |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | G-01 | "Swiss 456, turn right heading 290 degrees, and climb flight level 370." | "Turning right heading 290 degrees and climbing to flight level 370, Swiss 456." | Heading + level; callsign echo |
 | G-02 | "N123AB, crossing to Schrattenfluh approved, descend 5'000 feet, QNH 1019, report crossing completed." | "Crossing to Schrattenfluh approved and descending to 5,000 feet, QNH 1019, call you completed N123AB." | Swiss toponym; QNH; conditional report |
 | G-03 | "Heli-NA, Report HE, QNH 1023, look out for opposite helicopter just departed FATO climbing direction Evolène." | "Call you HE, QNH 1023, looking out for traffic Heli-NA." | Swiss municipality; helicopter R/T; reporting point |
@@ -184,7 +190,7 @@ The golden set is expanded with instructor-authored cases per Swiss language/dia
 ### 7.2 Metrics & targets
 
 | Metric | Definition | Target (illustrative — **validate with Academy**) |
-|---|---|---|
+| --- | --- | --- |
 | **Word Error Rate (WER)** | STT transcription errors vs reference, **stratified by language/dialect/accent**. | e.g. ≤ X% overall **and** per-cohort parity within ±Y% (no cohort materially worse). Set with Academy. |
 | **Command-mapping accuracy** | % of transmissions producing the correct, schema-valid simulator command. | High (e.g. ≥ 98% on golden set) — **safety-relevant for training fidelity**. |
 | **Read-back correctness** | % of virtual-pilot read-backs faithful to the dispatched command & phraseology. | High (e.g. ≥ 98%); zero tolerance for confidently-wrong read-backs on core clearances. |
@@ -194,9 +200,11 @@ The golden set is expanded with instructor-authored cases per Swiss language/dia
 | **Fairness parity** | Max inter-cohort gap on WER/command accuracy. | Within agreed parity band (§5.1). |
 
 ### 7.3 Red-teaming & adversarial testing
+
 - Prompt-injection / jailbreak attempts on any free-text path; out-of-domain requests; malicious/garbled audio; ambiguous or conflicting clearances; accent/dialect stress cases; attempts to elicit unsafe or out-of-scope behaviour. Findings feed guardrail tuning and the risk register. Cadence set post-MVP (fast-follow, [COMPLIANCE.md](./COMPLIANCE.md) §6).
 
 ### 7.4 Evaluation as a release gate
+
 Golden-set + fairness + groundedness evals run in **CI**; a regression **blocks deployment** (ties to §8 and [SECURITY.md](./SECURITY.md) NFR-18). Demo scope runs a smoke subset; production runs the full gate.
 
 ---

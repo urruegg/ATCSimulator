@@ -1,7 +1,7 @@
 # ATCSimulator — Bill of Materials & Cloud-Service Availability Assessment (BOM)
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Product | ATCSimulator |
 | Document | Bill of Materials (BOM) & Availability Assessment |
 | Version | 0.1 (Draft) |
@@ -16,6 +16,7 @@
 
 > **Freshness & method.** Availability below was retrieved on **14 July 2026** from Microsoft's live sources and is **directional — model/region availability changes frequently (often weekly). Re-verify at design time.**
 > Authoritative live sources to check:
+>
 > - Azure OpenAI model regional availability matrix (updates ~every 10 min): `https://model-availability.azurewebsites.net/`
 > - Microsoft Learn — *Region availability for Foundry Models sold by Azure*
 > - Microsoft Learn — *Supported regions for Azure Speech*
@@ -40,7 +41,7 @@ The single most consequential finding for ATCSimulator:
 ## 2. Region reference set
 
 | Purpose | Region | Identifier | Residency |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | In-country Swiss (production personal data) | Switzerland North | `switzerlandnorth` | 🇨🇭 Swiss |
 | In-country Swiss (DR / secondary) | Switzerland West | `switzerlandwest` | 🇨🇭 Swiss |
 | EU cutting-edge models (fallback / demo) | Sweden Central | `swedencentral` | 🇪🇺 EU boundary |
@@ -51,7 +52,7 @@ The single most consequential finding for ATCSimulator:
 ### 3.1 AI & speech services (the core of ATCSimulator)
 
 | # | Service / model | Role in ATCSimulator | Switzerland North | Switzerland West | Sweden Central (EU) | East US 2 (US) | Notes |
-|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | A1 | **Azure AI Speech — Speech-to-Text (real-time & batch)** | Production ASR of Swiss R/T | **GA** | GA | GA | GA | In-country STT available today; data processed only in the resource region. |
 | A2 | **Azure AI Speech — Custom Speech** (domain adaptation for R/T & dialects) | Improve ASR on aviation vocabulary/place names | GA (train in dedicated-HW regions, then copy) | GA | GA | GA | Custom training may require specific HW regions; deploy copy in CH. |
 | A3 | **Azure AI Speech — Neural TTS (standard voices)** | Virtual-pilot voice output | **GA** | GA | GA | GA | Multiple Swiss-language voices; SSML for prosody. |
@@ -71,7 +72,7 @@ The single most consequential finding for ATCSimulator:
 ### 3.2 Application, integration & compute
 
 | # | Service | Role | Switzerland North | Sweden Central | East US 2 | Notes |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | B1 | **Azure API Management** | The **Agnostic API** façade (simulator-vendor-independent) | GA | GA | GA | Policy layer also enforces residency routing. |
 | B2 | **Azure Container Apps** | Host orchestrator & agents | GA | GA | GA | Serverless scale for concurrent sessions. |
 | B3 | **Azure Kubernetes Service (AKS)** | Production-scale alt to B2 | GA | GA | GA | Optional at scale. |
@@ -83,7 +84,7 @@ The single most consequential finding for ATCSimulator:
 ### 3.3 Data & analytics
 
 | # | Service | Role | Switzerland North | Notes |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | C1 | **Azure Blob Storage / ADLS Gen2** | Audio recordings, transcripts (prod) | GA | In-country; lifecycle/retention per [DATA.md](./DATA.md). |
 | C2 | **Azure Cosmos DB** | Session/scenario state | GA | Low-latency state store. |
 | C3 | **Azure SQL Database** | Structured session/performance records | GA | — |
@@ -92,7 +93,7 @@ The single most consequential finding for ATCSimulator:
 ### 3.4 Security, identity & governance
 
 | # | Service | Role | Availability | Notes |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | D1 | **Microsoft Entra ID** (+ Conditional Access, PIM) | Identity, Zero Trust | Global | Non-regional identity plane. |
 | D2 | **Azure Key Vault / Managed HSM** | Secrets, keys, CMK | GA (CH North) | Customer-managed keys for production. |
 | D3 | **Microsoft Purview** | Data catalog, DLP, audit, residency evidence | GA | Governance evidence for [COMPLIANCE.md](./COMPLIANCE.md). |
@@ -104,7 +105,7 @@ The single most consequential finding for ATCSimulator:
 ### 3.5 Developer experience & delivery (GitHub Copilot "superpowers")
 
 | # | Tool | Role | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | E1 | **GitHub (repos, Issues, Projects)** | Source of truth & traceability | Mirrors reference-repo pattern. |
 | E2 | **GitHub Actions** | CI/CD, what-if, approval-gated promotion | See [COPILOT-BUILD-GUIDE.md](./COPILOT-BUILD-GUIDE.md). |
 | E3 | **GitHub Advanced Security** | Code/secret/dependency scanning | Release gate. |
@@ -114,13 +115,13 @@ The single most consequential finding for ATCSimulator:
 ### 3.6 Demo data source (Scope 2)
 
 | # | Source | Role | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | F1 | **Public live-flight feed** — FlightAware AeroAPI / Flightradar24 | Select an aircraft to seed the scenario | **Read-only, public data**; fronted by APIM; validate provider **Terms of Service** (ASS-03). No personal data. |
 
 ### 3.7 Optional — UC1 challenger (Horizon-2)
 
 | # | Service | Role | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | G1 | **Microsoft Copilot Studio** | Low-code Report Summarization agent | Human-in-the-loop approval. |
 | G2 | **Microsoft 365 Copilot / Graph connectors** | LMS content access | Only if LMS integrates with M365. |
 | G3 | **Azure OpenAI (summarization)** | Summary generation | In-country/EU per availability. |
@@ -128,7 +129,7 @@ The single most consequential finding for ATCSimulator:
 ## 4. Availability matrix — condensed decision view
 
 | Capability | In-country CH today? | EU (Sweden Central)? | US (East US 2)? | ATCSimulator decision |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Classic STT/TTS (Azure AI Speech) | ✅ GA | ✅ | ✅ | **Production: in-country CH** |
 | Custom Speech / Custom Neural Voice | ✅ GA (CNV RAI-gated) | ✅ | ✅ | Production voice in CH; CNV needs RAI approval |
 | Real-time speech-to-speech (GPT audio) | ❌ not listed | ✅ | ✅ | **Demo: Sweden Central (EU) preferred** |
@@ -144,9 +145,11 @@ The single most consequential finding for ATCSimulator:
 4. **Track model/region availability** as a standing design task — real-time audio in Switzerland North would let the demo pattern move fully in-country; re-check the live matrix before each milestone (CON-05).
 
 ## 6. Cost drivers (link to [BVA.md](./BVA.md))
+
 Primary run-rate drivers: **real-time-audio model minutes** (demo), **Speech STT/TTS minutes** (production), **reasoning-model tokens**, **compute** (Container Apps/AKS), **storage** (audio + transcripts), **APIM tier**, and **observability**. These feed the ROM TCO and must be monitored against NFR-25.
 
 ## 7. Assumptions & caveats
+
 - Availability reflects **14 July 2026**; **verify at design time** (CON-05).
 - "GA/Prev" for Azure OpenAI audio models reflects the current model matrix; specific model *versions* and *deployment types* (standard / global-standard / data-zone-standard) vary by region.
 - Custom Neural Voice and some Preview features require **application/limited-access approval**.

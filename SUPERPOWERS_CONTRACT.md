@@ -1,7 +1,7 @@
 # SUPERPOWERS CONTRACT — Agent-Driven Build Governance
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Product | ATCSimulator |
 | Document | Superpowers Contract (agent operating rules) |
 | Version | 0.1 (Draft) |
@@ -46,7 +46,7 @@
 ## 2. Roles & authority (who may approve what)
 
 | Agent (custom agent) | May propose | Must NOT decide alone | Human gate it enforces |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `AG-E-01` Product Owner | stories, acceptance criteria, priorities | scope changes affecting residency/compliance | — |
 | `AG-E-02` Developer | code, tests, IaC, issue→PR | merging to protected branches | — |
 | `AG-E-03` Enterprise Architect | ADRs, API contract, topology | production go-live without signed architecture | **Architecture approval** |

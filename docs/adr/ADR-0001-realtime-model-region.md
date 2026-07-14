@@ -1,7 +1,7 @@
 # ADR-0001: Real-time speech-to-speech model & region for the demo
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Product | ATCSimulator |
 | Document | ADR-0001 — Real-time speech-to-speech model & region (demo) |
 | Version | 0.1 (Draft) |
@@ -43,12 +43,14 @@ For the **demo/MVP**, run the real-time speech-to-speech loop on the **Azure Ope
 
 ## Consequences
 
-**Positive**
+### Positive
+
 - Delivers the "latest & greatest" real-time voice demo the Customer asked for, fast, without waiting for Switzerland North.
 - Keeps demo data in the **EU boundary** by default (Sweden Central), minimizing sovereignty friction.
 - No personal data ever leaves the appropriate boundary; US is a bounded, documented exception (`RISK-03` mitigated).
 
-**Negative / trade-offs**
+### Negative / trade-offs
+
 - Demo real-time processing is **not in-country** — must be clearly communicated as a **demo-only** posture, not the production residency answer.
 - Creates a **two-path** reality (demo real-time vs production decomposed pipeline); the vendor-agnostic API façade ([ADR-0002](./ADR-0002-agnostic-api-facade.md)) is what keeps this from leaking into clients.
 - Availability can change; the decision must be **re-verified at design time** and may move to Switzerland North if/when the real-time family lands there.

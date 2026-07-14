@@ -1,7 +1,7 @@
 # Personas & End-to-End Journey
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Product | ATCSimulator |
 | Document | Personas & End-to-End Journey |
 | Version | 0.1 (Draft) |
@@ -29,6 +29,7 @@
 ## 2. Human personas (`P-##`)
 
 ### P-01 — ATC Trainee (primary user)
+
 *Air traffic controller in training who issues clearances and instructions by radio (R/T).*
 
 - **Goals.** Build fluent, correct radiotelephony and traffic-management skill; accumulate as many realistic training repetitions as possible; get objective, evidence-based feedback; practise without fear of judgment.
@@ -38,6 +39,7 @@
 - **Runtime agents.** Speaks to **AG-F-01** (the virtual-pilot persona) in real time; is served transparently by **AG-F-02→AG-F-03→AG-F-04→AG-F-05** (the voice loop) and by **AG-F-07** (surprise elements); reviews output from **AG-F-06** (transcript/self-review).
 
 ### P-02 — Coach / Instructor (human-in-the-loop reviewer & debriefer)
+
 *Experienced controller who supervises the exercise, advises, and owns the debrief and assessment.*
 
 - **Goals.** Maximize each trainee's learning; run efficient, evidence-based debriefs; retain full pedagogical authority and accountability for assessment.
@@ -47,6 +49,7 @@
 - **Runtime agents.** Consumes **AG-F-06** (transcription/debrief insights) as the primary tool; oversees **AG-F-01** behaviour and can select/approve **AG-F-07** variability sets; for UC1, **reviews and approves AG-F-08** summaries before submission.
 
 ### P-03 — Scenario Designer / Training Content Author
+
 *Instructional designer / SME who authors the exercises, phraseology content, and surprise elements.*
 
 - **Goals.** Produce realistic, pedagogically-targeted scenarios at the right difficulty; keep phraseology content correct and current; enable progressive difficulty and variability.
@@ -56,6 +59,7 @@
 - **Runtime agents.** Authors content consumed by **AG-F-01** and **AG-F-07**; defines the command tool-schema used by **AG-F-04**; curates the grounding corpus used by **AG-F-03**.
 
 ### P-04 — Training Academy Manager (value owner)
+
 *Owns the Academy's training throughput, quality, budget, and the ATCSimulator value case.*
 
 - **Goals.** Increase training capacity and quality without proportional headcount; demonstrate ROI; de-risk delivery; scale from MVP to standard operation.
@@ -65,6 +69,7 @@
 - **Runtime agents.** Does not operate agents directly; consumes **aggregated analytics** derived from **AG-F-06** and the closed loop; is the value owner for the whole `AG-F-##` roster.
 
 ### P-05 — Data Protection / Compliance Officer (DPO)
+
 *Accountable owner of lawful basis, DPIA, residency, retention, and data-subject rights.*
 
 - **Goals.** Ensure ATCSimulator meets **FADP/revDSG + GDPR** "state of the art"; keep personal data in Switzerland where possible; prevent function creep; keep governance **minimal but sufficient**.
@@ -74,6 +79,7 @@
 - **Runtime agents.** Governs (not operates) the data produced by **AG-F-02** (voice, D4) and **AG-F-06** (transcripts D5, performance D6); sets residency/retention constraints all `AG-F-##` inherit.
 
 ### P-06 — Platform / Cloud Operations Engineer
+
 *Builds and runs the landing zone, deploys the agents, and keeps the service healthy, cheap, and secure.*
 
 - **Goals.** Reliable, observable, cost-controlled operation from day one; repeatable deployments; enforce Zero-Trust and residency by policy; hit the real-time latency budget (DP-11).
@@ -83,6 +89,7 @@
 - **Runtime agents.** Deploys, scales, monitors and secures **all `AG-F-##`** and the APIM Agnostic-API façade; owns their runtime SLOs and cost — but has **no data-plane read** of personal performance data.
 
 ### P-07 — LMS Administrator (UC1 challenger)
+
 *Administers the Learning Management System and its integration with the summarization agent.*
 
 - **Goals.** Reduce repetitive manual documentation; get accurate trainee report summaries into the LMS with the instructor firmly in control.
@@ -94,7 +101,7 @@
 > **Persona → primary agent map (quick reference)**
 >
 > | Persona | Primary runtime agent(s) | Interaction mode |
-> |---|---|---|
+> | --- | --- | --- |
 > | P-01 ATC Trainee | AG-F-01 (+02/03/04/05, 07) | Real-time voice R/T |
 > | P-02 Coach/Instructor | AG-F-06 (+01, 07); AG-F-08 (UC1) | Review, oversight, sign-off |
 > | P-03 Scenario Designer | AG-F-01, AG-F-07, AG-F-04 (schema), AG-F-03 (corpus) | Authoring |
@@ -232,7 +239,7 @@ sequenceDiagram
 Legend: **●** primary/does the work · **◐** supports/reviews · **○** informed/consumes output · — not involved. Stages marked **(prod)** exist only in the full/production journey.
 
 | Stage | P-01 Trainee | P-02 Coach | P-03 Designer | P-04 Manager | P-05 DPO | P-06 Cloud Ops | P-07 LMS Admin |
-|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | Author scenario / phraseology / schema | — | ◐ | ● | ○ | ○ | — | — |
 | Enrol & voice consent **(prod)** | ◐ | ○ | — | ○ | ● | ○ | — |
 | Sign in + disclosures | ● | ○ | — | — | ◐ | ◐ | — |
@@ -253,7 +260,7 @@ Legend: **●** primary/does the work · **◐** supports/reviews · **○** inf
 Maps build workstreams to the **engineering (build-time) agents `AG-E-##`** (custom agents in [../.github/agents/](../.github/agents/)) and the human sign-off roles. **R** = Responsible (does it), **A** = Accountable (owns the outcome/sign-off), **C** = Consulted, **I** = Informed. AG-E roster: AG-E-01 Product Owner · AG-E-02 Developer · AG-E-03 Enterprise Architect · AG-E-04 SecDevOps · AG-E-05 ATC Domain Expert · AG-E-06 Responsible-AI & Compliance Officer. Human sign-off: **Academy Mgr (P-04)** and **DPO (P-05)**.
 
 | Build workstream | AG-E-01 PO | AG-E-02 Dev | AG-E-03 EA | AG-E-04 SecDevOps | AG-E-05 ATC SME | AG-E-06 RAI | P-04 Mgr | P-05 DPO |
-|---|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Backlog, user stories & acceptance criteria (from [PRD.md](./PRD.md)) | **A/R** | C | C | I | C | C | C | I |
 | MVP scope guardrails (public-data-only demo) | **A/R** | C | C | C | C | **C** | C | C |
 | Real-time voice loop implementation (AG-F-02/03/04/05) | C | **A/R** | C | C | C | C | I | I |
@@ -276,7 +283,7 @@ Maps build workstreams to the **engineering (build-time) agents `AG-E-##`** (cus
 ## 7. Traceability
 
 | This document | Links to |
-|---|---|
+| --- | --- |
 | Personas `P-01…P-07` | [../AGENTS.md](../AGENTS.md) (agent interactions), [COMPLIANCE.md](./COMPLIANCE.md) §6.2 (RACI), [AI.md](./AI.md) §6 (HITL) |
 | Demo journey (Scope 2) | [COMPLIANCE.md](./COMPLIANCE.md) §9, [SECURITY.md](./SECURITY.md) §10, [BOM.md](./BOM.md) (regions), [SD.md](./SD.md) |
 | Production journey (Scope 1) | [SD.md](./SD.md), [DATA.md](./DATA.md), [AI.md](./AI.md) §9 (closed loop) |

@@ -1,7 +1,7 @@
 # Compliance & Regulatory Design
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Product | ATCSimulator |
 | Document | Compliance & Regulatory Design |
 | Version | 0.1 (Draft) |
@@ -34,7 +34,7 @@ The Customer is Switzerland's national air navigation service provider (ANSP). T
 ### 2.1 Data-protection law (the binding driver)
 
 | Regime | Applies because | Key obligations relevant to ATCSimulator | Owner |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Swiss FADP — revised Federal Act on Data Protection (revDSG / nFADP), in force since 1 Sept 2023**, with **Ordinance (revDSV) and DSG-specific requirements** | The Customer is a Swiss entity processing personal data of data subjects in Switzerland (trainees, instructors). | Lawful & good-faith processing, proportionality, purpose limitation, data security "state of the art", transparency/information duty, data-subject rights, **records of processing activities (RoPA)**, **DPIA (Datenschutz-Folgenabschätzung)** for high-risk processing, breach notification to the FDPIC, privacy-by-design/default. | Customer DPO |
 | **EU GDPR (Regulation 2016/679)** | Likely applies via **Art. 3** if any monitoring/processing touches EU-based data subjects or establishments, and is contractually expected by the Customer. **[validate with Customer legal/DPO]** whether GDPR applies as primary or as an aligned-standard baseline. | Art. 5 principles, Art. 6/9 lawful basis (incl. special-category rules), Art. 30 RoPA, Art. 35 DPIA, Arts. 12–22 data-subject rights, Arts. 44–49 transfers, Art. 25 privacy-by-design. | Customer DPO |
 | **Swiss data-transfer regime (FADP Art. 16/17 + FDPIC country list)** | Any processing outside Switzerland (EU Data Zone, US demo region). | Adequacy (EU is recognized adequate by Switzerland); for the US, **Swiss–U.S. Data Privacy Framework** or **Standard Contractual Clauses (SCC) + Transfer Impact Assessment** may be required. **[validate with Customer legal/DPO]** | Customer DPO + CSA |
@@ -46,7 +46,7 @@ The Customer is Switzerland's national air navigation service provider (ANSP). T
 The aviation standards below apply to ATCSimulator **only as sources of correct training content** (what "good" radiotelephony looks like), **never** as operational-certification obligations on the platform.
 
 | Standard | How it is used in ATCSimulator | How it is **not** used |
-|---|---|---|
+| --- | --- | --- |
 | **ICAO Annex 10 (Aeronautical Telecommunications), Vol. II** | Reference for standard R/T procedures the phraseology-validation guardrail checks trainee/virtual-pilot exchanges against. | Not a platform certification; ATCSimulator carries no ICAO approval and needs none. |
 | **ICAO Doc 9432 (Manual of Radiotelephony)** | Source corpus for the **golden phraseology test set** and read-back-correctness scoring (see [AI.md](./AI.md) §7). | Not an operational compliance gate. |
 | **ICAO Doc 4444 (PANS-ATM)** phraseology extracts | Optional enrichment of scenario content and clearance vocabulary. | Not operational procedure enforcement. |
@@ -69,7 +69,7 @@ The aviation standards below apply to ATCSimulator **only as sources of correct 
 Four tiers are used consistently across [DATA.md](./DATA.md), [SECURITY.md](./SECURITY.md), and this document:
 
 | Tier | Definition | Handling baseline |
-|---|---|---|
+| --- | --- | --- |
 | **Public** | Already public; no confidentiality obligation. | No residency constraint. |
 | **Internal** | Customer business data, non-personal. | Encrypt; access-controlled; residency preferred CH/EU. |
 | **Personal** | Data relating to an identified/identifiable person (FADP/GDPR). | Lawful basis + minimization + in-country residency preferred; DPIA input. |
@@ -78,7 +78,7 @@ Four tiers are used consistently across [DATA.md](./DATA.md), [SECURITY.md](./SE
 ### 3.2 Personal-data inventory
 
 | Data element | Domain (see [DATA.md](./DATA.md)) | Classification | Why | Notes |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | **Trainee voice audio** (live R/T stream + any recording) | Voice audio streams | **Sensitive** | Voice is **biometric-adjacent**: raw voice can enable speaker identification. Whether it is *legally* "biometric data for the purpose of uniquely identifying" (GDPR Art. 9 / FADP special category) depends on whether ATCSimulator performs voiceprint identification — **it does not by design**, but the raw signal remains high-risk. **[validate with Customer legal/DPO]** | Prefer transient processing; avoid persistent storage unless justified (see §4, DATA.md retention). |
 | **Trainee transcripts** (STT output of trainee speech) | Transcripts | **Personal** | Content attributable to an identified trainee. | Free-text may embed incidental personal data. |
 | **Trainee identity** (name, Academy ID, cohort, role) | Session/performance records | **Personal** | Directly identifying. | Pseudonymize in analytics store where possible. |
@@ -91,7 +91,7 @@ Four tiers are used consistently across [DATA.md](./DATA.md), [SECURITY.md](./SE
 ### 3.3 Core FADP/GDPR obligations mapped to ATCSimulator
 
 | Obligation | ATCSimulator position | Marker |
-|---|---|---|
+| --- | --- | --- |
 | **Lawful basis** | Candidate bases: (a) **performance of the training relationship / task in the public interest**; (b) **legitimate interest** in effective controller training; (c) **consent** specifically for **voice capture and any recording retention**. Employment-context consent is fragile (imbalance of power) — do **not** rely on consent as sole basis for the *training* itself; use it specifically to authorize *voice recording/retention*. **[validate with Customer legal/DPO]** | RISK-01 |
 | **Purpose limitation** | Voice/transcripts processed **only** for: real-time simulation interaction, debrief/documentation, and (with separate basis) model improvement. No secondary use (e.g., staff performance management, disciplinary use) without new basis. `CON-02` | RISK-06 |
 | **Data minimization** | Prefer **transient, streamed** voice processing; persist recordings only when the training/debrief purpose requires it; default to **transcript-only retention** where feasible; aggressive TTL on raw audio (see [DATA.md](./DATA.md) §4). | — |
@@ -126,7 +126,7 @@ A **Data Protection Impact Assessment is recommended and should be treated as a 
 This is the crux of the design tension: the Customer wants **data in Switzerland**, but the **cutting-edge real-time speech-to-speech** capability is **not currently available in Switzerland North** (as of Jul 2026; verify at design time — see [BOM.md](./BOM.md)). The answer is a **split-plane pattern** matched to data classification.
 
 | Plane / workload | Data it touches | Target region | Residency outcome | Rationale |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | **Production personal/sensitive plane** — trainee voice, transcripts, identity, performance records; classic **Azure AI Speech STT/TTS**; storage (Blob/ADLS, Cosmos, SQL); Key Vault; Purview | Personal / Sensitive | **Switzerland North** (Switzerland West for DR/pairing) | **In-country (Swiss) residency** | Azure AI Speech is **GA in Switzerland North & West**; data processed only in the resource's region → in-country STT/TTS is achievable. |
 | **Reasoning / command-mapping (production)** — GPT-4.1 / GPT-5.x-class model for voice→command | Transcripts (personal) | **Switzerland North** if the required model is in-country; else **EU Data Zone (`data-zone-standard (EU)`)** | Swiss-preferred, **EU boundary as fallback** | Switzerland North hosts a broadened Foundry catalog but a subset vs EU/US; EU Data Zone keeps data within the EU. |
 | **Real-time speech-to-speech (demo / Art-of-the-Possible)** — `gpt-realtime` / `gpt-4o-realtime` family | **Synthetic voice + public flight data only — NO personal data** | **Sweden Central (EU)** preferred; **East US 2 (US)** only if a Preview capability is US-only | EU (or US, demo-only) | Real-time family **not listed in Switzerland North**; demo carries **no personal data**, so EU/US processing is acceptable **for the demo**. |
@@ -134,6 +134,7 @@ This is the crux of the design tension: the Customer wants **data in Switzerland
 | **US region** | **Demo, non-personal only** | **East US 2** | US, demo-only, **no personal data** | Hard rule: **no personal data ever lands in a US region.** `CON-03` |
 
 **Sovereignty rules of the road (`CON-03`):**
+
 1. **Personal/sensitive data → Switzerland North** (in-country) by default; **Switzerland West** for resiliency pairing.
 2. If a required model is not in Switzerland → **EU Data Zone** (EU boundary), and only after **[validate with Customer legal/DPO]** that EU processing is acceptable for that data class.
 3. **US regions carry demo/synthetic/public data only — never personal data.**
@@ -150,7 +151,7 @@ The Customer is **green-field** on cloud/AI governance and explicitly wants **mi
 ### 6.1 MVP-mandatory vs fast-follow
 
 | Governance element | MVP-mandatory? | What "minimal" looks like | Fast-follow (post-MVP) |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Named Data Owner** (for trainee personal data) | **MUST** | One accountable role named; owns lawful basis & retention. | Formal data-owner council. |
 | **Architecture sign-off** | **MUST** for production; **not** for isolated sandbox/demo | Single EA + Governance/Compliance sign-off of the reference architecture (a "signed architecture" per the discovery call). Demo runs as **isolated sandbox → no sign-off needed**. | Standard architecture review board + ADR gate. |
 | **AI use-case register** | **MUST** | One lightweight register (a table/list) recording: use case, owner, models used, region/data-boundary, RAI risk tier, HITL status, approval date. | Enterprise AI inventory + Purview/Foundry integration. |
@@ -166,7 +167,7 @@ The Customer is **green-field** on cloud/AI governance and explicitly wants **mi
 Roles use titles only (no personal names, per anonymization rules). R = Responsible, A = Accountable, C = Consulted, I = Informed.
 
 | Activity | Data Protection / Compliance Officer (DPO) | Training Academy Manager (value owner) | Enterprise Architect | Cloud/Platform Ops Engineer | Responsible-AI Lead | CSA (Microsoft) |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | Lawful basis & consent design | **A/R** | C | I | I | C | C |
 | DPIA | **A/R** | C | C | C | C | C (technical mitigations) |
 | Architecture sign-off (production) | C | I | **A/R** | C | C | C |
@@ -186,7 +187,7 @@ Roles use titles only (no personal names, per anonymization rules). R = Responsi
 Control → requirement → how ATCSimulator meets it → evidence artefact. IDs cross-reference [SECURITY.md](./SECURITY.md) (`NFR-##`), this doc (`CON-##`, `RISK-##`), and [AI.md](./AI.md).
 
 | # | Control area | Requirement / obligation | How ATCSimulator meets it | Evidence artefact |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | C-01 | Data residency | Keep personal data in Switzerland where possible (FADP; discovery call). | Split-plane: personal/sensitive + classic Speech in **Switzerland North**; `CON-03` region rules; Azure Policy allowed-regions. | Azure Policy assignment export; resource region inventory; BOM region matrix. |
 | C-02 | Lawful basis & consent | FADP/GDPR Art. 6/9 basis; explicit consent for voice. | Documented lawful-basis memo; consent captured & enforced at session gate; revocation runbook. | Lawful-basis memo **[DPO]**; consent-log schema ([DATA.md](./DATA.md)); privacy notice. |
 | C-03 | DPIA | High-risk processing → DPIA. | DPIA completed & signed before production; screening for demo. | Signed DPIA; demo screening record. |
@@ -211,7 +212,7 @@ Control → requirement → how ATCSimulator meets it → evidence artefact. IDs
 Likelihood/Impact: L / M / H. Owner roles per anonymization rules.
 
 | ID | Description | Likelihood | Impact | Mitigation | Owner |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | `RISK-01` | **Lawful basis / consent for voice is invalid or fragile** (employee power-imbalance undermines consent; wrong basis chosen). | M | H | Documented lawful-basis memo separating training-relationship basis from voice-recording consent; DPO sign-off; consent enforced at session gate + revocation runbook. | Data Protection / Compliance Officer |
 | `RISK-02` | **DPIA not completed before processing real voice**, exposing high-risk processing without assessment. | M | H | Treat DPIA as a hard production gate; demo screening only needs "no personal data" confirmation; CSA supplies technical mitigation sections. | Data Protection / Compliance Officer |
 | `RISK-03` | **Personal data leaves Switzerland unintentionally** (model routed to EU/US; global-standard deployment; logging egress). | M | H | `CON-03` region rules; Azure Policy allowed-regions + deny-public-endpoint; Private Link; per-deployment region recorded in AI register; verify model-availability at design time. | Enterprise Architect / Cloud Ops |
@@ -233,7 +234,7 @@ Likelihood/Impact: L / M / H. Owner roles per anonymization rules.
 The demo (Scope 2, Art-of-the-Possible) is **materially lighter** than production (Scope 1) because it processes **no personal data**.
 
 | Dimension | Demo / MVP (Scope 2) | Full / production (Scope 1) |
-|---|---|---|
+| --- | --- | --- |
 | **Personal data** | **None** — public flight feed + synthetic voices only. | Trainee voice, identity, transcripts, performance (personal/sensitive). |
 | **FADP/GDPR trigger** | Minimal — no personal data processing; screening confirms. | Full applicability. |
 | **DPIA** | **Not required** — short "no personal data" screening. | **Required** production gate (RISK-02). |

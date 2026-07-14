@@ -1,7 +1,7 @@
 # Agent Registry — Runtime & Engineering Agents
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Product | ATCSimulator |
 | Document | Agent Registry (runtime `AG-F-##` + engineering `AG-E-##`) |
 | Version | 0.1 (Draft) |
@@ -74,6 +74,7 @@ flowchart TB
 Each agent below lists **Purpose · Inputs → Outputs · Realizing Azure/AI service (see [BOM.md](./docs/BOM.md)) · Key guardrails · Side effects · Human-in-the-loop (HITL)**. Data domains `D1–D7` are defined in [DATA.md](./docs/DATA.md).
 
 ### AG-F-01 — Virtual Simulation Pilot Agent (orchestrator / persona)
+
 - **Purpose.** Play the **simulation-pilot role**: own the session, orchestrate the other agents, and present a single realistic virtual-pilot persona to the trainee.
 - **Inputs → Outputs.** Scenario (D1) + trainee voice (D4) + command results → orchestrated exchange + **grounded read-back text** → TTS.
 - **Realizing service.** Azure AI Foundry **Agent Service** / orchestrator on Azure Container Apps; read-back generation via Azure OpenAI reasoning model (real-time model in demo). See [BOM.md](./docs/BOM.md).
@@ -82,6 +83,7 @@ Each agent below lists **Purpose · Inputs → Outputs · Realizing Azure/AI ser
 - **HITL.** Instructor (P-02) oversees behaviour; assessment is **advisory only** (RISK-05).
 
 ### AG-F-02 — Speech Recognition (ASR/STT) Agent
+
 - **Purpose.** Convert trainee spoken R/T to normalized text, robust to **Swiss dialects/languages + accented English** and R/T vocabulary.
 - **Inputs → Outputs.** Voice audio (D4) → normalized R/T transcript (D5) + confidence/N-best.
 - **Realizing service.** **Azure AI Speech STT + Custom Speech** (domain-adapted) — **GA in Switzerland North** (in-country); real-time model / `gpt-4o-transcribe`/Whisper in the demo. See [BOM.md](./docs/BOM.md).
@@ -90,6 +92,7 @@ Each agent below lists **Purpose · Inputs → Outputs · Realizing Azure/AI ser
 - **HITL.** Low-confidence recognitions surfaced to the instructor, not hidden.
 
 ### AG-F-03 — NLP / Intent & Phraseology Agent (Swiss ATC fine-tuned)
+
 - **Purpose.** Tokenize/keyword-group the transcript, **validate R/T phraseology**, and produce a **structured intent**.
 - **Inputs → Outputs.** Transcript (D5) → structured intent (schema) + phraseology-deviation flags.
 - **Realizing service.** Azure OpenAI reasoning model (GPT-4.1/GPT-5.x-class) with a grammar/phraseology parser, **grounded via Azure AI Search** over the ICAO/Swiss phraseology corpus. See [BOM.md](./docs/BOM.md).
@@ -98,6 +101,7 @@ Each agent below lists **Purpose · Inputs → Outputs · Realizing Azure/AI ser
 - **HITL.** Deviation flags become **advisory** debrief evidence for the instructor.
 
 ### AG-F-04 — Simulator Command Agent (voice → API)
+
 - **Purpose.** Turn validated intent into **deterministic, schema-valid simulator commands** and dispatch them to the simulator via the Agnostic API. **This is the only agent that commands the simulator.**
 - **Inputs → Outputs.** Structured intent → typed tool calls (`select_aircraft`, `set_heading`, `set_flight_level`, `set_speed`, `set_qnh`, …) → simulator ack (OK/error).
 - **Realizing service.** **Deterministic function/tool-calling** with JSON schema; Azure API Management enforces the contract; simulator vendor adapters behind APIM. See [BOM.md](./docs/BOM.md), [./api/openapi.yaml](./api/openapi.yaml).
@@ -106,6 +110,7 @@ Each agent below lists **Purpose · Inputs → Outputs · Realizing Azure/AI ser
 - **HITL.** Rejections surfaced to the instructor; no autonomous action beyond the schema.
 
 ### AG-F-05 — Speech Synthesis (TTS) Agent
+
 - **Purpose.** Voice the virtual-pilot read-back with realistic **male/female voices & accents**.
 - **Inputs → Outputs.** Read-back text → synthetic pilot audio (D4, **Internal/non-personal**).
 - **Realizing service.** **Azure AI Speech Neural TTS** (standard neural voices) in Switzerland North; **Custom Neural Voice (CNV)** optional but **RAI limited-access gated**; real-time model TTS / `gpt-4o-mini-tts` in demo. See [BOM.md](./docs/BOM.md).
@@ -114,6 +119,7 @@ Each agent below lists **Purpose · Inputs → Outputs · Realizing Azure/AI ser
 - **HITL.** None at runtime; CNV enablement requires RAI Lead approval.
 
 ### AG-F-06 — Transcription & Debrief Agent
+
 - **Purpose.** Capture the time-aligned transcript and produce **advisory** debrief insights (phraseology, read-back correctness, metrics) for documentation and the closed loop.
 - **Inputs → Outputs.** Transcripts (D5) + command log + flags → session/performance records (D6) + debrief view.
 - **Realizing service.** STT + summarization on the reasoning model; storage in **Blob/ADLS + Cosmos + SQL** (CH); analytics via **Fabric/Power BI**. See [BOM.md](./docs/BOM.md).
@@ -122,6 +128,7 @@ Each agent below lists **Purpose · Inputs → Outputs · Realizing Azure/AI ser
 - **HITL.** **Instructor (P-02) reviews, overrides, and signs off** — assessment is advisory, **no automated pass/fail** (DP-17, RISK-05).
 
 ### AG-F-07 — Scenario Variability Agent (surprise engine)
+
 - **Purpose.** Inject **bounded surprise elements** to raise realism and training value.
 - **Inputs → Outputs.** Scenario schema (D1) + learner level → approved in-scenario variations/events.
 - **Realizing service.** Scenario engine + reasoning model, bounded by the **scenario schema**; state in Cosmos DB. See [BOM.md](./docs/BOM.md).
@@ -130,6 +137,7 @@ Each agent below lists **Purpose · Inputs → Outputs · Realizing Azure/AI ser
 - **HITL.** Scenario Designer (P-03) defines and **instructor approves** the variation bounds.
 
 ### AG-F-08 — Report Summarization Agent (UC1 challenger)
+
 - **Purpose.** Draft **per-trainee summaries** of training-session reports held in the LMS, to remove repetitive documentation effort. **Implemented after UC2.**
 - **Inputs → Outputs.** LMS training-session reports → **draft** summaries returned to the LMS for review.
 - **Realizing service.** Azure OpenAI reasoning model (or Microsoft Copilot Studio / M365 Copilot with SharePoint/Graph connectors to the LMS). See [BOM.md](./docs/BOM.md) (optional M365 stack).
@@ -140,7 +148,7 @@ Each agent below lists **Purpose · Inputs → Outputs · Realizing Azure/AI ser
 ### 2.1 Summary table
 
 | Agent | Purpose (one line) | Key input → output | Realizing service ([BOM.md](./docs/BOM.md)) | Primary guardrail |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | AG-F-01 | Orchestrator / virtual-pilot persona | scenario+voice → read-back | Foundry Agent Service + AOAI | Grounded read-back; AI disclosure |
 | AG-F-02 | ASR/STT (Swiss dialect) | audio → transcript | Azure AI Speech + Custom Speech | Confidence thresh.; fairness parity |
 | AG-F-03 | NLP/intent + phraseology | transcript → intent | AOAI + AI Search (grounding) | Grounded phraseology validation |
@@ -157,7 +165,7 @@ Each agent below lists **Purpose · Inputs → Outputs · Realizing Azure/AI ser
 Which agents may perform which side effects. **✔ = permitted (with the stated control)** · **✘ = never**. The last column restates the hard rule.
 
 | Agent | Call **training** simulator API | Write **personal** data (CH) | Emit synthetic voice | Read public feed (demo) | Write LMS (draft) | Touch **operational ATC** |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | AG-F-01 Virtual Pilot | ✘ (delegates to AG-F-04) | ✔ via AG-F-06 | ✔ via AG-F-05 | ✔ (seed) | ✘ | **✘ NEVER** |
 | AG-F-02 ASR/STT | ✘ | ✔ (transcripts, D5) | ✘ | ✘ | ✘ | **✘ NEVER** |
 | AG-F-03 NLP/Intent | ✘ | ✘ (flags → AG-F-06) | ✘ | ✘ | ✘ | **✘ NEVER** |
@@ -176,7 +184,7 @@ Which agents may perform which side effects. **✔ = permitted (with the stated 
 Custom agents that accelerate the **build**. Each is a drop-in `.agent.md` under [./.github/agents/](./.github/agents/), usable with GitHub Copilot. The legacy `.github/chatmodes/` folder remains as template/source material; the supported runtime entry point is `.github/agents/`. Full role, operating principles, quality gates, guardrails, and handoffs are inside each file.
 
 | Agent | One-line role | Custom agent file |
-|---|---|---|
+| --- | --- | --- |
 | **AG-E-01 Product Owner** | Owns the backlog, user stories from the [PRD.md](./docs/PRD.md), acceptance criteria, prioritization, and MVP-scope (public-data-only) guardrails. | [./.github/agents/product-owner.agent.md](./.github/agents/product-owner.agent.md) |
 | **AG-E-02 Developer** | Implements the real-time voice loop & Agnostic API with Azure SDKs, IaC, and tests (TDD); follows the [SD.md](./docs/SD.md). | [./.github/agents/developer.agent.md](./.github/agents/developer.agent.md) |
 | **AG-E-03 Enterprise Architect** | Owns the landing zone, WAF/CAF alignment, ADRs, the residency split-plane, and the architecture sign-off gate. | [./.github/agents/enterprise-architect.agent.md](./.github/agents/enterprise-architect.agent.md) |
