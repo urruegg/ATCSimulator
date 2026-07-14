@@ -66,7 +66,7 @@ sequenceDiagram
     STT->>NLP: transcript (normalized R/T text)
     NLP->>NLP: tokenize + phraseology validation (grounded)
     NLP->>CMD: structured intent (schema)
-    CMD->>SIM: deterministic tool call: SELECT AIRCRAFT SWISS456; SET HEADING 290; SET FL 370
+    CMD->>SIM: deterministic tool call set: SELECT AIRCRAFT SWISS456, SET HEADING 290, SET FL 370
     SIM-->>CMD: ack (OK / error)
     CMD->>GEN: command result + context
     GEN->>GEN: generate read-back (grounded, content-safe)

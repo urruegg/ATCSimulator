@@ -274,8 +274,8 @@ A story is **Done** only when **all** hold:
 flowchart TB
     PR["Pull Request"] --> B["Build + Unit"]
     B --> GHAS["GHAS: secret scan / CodeQL / Dependabot"]
-    GHAS --> IAC["IaC scan + Azure Policy what-if<br/>(allowed regions CH/EU; deny public endpoints)"]
-    IAC --> EVAL["Golden-set eval + groundedness<br/>(AG-E-06 owns; merge-blocking)"]
+    GHAS --> IAC["IaC scan + Azure Policy what-if<br/>(allowed regions CH/EU, deny public endpoints)"]
+    IAC --> EVAL["Golden-set eval + groundedness<br/>(AG-E-06 owns, merge-blocking)"]
     EVAL --> CS["Content Safety config check"]
     CS --> TRACE["Traceability check<br/>(FR/NFR + US-### + evidence links)"]
     TRACE --> CODEOWNERS["Required reviewers via CODEOWNERS<br/>EA (arch/contract/residency) · RAI (model/prompt/eval)"]

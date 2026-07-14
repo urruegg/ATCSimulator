@@ -142,7 +142,7 @@ sequenceDiagram
     participant TTS as AG-F-05 TTS
     participant TR as AG-F-06 Transcription/Debrief
 
-    T->>UI: Sign in (Entra ID + CA); see AI-pilot disclosure
+    T->>UI: Sign in (Entra ID + CA) and see AI-pilot disclosure
     UI->>APIM: Request live aircraft (public feed)
     APIM->>FEED: GET flights (read-only, public)
     FEED-->>UI: Aircraft list (callsign, type, state)
@@ -214,7 +214,7 @@ sequenceDiagram
         LOOP-->>TR: transcript + performance signals
     end
     TR-->>C: Transcript + advisory flags/metrics (evidence-linked)
-    C->>C: Confirm/override; SIGN OFF assessment (HITL, no auto pass/fail)
+    C->>C: Confirm or override, then sign off assessment (HITL, no auto pass/fail)
     TR->>LMS: Session report
     LMS->>SUM: Report(s) for trainee
     SUM-->>LMS: Draft summary
