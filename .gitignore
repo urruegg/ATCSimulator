@@ -16,5 +16,7 @@ azd.env
 # IDE
 .vscode/*.local
 .idea/
+# Local worktrees
+.worktrees/
 # Local scratch
 *.local.md
