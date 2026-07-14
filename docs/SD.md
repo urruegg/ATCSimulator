@@ -48,8 +48,8 @@ flowchart LR
     APIM --> ASR --> NLP --> CMD
     NLP --> GEN --> TTS --> APIM
     VAR -. "surprise events" .-> GEN
-    CMD <--> SimAdapter[[Simulator Adapter(s)<br/>vendor-specific]]
-    SimAdapter <--> Sim[(Simulator backend<br/>demo: mock · prod: real)]
+    CMD <--> SimAdapter[Simulator adapters<br/>vendor specific]
+    SimAdapter <--> Sim[Simulator backend<br/>demo mock · prod real]
 
     NLP --> TRX[AG-F-06<br/>Transcription & Debrief]
     GEN --> TRX
@@ -141,7 +141,7 @@ flowchart TB
     Trainee([Trainee]) --> FEp --> APIMp --> Orchp
     Orchp <--> SpeechCH
     Orchp <-. "EU fallback for models not in CH<br/>(residency-approved)" .-> RTeu
-    Orchp --> SimA[[Simulator Adapters]] --> RealSim[(Real simulator vendor(s))]
+    Orchp --> SimA[Simulator adapters] --> RealSim[Real simulator vendors]
     Orchp --> StoreCH
     Orchp --> SearchCH
     StoreCH --> Fabric

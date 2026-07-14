@@ -203,7 +203,7 @@ sequenceDiagram
     actor C as P-02 Coach/Instructor
     participant SC as Scenario Store (D1, CH)
     participant VP as AG-F-01 Virtual Pilot
-    participant LOOP as AG-F-02/03/04/05 Voice Loop
+    participant VLP as AG-F-02/03/04/05 Voice Loop
     participant SIM as Customer Simulator (Agnostic API)
     participant TR as AG-F-06 Transcription/Debrief (CH)
     participant SUM as AG-F-08 Summarization (UC1)
@@ -214,11 +214,11 @@ sequenceDiagram
     T->>VP: Consent + start assigned exercise (Entra ID + CA)
     VP->>SC: Load scenario + bounded variability
     loop Real-time R/T (in-country)
-        T->>LOOP: Voice R/T instruction
-        LOOP->>SIM: Deterministic, schema-validated commands
-        SIM-->>LOOP: Ack
-        LOOP-->>T: Grounded read-back (TTS)
-        LOOP-->>TR: transcript + performance signals
+        T->>VLP: Voice R/T instruction
+        VLP->>SIM: Deterministic, schema-validated commands
+        SIM-->>VLP: Ack
+        VLP-->>T: Grounded read-back (TTS)
+        VLP-->>TR: transcript + performance signals
     end
     TR-->>C: Transcript + advisory flags/metrics (evidence-linked)
     C->>C: Confirm or override, then sign off assessment (HITL, no auto pass/fail)
