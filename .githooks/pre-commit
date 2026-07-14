@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+set -eu
+
+if ! command -v npx >/dev/null 2>&1; then
+  echo "Error: npx is required to run markdownlint pre-commit checks."
+  echo "Install Node.js (which includes npx), then commit again."
+  exit 1
+fi
+
+echo "Running markdownlint pre-commit check..."
+# --yes avoids interactive install prompts in hook execution.
+npx --yes markdownlint-cli2 "**/*.md"

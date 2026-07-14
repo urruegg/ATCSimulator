@@ -146,6 +146,7 @@ api/openapi.yaml
 2. **Open the custom agents** in [.github/agents/](./.github/agents/) in VS Code with GitHub Copilot; start with the Product Owner to shape the backlog, then the Enterprise Architect for sign-off, then the Developer to build.
 3. **Follow** [docs/COPILOT-BUILD-GUIDE.md](./docs/COPILOT-BUILD-GUIDE.md) to build the demo, honoring the guardrails in [.github/copilot-instructions.md](./.github/copilot-instructions.md) and [SUPERPOWERS_CONTRACT.md](./SUPERPOWERS_CONTRACT.md).
 4. **Use the workflow folders** under `docs/ideas`, `docs/specs`, `docs/plans`, `docs/sprints`, and `docs/reviews` to track ideation through sprint delivery and stakeholder review.
+5. **Anchor markdown checks before commits** by running `powershell -ExecutionPolicy Bypass -File scripts/setup-githooks.ps1` once per clone. This configures Git to use the repository hook at `.githooks/pre-commit`, which runs `markdownlint-cli2` for all Markdown files before each commit.
 
 ## Provenance & disclaimers
 
