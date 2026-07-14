@@ -59,6 +59,8 @@ Most blockers are resolvable in Sprint 0 through explicit decision capture and c
 
 Stakeholder focus: use publicly available live flight trackers in demo scope (FlightAware / Flightradar24) and confirm API-consumable integration patterns.
 
+New input from subfolder analysis confirms a provider-decision draft in ADR form and documents a practical FR24 onboarding path with a free sandbox API key for build/test.
+
 Key clarification:
 
 - The tracker websites themselves are not the integration surface for automation.
@@ -72,15 +74,22 @@ Key clarification:
 | FlightAware live website pages | No (for automated ingestion) | Do not use directly | Terms limit website access to human-operated browser except official data feeds/APIs; use AeroAPI or commercial data products instead. |
 | FlightAware AeroAPI | Yes | Strong primary candidate | Query-based REST API with commercial tiers and clear docs; validate selected tier, query-volume cost, and permitted demo redistribution/display. |
 | Flightradar24 live website pages | No (for automated ingestion) | Do not use directly | Terms distinguish website/browser access from FR24 API usage; no scraping/robot retrieval path for website pages. |
-| Flightradar24 FR24 API | Yes | Strong secondary candidate | API is subscription + API-credit model with explicit caching and usage restrictions; ensure demo usage does not breach provider-specific limitations. |
+| Flightradar24 FR24 API (`fr24api.flightradar24.com`) | Yes | Recommended primary candidate | API is subscription + API-credit model, supports `bounds`-style area selection, and offers a free sandbox key for integration testing; production/demo usage still requires licensed plan and terms validation. |
 | Community/public ADS-B sources (for fallback or backup only) | Often yes, varies by provider | Optional fallback | Usually lower SLA/coverage and tighter fair-use limits; suitable as resilience option, not default workshop dependency. |
 
 #### Recommendation for current demo baseline
 
-1. Primary: implement provider abstraction with FlightAware AeroAPI first.
-2. Secondary: keep a provider adapter contract for FR24 API so either source can be swapped without frontend changes.
+1. Primary: implement provider abstraction with Flightradar24 FR24 API first.
+2. Secondary: keep a provider adapter contract for FlightAware AeroAPI so either source can be swapped without frontend changes.
 3. Safety/compliance: do not scrape map webpages; only consume documented API endpoints under explicit license terms.
 4. Reliability: add deterministic fallback path to seed scenario aircraft when external API is unavailable.
+5. Delivery practicality: start implementation against FR24 sandbox key, then switch to paid tier credentials for customer-facing rehearsal/demo.
+
+#### FR24 sandbox-key implications for this review
+
+- Sandbox access reduces delivery risk in Sprint 0 because integration can start before commercial-credit activation.
+- Sandbox behavior must be treated as non-production-like for quota/performance and data completeness.
+- Go/no-go evidence must include one rehearsal run with paid-tier credentials, not sandbox-only proof.
 
 #### Additional risks introduced by source-provider dependency
 
@@ -105,8 +114,9 @@ Key clarification:
 | D-08 Lock golden-set pass bars as CI blocker | Responsible AI Officer + ATC SME | Sprint 1 | Define numeric minimum pass thresholds and block merge on regression. |
 | D-09 Publish segregation attestation checklist | Enterprise Architect + SecDevOps | Sprint 0 | Add signed pre-demo isolation verification covering network, identity, and secret boundaries. |
 | D-10 Publish workshop go/no-go checklist | Product Owner + SecDevOps | Sprint 0 | Consolidate all release blockers into one checklist reviewed before demo day. |
-| D-11 Select primary flight-data provider and commercial tier | Product Owner + Enterprise Architect | Sprint 0 | Select one provider-of-record (recommended: FlightAware AeroAPI) and document quota, cost guardrails, and contract owner. |
+| D-11 Select primary flight-data provider and commercial tier | Product Owner + Enterprise Architect | Sprint 0 | Select one provider-of-record (recommended: Flightradar24 FR24 API), and document quota, cost guardrails, and contract owner. |
 | D-12 Define provider adapter contract and fallback behavior | Developer + Enterprise Architect | Sprint 0 | Implement a source-agnostic `FlightFeedProvider` interface and fallback to seeded scenario data on provider outage/rate limit. |
+| D-13 Define FR24 sandbox-to-paid promotion checklist | SecDevOps + Developer | Sprint 0 | Separate sandbox and paid credentials in Key Vault, validate endpoint/path parity, and require paid-tier rehearsal evidence before workshop sign-off. |
 
 ## 5. Demo readiness thresholds (go/no-go)
 
@@ -141,6 +151,7 @@ A story is ready only if all are true:
 - Confirm final decision owners and sign-off cadence for Sprint 0.
 - Confirm primary external flight-data provider decision and commercial plan before Sprint 1 implementation.
 - Confirm legal review of provider terms (automation, caching, display rights) and record accepted usage boundaries.
+- Confirm FR24 sandbox key constraints and the exact production endpoint/parameter contract in the provider portal before locking adapter code.
 
 ## 8. Linked artifacts
 
@@ -151,4 +162,6 @@ A story is ready only if all are true:
 - [DATA.md](../DATA.md)
 - [COMPLIANCE.md](../COMPLIANCE.md)
 - [SECURITY.md](../SECURITY.md)
+- [FLIGHT-DATA-SOURCES.md](./2026-07-14-demo-scope-prd-clarity-review/FLIGHT-DATA-SOURCES.md)
+- [ADR-0004-flight-data-provider.md](./2026-07-14-demo-scope-prd-clarity-review/ADR-0004-flight-data-provider.md)
 - [SUPERPOWERS_CONTRACT.md](../../SUPERPOWERS_CONTRACT.md)
