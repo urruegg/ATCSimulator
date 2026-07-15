@@ -66,3 +66,9 @@ flowchart LR
 ## 7. Continuous improvement (closed loop)
 
 Operations feeds the **closed-loop learning** cycle ([DESIGN-PRINCIPLES.md](./DESIGN-PRINCIPLES.md) DP for closed loop): capture → transcribe → evaluate (phraseology & difficulty) → improve scenarios/models → measure outcomes. Fabric/Power BI provide the analytics surface.
+
+## 8. PoC Operations Addendum
+
+- FR24 sandbox and Foundry credentials must be stored in Key Vault.
+- Application Insights is required for flight-data response timing and voice-turn latency.
+- App Service configuration must use `atcsim` naming conventions and environment-specific secret references.

@@ -59,3 +59,9 @@ Mirrors PRD §9.2: aircraft-from-feed selection, real-time voice loop within lat
 ## 6. Traceability
 
 Each test references the `FR-##`/`NFR-##` it validates and the `US-###` story. CI publishes an **evidence bundle** (test results + eval scores + policy compliance) attached to the PR/release, per the traceability model in [COPILOT-BUILD-GUIDE.md](./COPILOT-BUILD-GUIDE.md).
+
+## 7. PoC Validation Addendum
+
+- PoC 1 validates authenticated FR24 sandbox reading, Azure Maps rendering, and aircraft selection.
+- PoC 2 validates full voice-in/voice-out flow with tool-first mock knowledge.
+- Latency evidence must be recorded for capture, backend, agent/model, and spoken response stages.

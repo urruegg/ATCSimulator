@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+name: atcsim-pocs
+metadata:
+  template: atcsim-pocs@0.1.0
+services:
+  web:
+    project: src/web/atcsim-shell
+    language: js
+    host: appservice
+  flight-data-api:
+    project: src/apis/AtcSim.FlightDataApi
+    language: dotnet
+    host: appservice
+  voice-agent-api:
+    project: src/apis/AtcSim.VoiceAgentApi
+    language: dotnet
+    host: appservice
