@@ -7,7 +7,26 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<MockKnowledgeTool>();
 
+var webOrigin = builder.Configuration["Web:Origin"];
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        if (!string.IsNullOrWhiteSpace(webOrigin))
+        {
+            policy.WithOrigins(webOrigin).AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+        }
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors();
+
+if (string.IsNullOrWhiteSpace(webOrigin))
+{
+    app.Logger.LogWarning("Web:Origin is not configured; cross-origin requests will be blocked (same-origin only).");
+}
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "voice-agent-api" }));
 

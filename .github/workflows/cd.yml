@@ -1,0 +1,55 @@
+﻿name: CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  LOCATION: swedencentral
+
+jobs:
+  deploy-sit:
+    runs-on: ubuntu-latest
+    environment: sit
+    concurrency: deploy-sit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - uses: ./.github/actions/deploy-environment
+        with:
+          environment: sit
+          resource-group: rg-atcsim-sit
+          fr24-token: ${{ secrets.FR24_TOKEN }}
+          entra-client-id: ${{ vars.WEB_CLIENT_ID }}
+          entra-tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          api-scope: ${{ vars.API_SCOPE }}
+
+  deploy-prod:
+    runs-on: ubuntu-latest
+    environment: prod
+    needs: deploy-sit
+    concurrency: deploy-prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - uses: ./.github/actions/deploy-environment
+        with:
+          environment: prod
+          resource-group: rg-atcsim-prod
+          fr24-token: ${{ secrets.FR24_TOKEN }}
+          entra-client-id: ${{ vars.WEB_CLIENT_ID }}
+          entra-tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          api-scope: ${{ vars.API_SCOPE }}
