@@ -1,11 +1,17 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using AtcSim.VoiceAgentApi.Contracts;
+using AtcSim.VoiceAgentApi.Options;
 using AtcSim.VoiceAgentApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<MockKnowledgeTool>();
+builder.Services.Configure<VoiceLiveOptions>(builder.Configuration.GetSection("VoiceLive"));
+builder.Services.AddSingleton<SimCommandValidator>();
+builder.Services.AddSingleton<MockSimulatorAdapter>();
+builder.Services.AddSingleton<FunctionCallHandler>();
+builder.Services.AddSingleton<VoiceLiveControlChannel>();
 
 var webOrigin = builder.Configuration["Web:Origin"];
 builder.Services.AddCors(options =>
@@ -42,6 +48,23 @@ app.MapPost("/api/voice/respond", async (VoiceSessionRequest request, MockKnowle
         Convert.ToBase64String(Encoding.UTF8.GetBytes(answer)),
         elapsed,
         elapsed));
+});
+
+app.MapPost("/api/voice/session", async (
+    SdpOfferRequest request,
+    VoiceLiveControlChannel channel,
+    CancellationToken ct) =>
+{
+    var answer = await channel.NegotiateAsync(request.SdpOffer, ct);
+    return Results.Ok(new SdpAnswerResponse(answer));
+});
+
+app.MapPost("/api/voice/transcript", (TranscriptEvent transcriptEvent, ILoggerFactory loggerFactory) =>
+{
+    // Audit only; no personal data in the demo. Never log audio payloads.
+    loggerFactory.CreateLogger("Debrief")
+        .LogInformation("transcript {Role} @ {Ts}ms", transcriptEvent.Role, transcriptEvent.TimestampMs);
+    return Results.Accepted();
 });
 
 app.Run();
