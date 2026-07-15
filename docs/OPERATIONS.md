@@ -37,6 +37,7 @@ flowchart LR
 
 - IaC (Bicep + `azd`), deployed by GitHub Actions with **what-if** validation and **approval-gated** SIT→PROD promotion using OIDC (no static cloud secrets). See [COPILOT-BUILD-GUIDE.md](./COPILOT-BUILD-GUIDE.md).
 - **Azure Policy** enforces the allowed-region allow-list (residency, **CON-03**) and permitted SKUs.
+- **CI/CD and environment operations** — the dev / SIT / PROD environments, the one-time bootstrap runbook, and the promotion gates — are documented in [ALM.md](./ALM.md).
 
 ## 3. Service levels (SLO targets — validate with Customer)
 
