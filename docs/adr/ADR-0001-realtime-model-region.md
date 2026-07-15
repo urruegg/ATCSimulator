@@ -8,7 +8,7 @@
 | Date | 2026-07-14 |
 | Author | Cloud Solution Architect (CSA), Microsoft |
 | Status | Accepted (for demo/MVP scope) — revisit at design time |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 **Related documents:** [../BOM.md](../BOM.md) · [../COMPLIANCE.md](../COMPLIANCE.md) §5 · [../AI.md](../AI.md) §1/§2 · [../SECURITY.md](../SECURITY.md) §3 · [../DESIGN-PRINCIPLES.md](../DESIGN-PRINCIPLES.md) DP-11/DP-18 · [ADR-0003-split-plane-data-residency.md](./ADR-0003-split-plane-data-residency.md)
 **Related IDs:** `FR` real-time voice loop · `NFR` latency (AI.md §7.2) · `CON-03` · `RISK-03` · `DP-11`, `DP-18`

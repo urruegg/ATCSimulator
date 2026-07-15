@@ -51,7 +51,7 @@ Required fields (in this order):
 | Date | `YYYY-MM-DD` (last meaningful update) |
 | Author | Role or team |
 | Status | Draft / Approved / In progress / Complete / Active |
-| Classification | `Confidential — anonymized` unless stated otherwise |
+| Classification | `Public — anonymized demo` unless stated otherwise |
 
 Rules:
 

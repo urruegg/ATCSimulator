@@ -9,7 +9,7 @@
 | Date | 2026-07-15 |
 | Author | ATCSimulator team |
 | Status | Active |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 **Related documents:** [../AGENTS.md](../AGENTS.md) · [.github/agents/AGENT_WORKFLOW.md](../.github/agents/AGENT_WORKFLOW.md) · [.github/copilot-instructions.md](../.github/copilot-instructions.md)
 

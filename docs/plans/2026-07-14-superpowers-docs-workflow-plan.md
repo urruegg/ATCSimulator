@@ -9,7 +9,7 @@
 | Date | 2026-07-14 |
 | Author | ATCSimulator team |
 | Status | Complete |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 **Related documents:** [specification](../specs/2026-07-14-superpowers-docs-workflow-spec.md)
 

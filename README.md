@@ -8,7 +8,7 @@
 | Date | 2026-07-14 |
 | Author | Cloud Solution Architect (CSA), Microsoft |
 | Status | Draft for Customer workshop — 4 August 2026 |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 > **Anonymization.** This repository uses the placeholder product name **ATCSimulator** and refers to the organization only as **the Customer** to protect the real party. No real personal names are used.
 

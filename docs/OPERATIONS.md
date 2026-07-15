@@ -8,7 +8,7 @@
 | Date | 2026-07-14 |
 | Author | Cloud Solution Architect (CSA), Microsoft |
 | Status | Draft for Customer workshop (4 August 2026) |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 **Related documents:** [SD.md](./SD.md) · [SECURITY.md](./SECURITY.md) · [BOM.md](./BOM.md) · [DESIGN-PRINCIPLES.md](./DESIGN-PRINCIPLES.md) · [TEST.md](./TEST.md) · [COPILOT-BUILD-GUIDE.md](./COPILOT-BUILD-GUIDE.md)
 

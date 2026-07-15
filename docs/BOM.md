@@ -8,7 +8,7 @@
 | Date | 2026-07-14 |
 | Author | Cloud Solution Architect (CSA), Microsoft |
 | Status | Draft for Customer workshop (4 August 2026) |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 **Related documents:** [SD.md](./SD.md) · [AI.md](./AI.md) · [BVA.md](./BVA.md) · [COMPLIANCE.md](./COMPLIANCE.md) · [SECURITY.md](./SECURITY.md) · [adr/ADR-0001-realtime-model-region.md](./adr/ADR-0001-realtime-model-region.md) · [adr/ADR-0003-split-plane-data-residency.md](./adr/ADR-0003-split-plane-data-residency.md)
 

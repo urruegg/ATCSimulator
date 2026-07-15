@@ -8,7 +8,7 @@
 | Date | 2026-07-14 |
 | Author | Cloud Solution Architect (CSA), Microsoft |
 | Status | Accepted |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 **Related documents:** [../COMPLIANCE.md](../COMPLIANCE.md) §5 · [../DATA.md](../DATA.md) §4 · [../SECURITY.md](../SECURITY.md) §3/§6 · [../BOM.md](../BOM.md) §7 · [../AI.md](../AI.md) §1/§2 · [../DESIGN-PRINCIPLES.md](../DESIGN-PRINCIPLES.md) DP-18 · [ADR-0001-realtime-model-region.md](./ADR-0001-realtime-model-region.md)
 **Related IDs:** `CON-01` · `CON-03` · `RISK-03` · `RISK-11` · `C-01` · `C-15` · `DP-18`

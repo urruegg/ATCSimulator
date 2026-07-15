@@ -8,7 +8,7 @@
 | Date | 2026-07-14 |
 | Author | Cloud Solution Architect (CSA), Microsoft |
 | Status | Draft for Customer workshop (4 August 2026) |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 <!--
 These are repository-wide instructions for GitHub Copilot (chat, coding agent, and

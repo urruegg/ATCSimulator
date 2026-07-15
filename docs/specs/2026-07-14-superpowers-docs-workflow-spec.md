@@ -9,7 +9,7 @@
 | Date | 2026-07-14 |
 | Author | Product Owner, Enterprise Architect, SecDevOps |
 | Status | Approved |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 | Scope | Documentation structure only |
 
 **Related documents:** [implementation plan](../plans/2026-07-14-superpowers-docs-workflow-plan.md)

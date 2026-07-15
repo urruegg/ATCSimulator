@@ -9,7 +9,7 @@
 | Date | 2026-07-14 |
 | Author | ATCSimulator team |
 | Status | In progress — Tasks 1-8 merged (issue #1) |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 **Related documents:** [design spec](../specs/2026-07-14-two-pocs-demo-foundation-design.md) · [SD.md](../SD.md) · [AI.md](../AI.md) · [DATA.md](../DATA.md) · [SECURITY.md](../SECURITY.md) · sprint issue #1
 

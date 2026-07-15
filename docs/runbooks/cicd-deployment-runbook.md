@@ -9,7 +9,7 @@
 | Date | 2026-07-15 |
 | Author | ATCSimulator team |
 | Status | Active |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 **Related documents:** [ALM.md](../ALM.md) · [cloud CI/CD design](../specs/2026-07-15-cloud-platform-cicd-design.md) · [cloud CI/CD plan](../plans/2026-07-15-cloud-platform-cicd-plan.md) · [NON_DELEGABLE_WORK.md](../../.github/agents/NON_DELEGABLE_WORK.md) · sprint issue #3
 

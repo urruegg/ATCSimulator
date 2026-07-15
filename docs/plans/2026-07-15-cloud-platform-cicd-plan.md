@@ -9,7 +9,7 @@
 | Date | 2026-07-15 |
 | Author | ATCSimulator team |
 | Status | Ready for execution |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 **Related documents:** [design spec](../specs/2026-07-15-cloud-platform-cicd-design.md) · [SECURITY.md](../SECURITY.md) · [VERSIONING.md](../VERSIONING.md) · [AGENT_WORKFLOW.md](../../.github/agents/AGENT_WORKFLOW.md) · [NON_DELEGABLE_WORK.md](../../.github/agents/NON_DELEGABLE_WORK.md) · sprint issue #3
 

@@ -9,7 +9,7 @@
 | Date | 2026-07-15 |
 | Author | ATCSimulator team |
 | Status | Draft approved for planning |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 | Subscription | `75102af9-fc92-45d4-99a8-5510a24b5421` (ME-MngEnvMCAP164444-urruegg-2) |
 | Directory | `Contoso (mngenvmcap164444.onmicrosoft.com)` |
 | Region | Sweden Central (EU) |

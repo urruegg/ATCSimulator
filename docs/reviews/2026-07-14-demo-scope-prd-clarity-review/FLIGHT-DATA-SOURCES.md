@@ -8,7 +8,7 @@
 | Date | 2026-07-14 |
 | Author | Cloud Solution Architect (CSA), Microsoft |
 | Status | Draft for Customer workshop (4 August 2026) |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 **Related documents:** [SD.md](./SD.md) · [BOM.md](./BOM.md) · [PRD.md](./PRD.md) (FR-01, ASS-03) · [SECURITY.md](./SECURITY.md) · [COMPLIANCE.md](./COMPLIANCE.md) · [DATA.md](./DATA.md) · [adr/ADR-0004-flight-data-provider.md](./adr/ADR-0004-flight-data-provider.md) · [../api/openapi.yaml](../api/openapi.yaml) · [../data/scenarios/sample-scenario.json](../data/scenarios/sample-scenario.json)
 

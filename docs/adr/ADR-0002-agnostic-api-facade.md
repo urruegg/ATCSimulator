@@ -8,7 +8,7 @@
 | Date | 2026-07-14 |
 | Author | Cloud Solution Architect (CSA), Microsoft |
 | Status | Accepted |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 **Related documents:** [../../api/openapi.yaml](../../api/openapi.yaml) · [../SD.md](../SD.md) · [../DATA.md](../DATA.md) §5 · [../SECURITY.md](../SECURITY.md) §3/§9.2 · [../DESIGN-PRINCIPLES.md](../DESIGN-PRINCIPLES.md) DP-20 · [ADR-0001-realtime-model-region.md](./ADR-0001-realtime-model-region.md)
 **Related IDs:** `NFR-08` · `NFR-09` · `NFR-19` · `C-04` · `DP-20` · `RISK-13`

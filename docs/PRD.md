@@ -8,7 +8,7 @@
 | Date | 2026-07-14 |
 | Author | Cloud Solution Architect (CSA), Microsoft |
 | Status | Draft for Customer workshop (4 August 2026) |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 **Related documents:** [SD.md](./SD.md) · [BOM.md](./BOM.md) · [BVA.md](./BVA.md) · [AI.md](./AI.md) · [COMPLIANCE.md](./COMPLIANCE.md) · [SECURITY.md](./SECURITY.md) · [DATA.md](./DATA.md) · [DESIGN-PRINCIPLES.md](./DESIGN-PRINCIPLES.md) · [PERSONAS-JOURNEY.md](./PERSONAS-JOURNEY.md) · [BACKLOG.md](./BACKLOG.md) · [../AGENTS.md](../AGENTS.md)
 

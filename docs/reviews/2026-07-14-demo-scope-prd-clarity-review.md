@@ -9,7 +9,7 @@
 | Date | 2026-07-14 |
 | Author | ATCSimulator team |
 | Status | Complete |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 | Review type | Starting-pack baseline review |
 | Scope | Demo Scope 2 (primary) |
 | Primary source of truth | [PRD.md](../PRD.md) |

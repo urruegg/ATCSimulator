@@ -8,7 +8,7 @@
 | Date | 2026-07-14 |
 | Author | Cloud Solution Architect (CSA), Microsoft |
 | Status | Draft for Customer workshop (4 August 2026) |
-| Classification | Confidential — anonymized |
+| Classification | Public — anonymized demo |
 
 **Related documents:** [.github/copilot-instructions.md](./.github/copilot-instructions.md) · [AGENTS.md](./AGENTS.md) · [docs/COPILOT-BUILD-GUIDE.md](./docs/COPILOT-BUILD-GUIDE.md) · [docs/COMPLIANCE.md](./docs/COMPLIANCE.md) · [docs/SECURITY.md](./docs/SECURITY.md) · [docs/AI.md](./docs/AI.md) · [api/openapi.yaml](./api/openapi.yaml)
 
