@@ -45,37 +45,40 @@ Desired outcomes:
 
 ```mermaid
 flowchart TB
-    subgraph Browser["React SPA (App Service) — WebRTC client"]
+    subgraph Browser["React SPA (App Service) — WebRTC media client"]
       MIC["mic capture / audio playback"]
-      REL["tool-call relay + transcript forward"]
+      SDP["SDP offer/answer (via broker)"]
     end
-    subgraph CA["Azure Container Apps"]
-      TOK["Token/Broker API<br/>(mints ephemeral Voice Live token via Managed Identity)"]
-      SIM["Sim Command service<br/>(deterministic: schema + range + authz)"]
+    subgraph CA["Broker (voice-agent-api on App Service; Container Apps at scale)"]
+      SIG["Signaling + control-channel holder<br/>(holds Voice Live control WebSocket)"]
+      SIM["Sim Command dispatch<br/>(deterministic: schema + range + authz)"]
       DBR["Transcription / Debrief (AG-F-06 audit)"]
     end
     APIM["Azure API Management — Agnostic API facade"]
     subgraph Foundry["Microsoft Foundry (Sweden Central)"]
-      VL["Voice Live API"]
-      AG["Agent Service — virtual pilot AG-F-01<br/>(persona + function tools)"]
+      VL["Voice Live API (voice-live/realtime/calls)"]
+      AG["Agent Service — virtual pilot AG-F-01"]
     end
     MOCK["Mock simulator adapter"]
 
-    TOK -->|"1. ephemeral token"| MIC
-    MIC <-->|"2. WebRTC audio + events (direct, low-latency)"| VL
+    SDP -->|"1. SDP offer"| SIG
+    SIG <-->|"2. control WebSocket: SDP + session.update + tool calls"| VL
+    SIG -->|"3. SDP answer"| SDP
+    MIC <-->|"4. WebRTC media (RTP) + data channel: audio, VAD, transcripts"| VL
     VL --- AG
-    REL -->|"3. relay proposed function_call"| APIM --> SIM --> MOCK
-    SIM -->|"4. validated ack"| REL -->|"function_call_output"| VL
-    REL -->|"5. transcripts"| DBR
+    SIG -->|"5. function_call (server-side)"| APIM --> SIM --> MOCK
+    SIM -->|"6. function_call_output"| SIG --> VL
+    DBR -.->|"transcripts"| SIG
 ```
 
 Flow:
 
-1. The browser requests a short-lived Voice Live credential from the Token/Broker API.
-2. The browser opens a **WebRTC** session directly with Voice Live (audio media + data channel events) for the lowest latency.
-3. When the agent proposes a `function_call` (for example `SET_HEADING`), the browser **relays** the proposed call to the **Agnostic API** — it does not execute it locally.
-4. The **Sim Command service** validates (schema + range + authorization) and dispatches to the mock simulator, returning a validated result that the browser sends back to Voice Live as `function_call_output`; the agent then voices the read-back.
-5. Voice Live transcription events are forwarded to the Transcription/Debrief service for audit (`AG-F-06`).
+1. The browser creates the `RTCPeerConnection`, captures the microphone, and sends its SDP offer to the broker.
+2. The broker holds the Voice Live **control WebSocket** (`voice-live/realtime/calls`), performs the SDP exchange, sends `session.update`, and receives **tool/function-call events server-side**.
+3. The broker returns the SDP answer to the browser.
+4. Audio (RTP) and the data channel (VAD, transcripts) flow **directly** browser ↔ Voice Live for lowest latency.
+5. When the agent emits a `function_call` (for example `SET_HEADING`), it arrives on the **server-held control channel**; the broker validates (schema + range + authorization) and dispatches via the Agnostic API to the mock simulator.
+6. The broker returns `function_call_output` to Voice Live; the agent voices the read-back. Transcripts captured for audit (`AG-F-06`).
 
 ## 4. Guardrail reconciliation (WebRTC direct)
 
@@ -83,21 +86,21 @@ WebRTC direct keeps the **audio media** path browser ↔ Voice Live. The
 non-negotiable guardrail — *the LLM proposes, a deterministic layer disposes; no
 free-text or untrusted path ever commands the simulator; server-side
 authorization* ([AI.md](../AI.md) §4, [AGENTS.md](../../AGENTS.md) AG-F-04,
-`CON-01`) — is preserved by keeping the **command path server-side**:
+`CON-01`) — is preserved by holding the **control channel server-side**:
 
-- The browser only **relays** the agent's *proposed* `function_call` to the Agnostic API.
-- The **Sim Command service** performs schema, range, and authorization validation and is the **only** component that dispatches to the simulator.
-- The browser never calls the simulator directly; it holds no long-lived secrets (only an ephemeral Voice Live token).
+- Per the official WebRTC guidance, the control WebSocket "is typically initiated by your server" and carries the tool/function-call events "that need to reach your backend for processing." The broker holds this channel.
+- The **broker** is the only component that receives `function_call` events, validates them (schema + range + authorization), and dispatches to the simulator via the Agnostic API.
+- The **browser** handles only WebRTC media + the data channel (audio, VAD, transcripts). It never sees, relays, or executes simulator commands, and holds no long-lived secrets.
 
-This makes D1 (WebRTC direct) effectively a hybrid: **direct audio, server-side commands**.
+This is a stronger realization than a browser relay: commands never leave the trusted server boundary.
 
 ## 5. Component changes
 
 Changed:
 
 - **New:** Microsoft Foundry resource + project + **Agent Service** virtual-pilot agent (phraseology persona + function tools = the deterministic sim commands). Models are managed by Voice Live — no model deployment or capacity planning.
-- **`voice-agent-api` (mock) → Token/Broker API** on Azure Container Apps: mints short-lived Voice Live Microsoft Entra tokens via Managed Identity (`Cognitive Services User` + `Foundry User`), and hosts the command-relay and transcript-ingestion endpoints.
-- **React SPA** gains a WebRTC client (mic capture, Voice Live peer connection, tool-call relay, transcript forwarding). Continues to run on App Service.
+- **`voice-agent-api` (mock) → Broker service**: holds the Voice Live control WebSocket per session, relays the SDP offer/answer for WebRTC negotiation, sends `session.update`, and handles `function_call` events server-side (validate + dispatch via the Agnostic API). Also ingests transcripts for audit. Hosted on the existing **App Service** for the PoC (an outbound control WebSocket is fine at PoC concurrency); **Container Apps** is the documented scale path for many concurrent sessions.
+- **React SPA** gains a WebRTC media client (mic capture, `RTCPeerConnection`, SDP offer to the broker, audio playback, data-channel VAD/transcript handling). Continues to run on App Service.
 
 Unchanged:
 
@@ -121,7 +124,7 @@ Unchanged:
 
 ## 8. Security
 
-- Keyless: the Token/Broker API uses **Managed Identity** to mint ephemeral Voice Live Entra tokens; no keys in the browser or in code ([SECURITY.md](../SECURITY.md)).
+- Keyless: the **broker** authenticates to Voice Live with **Managed Identity** (Entra token, `ai.azure.com/.default` scope) over the control WebSocket. The **browser never connects to the Voice Live control endpoint** and holds no Voice Live credential — it only exchanges SDP via the broker and streams WebRTC media ([SECURITY.md](../SECURITY.md)).
 - Foundry RBAC: `Cognitive Services User` + `Foundry User` assigned to the broker's identity.
 - Content Safety and synthetic-voice disclosure ([AI.md](../AI.md), `DP-16`) remain in force.
 
@@ -129,7 +132,7 @@ Unchanged:
 
 | Risk | Mitigation |
 | --- | --- |
-| WebRTC direct weakens governance of the command path | Server-side command dispatch (§4); browser only relays proposed calls |
+| WebRTC direct weakens governance of the command path | Server-held **control channel**; the broker (not the browser) receives and dispatches all function-calls (§4) |
 | Voice Live not available in Switzerland North | Demo plane only; production stays in-country decomposed (`CON-05`) |
 | Transcript/audit gap because backend is out of the audio path | Forward Voice Live transcription events to the Debrief service (`AG-F-06`) |
 | Foundry Agent Service requires a Foundry resource (not Speech-only) | Provision a Microsoft Foundry resource explicitly |
@@ -154,8 +157,8 @@ simulator integration.
 ## 13. Testing & evaluation
 
 - Golden-phraseology / command-mapping evals unchanged and still gate merges ([AI.md](../AI.md) §7).
-- Add contract tests for the command-relay → Agnostic API path (schema + range rejection).
-- Verify ephemeral-token minting and that the browser holds no long-lived secret.
+- Add contract tests for the server-side `function_call` → Agnostic API path (schema + range rejection).
+- Verify the broker authenticates via Managed Identity and that the browser holds no Voice Live credential.
 
 ## 14. Next step
 
