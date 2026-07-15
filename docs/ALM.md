@@ -41,7 +41,7 @@ flowchart LR
 
 ## 3. One-time bootstrap (human-run)
 
-This bootstrap is **non-delegable** and must be performed by a human with the required privileges (see [../.github/agents/NON_DELEGABLE_WORK.md](../.github/agents/NON_DELEGABLE_WORK.md)).
+This bootstrap is **non-delegable** and must be performed by a human with the required privileges (see [../.github/agents/NON_DELEGABLE_WORK.md](../.github/agents/NON_DELEGABLE_WORK.md)). The full step-by-step procedure lives in the [CI/CD deployment runbook](./runbooks/cicd-deployment-runbook.md); the summary follows.
 
 1. Sign in as a subscription **Owner**, then run the OIDC and resource-group bootstrap script:
 

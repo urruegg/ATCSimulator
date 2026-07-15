@@ -36,8 +36,9 @@ Every knowledge-base document must begin (immediately after the H1 title) with a
 standard metadata table, followed by a `**Related documents:**` line. This applies
 to the key docs in [../../docs/](../../docs/) and to every document in
 [../../docs/ideas](../../docs/ideas), [../../docs/plans](../../docs/plans),
-[../../docs/specs](../../docs/specs), [../../docs/sprints](../../docs/sprints), and
-[../../docs/reviews](../../docs/reviews) (including each folder `README.md`).
+[../../docs/specs](../../docs/specs), [../../docs/sprints](../../docs/sprints),
+[../../docs/reviews](../../docs/reviews), and [../../docs/runbooks](../../docs/runbooks)
+(including each folder `README.md`).
 
 Required fields (in this order):
 
