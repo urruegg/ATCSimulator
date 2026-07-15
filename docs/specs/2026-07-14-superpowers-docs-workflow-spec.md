@@ -2,11 +2,17 @@
 
 | Field | Value |
 | --- | --- |
-| Topic | Superpowers workflow documentation structure |
+| Product | ATCSimulator |
+| Document | Superpowers Docs Workflow — Specification |
+| Type | Spec |
+| Version | 1.0 |
 | Date | 2026-07-14 |
+| Author | Product Owner, Enterprise Architect, SecDevOps |
 | Status | Approved |
+| Classification | Confidential — anonymized |
 | Scope | Documentation structure only |
-| Owners | Product Owner, Enterprise Architect, SecDevOps |
+
+**Related documents:** [implementation plan](../plans/2026-07-14-superpowers-docs-workflow-plan.md)
 
 ## Goal
 

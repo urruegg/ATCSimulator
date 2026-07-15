@@ -1,5 +1,18 @@
 # Two PoCs Demo Foundation Implementation Plan
 
+| Field | Value |
+| --- | --- |
+| Product | ATCSimulator |
+| Document | Two PoCs Demo Foundation — Implementation Plan |
+| Type | Plan |
+| Version | 0.1 (Draft) |
+| Date | 2026-07-14 |
+| Author | ATCSimulator team |
+| Status | In progress — Tasks 1-8 merged (issue #1) |
+| Classification | Confidential — anonymized |
+
+**Related documents:** [design spec](../specs/2026-07-14-two-pocs-demo-foundation-design.md) · [SD.md](../SD.md) · [AI.md](../AI.md) · [DATA.md](../DATA.md) · [SECURITY.md](../SECURITY.md) · sprint issue #1
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build two PoCs in one shared Entra-protected React shell on Azure App Service: PoC 1 proves FR24 sandbox-backed aircraft selection on Azure Maps, and PoC 2 proves voice-in and voice-out conversational latency through a Foundry-controlled agent path with tool-first mock knowledge.

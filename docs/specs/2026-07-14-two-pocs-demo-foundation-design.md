@@ -2,13 +2,21 @@
 
 | Field | Value |
 | --- | --- |
+| Product | ATCSimulator |
+| Document | Two PoCs Demo Foundation — Design |
+| Type | Spec |
+| Version | 0.1 (Draft) |
 | Date | 2026-07-14 |
+| Author | ATCSimulator team |
 | Status | Draft approved for planning |
+| Classification | Confidential — anonymized |
 | Scope | Two PoCs plus reusable demo-app foundation |
 | Subscription | `75102af9-fc92-45d4-99a8-5510a24b5421` |
 | Directory | `Contoso (mngenvmcap164444.onmicrosoft.com)` |
 | Target hosting posture | App Service first |
 | Naming convention prefix | `atcsim` |
+
+**Related documents:** [implementation plan](../plans/2026-07-14-two-pocs-demo-foundation-implementation-plan.md) · [SD.md](../SD.md) · sprint issue #1
 
 ## 1. Objective
 

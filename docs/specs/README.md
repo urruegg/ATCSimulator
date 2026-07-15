@@ -1,9 +1,9 @@
-# Plans
+# Specs
 
 | Field | Value |
 | --- | --- |
 | Product | ATCSimulator |
-| Document | Plans — Folder Guide |
+| Document | Specs — Folder Guide |
 | Type | Index |
 | Version | 1.0 |
 | Date | 2026-07-14 |
@@ -13,14 +13,14 @@
 
 > Every document in this folder must begin with the standard header table — see the [Docs Agent](../../.github/agents/docs.agent.md) document-header standard.
 
-Use this folder for implementation plans derived from an approved specification.
+Use this folder for approved specifications that govern implementation plans.
 
 Recommended filename pattern:
 
-- `YYYY-MM-DD-<topic>-plan.md`
+- `YYYY-MM-DD-<topic>-spec.md` or `YYYY-MM-DD-<topic>-design.md`
 
-Each plan should:
+Each spec should:
 
-- link back to its governing spec
-- support GitHub Copilot or Superpowers execution
-- link forward to a sprint document when one exists
+- capture the approved scope, decisions, and constraints
+- link forward to its implementation plan in [../plans](../plans)
+- reference the relevant ADRs in [../adr](../adr)

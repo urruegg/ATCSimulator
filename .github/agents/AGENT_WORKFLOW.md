@@ -57,6 +57,18 @@ flowchart TD
    (`--no-ff` to `main`). Update and close linked issues with an evidence summary;
    carry open gaps into the next sprint's plan and issue.
 
+## Branching model (phased)
+
+Branching and versioning mature with the product (see
+[../../docs/VERSIONING.md](../../docs/VERSIONING.md)):
+
+- **Phase 1 — PoC (current):** isolated `.worktrees/` + `feat/<slug>` branches,
+  `--no-ff` merge to `main`, one GitHub issue per sprint, manual `0.x` versioning.
+  This is the right level of ceremony while proving a PoC.
+- **Phase 2 — Post-PoC (planned):** once a PoC is proven, switch that workstream to a
+  single-branch model on `main` with `semantic-release` (Conventional Commits drive
+  automatic SemVer, Git tags, the GitHub release, and `CHANGELOG.md`).
+
 ## PR output contract (hard gate)
 
 An agent must not mark a PR ready for review unless all are satisfied:

@@ -30,6 +30,34 @@ residency, and operational decisions across [../../docs/](../../docs/) and
 3. All Markdown must pass the repository markdownlint gate (`.markdownlint-cli2.yaml`); the pre-commit hook runs `markdownlint-cli2 "**/*.md"`.
 4. Fenced code blocks must declare a language; headings and lists need surrounding blank lines; end files with a single newline.
 
+## Document header standard
+
+Every knowledge-base document must begin (immediately after the H1 title) with a
+standard metadata table, followed by a `**Related documents:**` line. This applies
+to the key docs in [../../docs/](../../docs/) and to every document in
+[../../docs/ideas](../../docs/ideas), [../../docs/plans](../../docs/plans),
+[../../docs/specs](../../docs/specs), [../../docs/sprints](../../docs/sprints), and
+[../../docs/reviews](../../docs/reviews) (including each folder `README.md`).
+
+Required fields (in this order):
+
+| Field | Value |
+| --- | --- |
+| Product | ATCSimulator |
+| Document | Human-readable document name |
+| Type | Idea / Spec / Plan / Sprint / Review / Index / Key |
+| Version | SemVer or `0.1 (Draft)` — see [../../docs/VERSIONING.md](../../docs/VERSIONING.md) |
+| Date | `YYYY-MM-DD` (last meaningful update) |
+| Author | Role or team |
+| Status | Draft / Approved / In progress / Complete / Active |
+| Classification | `Confidential — anonymized` unless stated otherwise |
+
+Rules:
+
+1. Working docs (ideas/plans/specs/sprints) may add domain rows (for example `Scope`, `Subscription`) **after** the required rows.
+2. The `**Related documents:**` line links the governing spec/plan and, for sprint-scoped work, the GitHub issue.
+3. The Docs Agent verifies the header exists and is current whenever a document in these folders is created or changed; a missing or stale header is a documentation defect to fix in the same change.
+
 ## Mermaid quality standard
 
 1. Choose the correct diagram type: `flowchart` for process/gates, `sequenceDiagram` for role interactions, `stateDiagram-v2` for lifecycle.

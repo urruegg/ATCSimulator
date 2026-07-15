@@ -1,5 +1,18 @@
 # Superpowers Docs Workflow Implementation Plan
 
+| Field | Value |
+| --- | --- |
+| Product | ATCSimulator |
+| Document | Superpowers Docs Workflow — Implementation Plan |
+| Type | Plan |
+| Version | 1.0 |
+| Date | 2026-07-14 |
+| Author | ATCSimulator team |
+| Status | Complete |
+| Classification | Confidential — anonymized |
+
+**Related documents:** [specification](../specs/2026-07-14-superpowers-docs-workflow-spec.md)
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Establish `docs/ideas`, `docs/specs`, `docs/plans`, `docs/sprints`, and `docs/reviews` directly under `docs` and make the new workflow discoverable in repository documentation.

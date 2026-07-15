@@ -89,7 +89,7 @@ When guidance conflicts, apply the most specific that is safe: **explicit prompt
 
 ## 8. Key documents
 
-`../docs/PRD.md` · `../docs/SD.md` · `../docs/BOM.md` · `../docs/DESIGN-PRINCIPLES.md` · `../docs/AI.md` · `../docs/DATA.md` · `../docs/SECURITY.md` · `../docs/COMPLIANCE.md` · `../docs/BACKLOG.md` · `../docs/COPILOT-BUILD-GUIDE.md` · `../docs/adr/` · `../api/openapi.yaml` · `../AGENTS.md` · `../SUPERPOWERS_CONTRACT.md` · `./agents/AGENT_WORKFLOW.md` · `./agents/NON_DELEGABLE_WORK.md` · `./agents/KPI_BASELINE.md`
+`../docs/PRD.md` · `../docs/SD.md` · `../docs/BOM.md` · `../docs/DESIGN-PRINCIPLES.md` · `../docs/AI.md` · `../docs/DATA.md` · `../docs/SECURITY.md` · `../docs/COMPLIANCE.md` · `../docs/BACKLOG.md` · `../docs/VERSIONING.md` · `../docs/COPILOT-BUILD-GUIDE.md` · `../docs/adr/` · `../api/openapi.yaml` · `../AGENTS.md` · `../SUPERPOWERS_CONTRACT.md` · `./agents/AGENT_WORKFLOW.md` · `./agents/NON_DELEGABLE_WORK.md` · `./agents/KPI_BASELINE.md`
 
 ## 9. Build, test & delivery workflow
 
@@ -115,4 +115,4 @@ Follow the delegated flow in `./agents/AGENT_WORKFLOW.md`; respect `./agents/NON
 - Traceability `FR-##`/`NFR-##` → `US-###` → tests/evals → evidence in every PR.
 - Golden-phraseology / command-mapping regressions must not merge.
 - EA (`AG-E-03`) architecture sign-off and RAI (`AG-E-06`) review before production-affecting merges.
-- Each sprint has a dedicated GitHub issue (backlog + WIP); feature work in a `.worktrees/` worktree on a `feat/` branch; merge `--no-ff`; push to origin only on explicit request.
+- Each sprint has a dedicated GitHub issue (backlog + WIP); feature work in a `.worktrees/` worktree on a `feat/` branch; merge `--no-ff`; push to origin only on explicit request. This is the **PoC-phase** model; once a PoC is proven the workstream switches to a **single-branch + `semantic-release`** model (see `../docs/VERSIONING.md`).
