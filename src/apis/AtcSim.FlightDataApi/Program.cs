@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<Fr24Options>(builder.Configuration.GetSection("Fr24"));
 builder.Services.AddHttpClient<IFlightFeedService, Fr24FlightFeedService>(client =>
 {
-	client.BaseAddress = new Uri("https://fr24api.flightradar24.com");
+	client.BaseAddress = new Uri("https://fr24api.flightradar24.com/api/");
 });
 
 var webOrigin = builder.Configuration["Web:Origin"];

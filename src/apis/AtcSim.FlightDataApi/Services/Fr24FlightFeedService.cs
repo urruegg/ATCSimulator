@@ -10,8 +10,10 @@ public sealed class Fr24FlightFeedService(HttpClient httpClient, IOptions<Fr24Op
 {
     public async Task<IReadOnlyList<AircraftResponse>> GetAircraftAsync(string bounds, CancellationToken cancellationToken)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, $"/live/flight-positions/full?bounds={bounds}");
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"live/flight-positions/full?bounds={bounds}");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", options.Value.Token);
+        request.Headers.Add("Accept-Version", options.Value.ApiVersion);
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
         using var response = await httpClient.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -24,7 +26,7 @@ public sealed class Fr24FlightFeedService(HttpClient httpClient, IOptions<Fr24Op
             .Select(x => new AircraftResponse(
                 x.GetProperty("callsign").GetString() ?? string.Empty,
                 x.GetProperty("type").GetString() ?? string.Empty,
-                x.TryGetProperty("registration", out var registration) ? registration.GetString() : null,
+                x.TryGetProperty("reg", out var registration) ? registration.GetString() : null,
                 x.GetProperty("lat").GetDouble(),
                 x.GetProperty("lon").GetDouble(),
                 x.GetProperty("alt").GetInt32(),

@@ -4,7 +4,7 @@ param(
     [Parameter(Mandatory = $true)] [string] $WebUrl,
     [Parameter(Mandatory = $true)] [string] $FlightApiUrl,
     [Parameter(Mandatory = $true)] [string] $VoiceApiUrl,
-    [string] $Bounds = '47.7,8.3,47.2,8.8'
+    [string] $Bounds = '47.7,47.2,8.3,8.8'
 )
 
 $ErrorActionPreference = 'Stop'
