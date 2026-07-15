@@ -2,7 +2,14 @@
 
 | Field | Value |
 | --- | --- |
+| Product | ATCSimulator |
+| Document | Demo Scope PRD Clarity Review |
+| Type | Review |
+| Version | 1.0 |
 | Date | 2026-07-14 |
+| Author | ATCSimulator team |
+| Status | Complete |
+| Classification | Confidential — anonymized |
 | Review type | Starting-pack baseline review |
 | Scope | Demo Scope 2 (primary) |
 | Primary source of truth | [PRD.md](../PRD.md) |
