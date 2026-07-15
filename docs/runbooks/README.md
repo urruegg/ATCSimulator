@@ -29,3 +29,4 @@ Each runbook should:
 ## Index
 
 - [cicd-deployment-runbook.md](./cicd-deployment-runbook.md) — bootstrap, deploy, and verify the SIT and PROD cloud environments.
+- [poc-e2e-validation-runbook.md](./poc-e2e-validation-runbook.md) — validate the two PoCs end-to-end on SIT and capture the PoC evidence.
