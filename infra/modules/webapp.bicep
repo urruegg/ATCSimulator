@@ -31,6 +31,7 @@ resource site 'Microsoft.Web/sites@2023-12-01' = {
       alwaysOn: true
       ftpsState: 'FtpsOnly'
       minTlsVersion: '1.2'
+      appCommandLine: 'pm2 serve /home/site/wwwroot --no-daemon --spa'
       appSettings: [
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -38,7 +39,7 @@ resource site 'Microsoft.Web/sites@2023-12-01' = {
         }
         {
           name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-          value: 'true'
+          value: 'false'
         }
       ]
     }
