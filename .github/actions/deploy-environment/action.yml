@@ -1,0 +1,98 @@
+﻿name: Deploy environment
+description: Provision infra and deploy the ATCSimulator baseline to one environment.
+inputs:
+  environment: { required: true }
+  resource-group: { required: true }
+  fr24-token: { required: true }
+  entra-client-id: { required: true }
+  entra-tenant-id: { required: true }
+  api-scope: { required: true }
+runs:
+  using: composite
+  steps:
+    - name: Ensure resource group
+      shell: bash
+      run: az group create -n ${{ inputs.resource-group }} -l swedencentral
+
+    - name: Provision infrastructure
+      shell: bash
+      run: |
+        az deployment group create \
+          -g ${{ inputs.resource-group }} \
+          -f infra/main.bicep \
+          -p infra/parameters/${{ inputs.environment }}.bicepparam
+
+    - name: Read outputs
+      id: outputs
+      shell: bash
+      run: |
+        KV=$(az deployment group show -g ${{ inputs.resource-group }} -n main --query properties.outputs.keyVaultName.value -o tsv)
+        WEB=$(az deployment group show -g ${{ inputs.resource-group }} -n main --query properties.outputs.webHostName.value -o tsv)
+        FLIGHT=$(az deployment group show -g ${{ inputs.resource-group }} -n main --query properties.outputs.flightDataApiHostName.value -o tsv)
+        VOICE=$(az deployment group show -g ${{ inputs.resource-group }} -n main --query properties.outputs.voiceAgentApiHostName.value -o tsv)
+        echo "kv=$KV" >> "$GITHUB_OUTPUT"
+        echo "web=https://$WEB" >> "$GITHUB_OUTPUT"
+        echo "flight=https://$FLIGHT" >> "$GITHUB_OUTPUT"
+        echo "voice=https://$VOICE" >> "$GITHUB_OUTPUT"
+
+    - name: Seed FR24 secret
+      shell: bash
+      run: az keyvault secret set --vault-name ${{ steps.outputs.outputs.kv }} --name fr24-token --value "${{ inputs.fr24-token }}"
+
+    - name: Set API CORS origin
+      shell: bash
+      run: |
+        az webapp config appsettings set -g ${{ inputs.resource-group }} \
+          --name $(basename ${{ steps.outputs.outputs.flight }} | cut -d. -f1) \
+          --settings Web__Origin=${{ steps.outputs.outputs.web }}
+        az webapp config appsettings set -g ${{ inputs.resource-group }} \
+          --name $(basename ${{ steps.outputs.outputs.voice }} | cut -d. -f1) \
+          --settings Web__Origin=${{ steps.outputs.outputs.web }}
+
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Publish and deploy APIs
+      shell: bash
+      run: |
+        for svc in FlightDataApi VoiceAgentApi; do
+          dotnet publish src/apis/AtcSim.$svc/AtcSim.$svc.csproj -c Release -o publish/$svc
+          (cd publish/$svc && zip -r ../$svc.zip .)
+        done
+        az webapp deploy -g ${{ inputs.resource-group }} \
+          --name $(basename ${{ steps.outputs.outputs.flight }} | cut -d. -f1) --type zip --src-path publish/FlightDataApi.zip
+        az webapp deploy -g ${{ inputs.resource-group }} \
+          --name $(basename ${{ steps.outputs.outputs.voice }} | cut -d. -f1) --type zip --src-path publish/VoiceAgentApi.zip
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Build and deploy web (env-specific)
+      shell: bash
+      working-directory: src/web/atcsim-shell
+      env:
+        VITE_ENTRA_CLIENT_ID: ${{ inputs.entra-client-id }}
+        VITE_ENTRA_TENANT_ID: ${{ inputs.entra-tenant-id }}
+        VITE_API_SCOPE: ${{ inputs.api-scope }}
+        VITE_FLIGHT_API_BASE_URL: ${{ steps.outputs.outputs.flight }}
+        VITE_VOICE_API_BASE_URL: ${{ steps.outputs.outputs.voice }}
+      run: |
+        npm ci
+        npm run build
+        (cd dist && zip -r ../web.zip .)
+        az webapp deploy -g ${{ inputs.resource-group }} \
+          --name $(basename ${{ steps.outputs.outputs.web }} | cut -d. -f1) --type zip --src-path web.zip
+
+    - name: Verify environment
+      shell: pwsh
+      run: ./scripts/verify-environment.ps1 -WebUrl "${{ steps.outputs.outputs.web }}" -FlightApiUrl "${{ steps.outputs.outputs.flight }}" -VoiceApiUrl "${{ steps.outputs.outputs.voice }}"
+
+    - name: Summary
+      shell: bash
+      run: |
+        echo "### ${{ inputs.environment }} deployed" >> "$GITHUB_STEP_SUMMARY"
+        echo "- Web: ${{ steps.outputs.outputs.web }}" >> "$GITHUB_STEP_SUMMARY"
+        echo "- Flight API: ${{ steps.outputs.outputs.flight }}" >> "$GITHUB_STEP_SUMMARY"
+        echo "- Voice API: ${{ steps.outputs.outputs.voice }}" >> "$GITHUB_STEP_SUMMARY"
