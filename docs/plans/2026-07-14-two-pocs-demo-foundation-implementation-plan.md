@@ -957,3 +957,42 @@ git commit -m "docs: add poc validation and operations guidance"
 - Spec coverage: the plan covers shared shell, Entra-first auth, FR24 sandbox UX, Foundry voice proof, App Service baseline, Key Vault, Application Insights, and reusable IaC.
 - Placeholder scan: no `TBD`, `TODO`, or deferred implementation notes remain in task steps.
 - Type consistency: frontend routes, API names, service seams, and naming prefix are consistent with the approved spec.
+
+## Sprint Retrospective — Gaps & Next-Sprint Evidence Steps
+
+Status as of 2026-07-15: Tasks 1-8 implemented and merged to `main`. Verified by
+evidence — backend tests (2 + 3 passing), frontend tests (2 passing), the frontend
+build succeeds, and Bicep compiles clean (`az bicep build`).
+
+### Open gaps (not yet proven by evidence)
+
+- **No live Azure deployment.** Task 7 Step 4 (`azd provision --dry-run`) was not
+  run — no `azd` / Azure auth in the build environment. Infrastructure is validated
+  only by `az bicep build`, not by an ARM what-if or a real deployment.
+- **No real end-to-end latency figure.** The PoC 2 latency UI is built and
+  unit-tested, but the capture -> backend -> agent -> spoken-response latency
+  evidence required by [TEST.md](../TEST.md) section 7 has not been recorded against
+  running services.
+- **Entra bootstrap not executed.** [bootstrap-entra.ps1](../../scripts/bootstrap-entra.ps1)
+  exists but has not been run against a tenant, so interactive sign-in is unverified.
+- **Voice agent uses mock knowledge only.** The real Foundry / real-time model path
+  (`FoundryVoiceAgentService`, `FoundryOptions`, `IVoiceAgentService`) was
+  intentionally deferred; the current agent returns tool-first curated answers.
+
+### Suggested evidence steps for the next sprint
+
+- Run the app end-to-end locally (frontend + both APIs) and record an actual PoC 2
+  latency figure across all four stages.
+- Execute `bootstrap-entra.ps1` in a dev tenant and verify interactive sign-in
+  against the created app registrations.
+- In an Azure-enabled environment, run `azd provision --preview` (or
+  `az deployment group what-if`) to validate the infrastructure against ARM.
+- Implement and evaluate the Foundry-backed voice path behind the existing
+  `IVoiceAgentService` seam, replacing the mock for real conversational latency.
+
+### Sprint tracking convention
+
+Each sprint is tracked by a dedicated GitHub issue that references this plan and the
+related documents, and is used to manage the backlog and work-in-progress. The issue
+is closed when the sprint's committed scope is merged, and any remaining gaps are
+carried into the next sprint's plan and issue.
