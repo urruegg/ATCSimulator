@@ -15,7 +15,7 @@ az account set --subscription $SubscriptionId
 
 # Register resource providers used by the infra (subscription-scoped, one-time).
 # The least-privilege deployer identity is RG-scoped and cannot self-register these.
-foreach ($ns in 'Microsoft.Web', 'Microsoft.KeyVault', 'Microsoft.OperationalInsights', 'Microsoft.Insights', 'Microsoft.ManagedIdentity') {
+foreach ($ns in 'Microsoft.Web', 'Microsoft.KeyVault', 'Microsoft.OperationalInsights', 'Microsoft.Insights', 'Microsoft.ManagedIdentity', 'Microsoft.CognitiveServices') {
     az provider register --namespace $ns | Out-Null
 }
 
