@@ -1,7 +1,7 @@
 import type { VoiceTurnRequest, VoiceTurnResponse } from './types';
 
 export async function sendVoiceTurn(request: VoiceTurnRequest): Promise<VoiceTurnResponse> {
-  const baseUrl = import.meta.env.VITE_VOICE_API_BASE_URL ?? '';
+  const baseUrl = (import.meta.env.VITE_VOICE_API_BASE_URL ?? '').replace(/\/$/, '');
   const response = await fetch(`${baseUrl}/api/voice/respond`, {
     method: 'POST',
     credentials: 'include',

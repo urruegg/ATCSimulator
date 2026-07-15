@@ -1,7 +1,7 @@
 import type { Aircraft } from './types';
 
 export async function fetchAircraft(bounds: string): Promise<Aircraft[]> {
-  const baseUrl = import.meta.env.VITE_FLIGHT_API_BASE_URL ?? '';
+  const baseUrl = (import.meta.env.VITE_FLIGHT_API_BASE_URL ?? '').replace(/\/$/, '');
   const response = await fetch(`${baseUrl}/api/aircraft?bounds=${encodeURIComponent(bounds)}`, {
     credentials: 'include',
   });

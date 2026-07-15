@@ -25,6 +25,11 @@ var app = builder.Build();
 
 app.UseCors();
 
+if (string.IsNullOrWhiteSpace(webOrigin))
+{
+    app.Logger.LogWarning("Web:Origin is not configured; cross-origin requests will be blocked (same-origin only).");
+}
+
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "flight-data-api" }));
 app.MapGet("/api/aircraft", async (string bounds, IFlightFeedService service, CancellationToken ct) =>
 {

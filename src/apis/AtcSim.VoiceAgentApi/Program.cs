@@ -23,6 +23,11 @@ var app = builder.Build();
 
 app.UseCors();
 
+if (string.IsNullOrWhiteSpace(webOrigin))
+{
+    app.Logger.LogWarning("Web:Origin is not configured; cross-origin requests will be blocked (same-origin only).");
+}
+
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "voice-agent-api" }));
 
 app.MapPost("/api/voice/respond", async (VoiceSessionRequest request, MockKnowledgeTool tool, CancellationToken ct) =>
