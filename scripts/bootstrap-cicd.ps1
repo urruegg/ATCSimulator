@@ -5,13 +5,19 @@
 param(
     [Parameter(Mandatory = $true)] [string] $SubscriptionId,
     [string] $Repo = 'urruegg/ATCSimulator',
-    [string] $AppName = 'gh-atcsim-deployer',
+    [string] $AppName = 'gh-oidc-atcsim',
     [string] $Location = 'swedencentral',
     [string[]] $Environments = @('sit', 'prod')
 )
 
 $ErrorActionPreference = 'Stop'
 az account set --subscription $SubscriptionId
+
+# Register resource providers used by the infra (subscription-scoped, one-time).
+# The least-privilege deployer identity is RG-scoped and cannot self-register these.
+foreach ($ns in 'Microsoft.Web', 'Microsoft.KeyVault', 'Microsoft.OperationalInsights', 'Microsoft.Insights', 'Microsoft.ManagedIdentity') {
+    az provider register --namespace $ns | Out-Null
+}
 
 $app = az ad app create --display-name $AppName | ConvertFrom-Json
 $appId = $app.appId
@@ -24,6 +30,8 @@ foreach ($env in $Environments) {
     $scope = "/subscriptions/$SubscriptionId/resourceGroups/$rg"
     az role assignment create --assignee $appId --role 'Contributor' --scope $scope | Out-Null
     az role assignment create --assignee $appId --role 'User Access Administrator' --scope $scope | Out-Null
+    # Data-plane write access so the deploy workflow can seed Key Vault secrets (fr24-token).
+    az role assignment create --assignee $appId --role 'Key Vault Secrets Officer' --scope $scope | Out-Null
 
     $cred = @{
         name      = "github-$env"

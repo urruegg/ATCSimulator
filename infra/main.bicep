@@ -60,12 +60,11 @@ module flightDataApi './modules/apiapp.bicep' = {
     appInsightsConnectionString: appInsights.outputs.connectionString
     serviceName: 'flight-data-api'
     keyVaultName: keyVault.outputs.name
-    appSettings: [
-      {
-        name: 'Fr24__Token'
-        value: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=fr24-token)'
-      }
-    ]
+    // FR24 token is injected as an app setting post-deploy by the CD action.
+    // The demo vault is policy-locked (public network access disabled) and the
+    // App Service has no VNet/private endpoint in the PoC, so Key Vault
+    // references cannot resolve. Production restores KV + private endpoint.
+    appSettings: []
   }
 }
 
@@ -79,16 +78,9 @@ module voiceAgentApi './modules/apiapp.bicep' = {
     appInsightsConnectionString: appInsights.outputs.connectionString
     serviceName: 'voice-agent-api'
     keyVaultName: keyVault.outputs.name
-    appSettings: [
-      {
-        name: 'Foundry__Endpoint'
-        value: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=foundry-endpoint)'
-      }
-      {
-        name: 'Foundry__ApiKey'
-        value: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=foundry-api-key)'
-      }
-    ]
+    // Voice agent runs in mock mode for the PoC; Foundry secrets are wired via
+    // Key Vault in production (private endpoint). See note on flightDataApi.
+    appSettings: []
   }
 }
 

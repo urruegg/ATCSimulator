@@ -35,9 +35,12 @@ runs:
         echo "flight=https://$FLIGHT" >> "$GITHUB_OUTPUT"
         echo "voice=https://$VOICE" >> "$GITHUB_OUTPUT"
 
-    - name: Seed FR24 secret
+    - name: Configure FR24 token
       shell: bash
-      run: az keyvault secret set --vault-name ${{ steps.outputs.outputs.kv }} --name fr24-token --value "${{ inputs.fr24-token }}"
+      run: |
+        az webapp config appsettings set -g ${{ inputs.resource-group }} \
+          --name $(basename ${{ steps.outputs.outputs.flight }} | cut -d. -f1) \
+          --settings Fr24__Token="${{ inputs.fr24-token }}"
 
     - name: Set API CORS origin
       shell: bash
