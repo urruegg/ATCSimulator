@@ -58,16 +58,17 @@ The single most consequential finding for ATCSimulator:
 | A3 | **Azure AI Speech — Neural TTS (standard voices)** | Virtual-pilot voice output | **GA** | GA | GA | GA | Multiple Swiss-language voices; SSML for prosody. |
 | A4 | **Azure AI Speech — Custom Neural Voice (CNV Pro / Lite)** | Bespoke pilot voice(s) | GA service; **limited-access (RAI-gated)**; CNV Lite = Prev | as service | as service | as service | Requires application + Microsoft-managed-customer eligibility; see [AI.md](./AI.md). |
 | A5 | **Azure AI Speech — Pronunciation Assessment** | Phraseology/read-back scoring (advisory) | GA | GA | GA | GA | Feeds FR-10 feedback. |
-| A6 | **Azure OpenAI — real-time audio (speech-to-speech)** `gpt-realtime` / `gpt-audio` family | **Demo** low-latency virtual pilot | **—** (not listed) | — | **GA/Prev** | **GA/Prev** | **Key gap for in-country.** Preferred **Sweden Central** for demo (EU). |
-| A7 | **Azure OpenAI — audio transcribe** `gpt-4o-transcribe` / `-mini-transcribe` | Alt STT (demo) | — | — | GA/Prev | GA/Prev | Part of the real-time/audio family; not in CH. |
-| A8 | **Azure OpenAI — audio TTS** `gpt-4o-mini-tts` | Alt TTS (demo) | — | — | GA/Prev | GA/Prev | As above. |
+| A6 | **Azure OpenAI — real-time audio (speech-to-speech)** `gpt-realtime` / `gpt-audio` family | **Demo** low-latency virtual pilot | **—** (not listed) | — | **GA/Prev** | **GA/Prev** | **Superseded for the demo by A14 (Voice Live)** ([ADR-0004](./adr/ADR-0004-voice-live-foundry-agent.md)); retained as fallback. **Key gap for in-country.** |
+| A7 | **Azure OpenAI — audio transcribe** `gpt-4o-transcribe` / `-mini-transcribe` | Alt STT (demo) | — | — | GA/Prev | GA/Prev | Superseded for the demo by A14 (Voice Live); retained as fallback. Not in CH. |
+| A8 | **Azure OpenAI — audio TTS** `gpt-4o-mini-tts` | Alt TTS (demo) | — | — | GA/Prev | GA/Prev | Superseded for the demo by A14 (Voice Live); retained as fallback. |
 | A9 | **Azure OpenAI — reasoning/chat** (GPT-4.1, GPT-5.x class) | Intent & command mapping (structured output/tools) | **Subset GA + EUDZ** | subset | GA | GA | Newer top-tier models often via EU Data Zone/global first; GPT-4o retiring. |
 | A10 | **Azure OpenAI — Whisper** (batch STT) | Offline transcript refinement | via availability | — | GA | GA | Optional for post-session transcription. |
 | A11 | **Azure AI Foundry — project + Agent Service** | Host/orchestrate the runtime agents | **Prev/GA (subset)** | subset | GA | GA | Verify Agent Service + chosen model in region at design time. |
 | A12 | **Azure AI Content Safety** | RAI guardrail on generated text/voice | GA (broad) | GA | GA | GA | Enabled across planes. |
 | A13 | **Azure AI Search** | Scenario & phraseology retrieval (RAG) | GA | GA | GA | GA | In-country for production. |
+| A14 | **Azure Voice Live API** (Foundry, managed speech-to-speech + Agent Service) | **Demo primary** virtual-pilot loop (WebRTC-direct; server-held control channel) | **—** (verify) | — | **Prev** | **Prev** | **Demo primary, supersedes A6–A8** ([ADR-0004](./adr/ADR-0004-voice-live-foundry-agent.md)). Sweden Central (EU), no personal data; re-verify availability/`api-version` at design time (`CON-05`). |
 
-> **How to read A6–A8:** these are the models that make the demo feel "magical" (single speech-to-speech model with tool calling). Because they are **not in Switzerland North**, the demo runs them in **Sweden Central/East US 2** with **no personal data**. The **in-country production** alternative is the classic **A1+A3 (Speech STT/TTS) + A9 (reasoning model)** composition, at somewhat higher latency but full Swiss residency.
+> **How to read A6–A8:** these were the raw models for a hand-orchestrated speech-to-speech loop. The demo now uses **A14 (Azure Voice Live API)** as the managed single-loop primary ([ADR-0004](./adr/ADR-0004-voice-live-foundry-agent.md)); A6–A8 are retained only as the conceptual fallback. Because these run in **Sweden Central/East US 2** (not Switzerland North), the demo carries **no personal data**. The **in-country production** alternative is the classic **A1+A3 (Speech STT/TTS) + A9 (reasoning model)** composition, at somewhat higher latency but full Swiss residency.
 
 ### 3.2 Application, integration & compute
 

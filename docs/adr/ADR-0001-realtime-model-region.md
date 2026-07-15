@@ -19,6 +19,8 @@
 
 **Accepted for the demo / MVP (Scope 2).** Region/model availability is volatile — **re-verify on the live Azure model-availability page at design time** (as of Jul 2026). Supersedes nothing. Constrained by [ADR-0003](./ADR-0003-split-plane-data-residency.md) (split-plane residency).
 
+> **Superseded for the demo plane by [ADR-0004](./ADR-0004-voice-live-foundry-agent.md).** The demo real-time voice loop now uses the **Azure Voice Live API + Foundry Agent Service** (managed speech-to-speech, WebRTC-direct). This ADR's hand-orchestrated `gpt-realtime` region/model reasoning is retained as the conceptual fallback and still informs the **production** decomposed pipeline (Scope 1) per [ADR-0003](./ADR-0003-split-plane-data-residency.md).
+
 ## Context
 
 The demo (Scope 2, "Art of the Possible") must deliver a **real-time speech-to-speech** experience: a trainee controller speaks an R/T instruction and a **virtual pilot** answers with a natural, low-latency voice read-back. This requires the Azure OpenAI **real-time audio** family (`gpt-realtime`, `gpt-audio`, `gpt-4o-realtime`, `gpt-4o-mini-tts`, `gpt-4o-transcribe`).
