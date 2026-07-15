@@ -66,14 +66,20 @@ instructions for every suggestion, chat answer, and coding-agent task in this re
 
 ## 6. How to use the custom agents (engineering agents `AG-E-##`)
 
-Pick the custom agent that matches the task (see `../AGENTS.md` and `./agents/`):
+Pick the custom agent that matches the task (see `../AGENTS.md` and `./agents/`).
 
-- **Product Owner** (`AG-E-01`, `product-owner.chatmode.md`) — refine epics/stories, acceptance criteria, MoSCoW, demo narrative.
-- **Developer** (`AG-E-02`, `developer.chatmode.md`) — implement stories, write code/tests/IaC, drive issue → PR with the coding agent.
-- **Enterprise Architect** (`AG-E-03`, `enterprise-architect.chatmode.md`) — architecture, ADRs, residency/split-plane, API contract; **architecture sign-off gate**.
-- **SecDevOps** (`AG-E-04`, `secdevops.chatmode.md`) — CI/CD, GHAS, IaC scanning, policy-as-code, secrets, supply chain.
-- **ATC Domain Expert** (`AG-E-05`, `atc-sme.chatmode.md`) — ICAO/R-T phraseology correctness, Swiss toponyms/dialect, golden-set authoring.
-- **Responsible-AI & Compliance** (`AG-E-06`, `responsible-ai.chatmode.md`) — RAI/Content Safety, evaluations, residency & data-protection review; **RAI review gate**.
+**Role agents (`AG-E-##`, who/expertise):**
+
+- **Product Owner** (`AG-E-01`, `agents/product-owner.agent.md`) — refine epics/stories, acceptance criteria, MoSCoW, demo narrative.
+- **Developer** (`AG-E-02`, `agents/developer.agent.md`) — implement stories, write code/tests/IaC, drive issue → PR with the coding agent.
+- **Enterprise Architect** (`AG-E-03`, `agents/enterprise-architect.agent.md`) — architecture, ADRs, residency/split-plane, API contract; **architecture sign-off gate**.
+- **SecDevOps** (`AG-E-04`, `agents/secdevops.agent.md`) — CI/CD, GHAS, IaC scanning, policy-as-code, secrets, supply chain.
+- **ATC Domain Expert** (`AG-E-05`, `agents/atc-domain-expert.agent.md`) — ICAO/R-T phraseology correctness, Swiss toponyms/dialect, golden-set authoring.
+- **Responsible-AI & Compliance** (`AG-E-06`, `agents/responsible-ai-officer.agent.md`) — RAI/Content Safety, evaluations, residency & data-protection review; **RAI review gate**.
+
+**Delivery agents (execution mode, complement the role agents):** `agents/feature.agent.md`, `agents/test.agent.md`, `agents/infra.agent.md`, `agents/docs.agent.md`, `agents/release.agent.md`. They execute the delegated workflow and defer to the role agents and human gates.
+
+**Process docs:** `agents/AGENT_WORKFLOW.md` (issue → PR → merge flow + PR contract), `agents/NON_DELEGABLE_WORK.md` (human-only actions), `agents/KPI_BASELINE.md` (delivery + quality metrics).
 
 Use `#codebase` to ground answers in this repo. Reference files explicitly (e.g., `#file:../api/openapi.yaml`). Human sign-off from EA (`AG-E-03`) and RAI (`AG-E-06`) is required before production-affecting merges — see `../SUPERPOWERS_CONTRACT.md`.
 
@@ -83,4 +89,30 @@ When guidance conflicts, apply the most specific that is safe: **explicit prompt
 
 ## 8. Key documents
 
-`../docs/PRD.md` · `../docs/SD.md` · `../docs/BOM.md` · `../docs/DESIGN-PRINCIPLES.md` · `../docs/AI.md` · `../docs/DATA.md` · `../docs/SECURITY.md` · `../docs/COMPLIANCE.md` · `../docs/BACKLOG.md` · `../docs/COPILOT-BUILD-GUIDE.md` · `../docs/adr/` · `../api/openapi.yaml` · `../AGENTS.md` · `../SUPERPOWERS_CONTRACT.md`
+`../docs/PRD.md` · `../docs/SD.md` · `../docs/BOM.md` · `../docs/DESIGN-PRINCIPLES.md` · `../docs/AI.md` · `../docs/DATA.md` · `../docs/SECURITY.md` · `../docs/COMPLIANCE.md` · `../docs/BACKLOG.md` · `../docs/COPILOT-BUILD-GUIDE.md` · `../docs/adr/` · `../api/openapi.yaml` · `../AGENTS.md` · `../SUPERPOWERS_CONTRACT.md` · `./agents/AGENT_WORKFLOW.md` · `./agents/NON_DELEGABLE_WORK.md` · `./agents/KPI_BASELINE.md`
+
+## 9. Build, test & delivery workflow
+
+Follow the delegated flow in `./agents/AGENT_WORKFLOW.md`; respect `./agents/NON_DELEGABLE_WORK.md`; track quality against `./agents/KPI_BASELINE.md`.
+
+**Build & test commands:**
+
+- Frontend (shell): `npm install --prefix src/web/atcsim-shell`, `npm run test --prefix src/web/atcsim-shell`, `npm run build --prefix src/web/atcsim-shell`.
+- Backend: `dotnet test tests/apis/AtcSim.FlightDataApi.Tests/AtcSim.FlightDataApi.Tests.csproj` and `dotnet test tests/apis/AtcSim.VoiceAgentApi.Tests/AtcSim.VoiceAgentApi.Tests.csproj`.
+- Infra: `az bicep build --file infra/main.bicep`; `az bicep build-params --file infra/parameters/dev.bicepparam`.
+- Docs: pre-commit runs `markdownlint-cli2 "**/*.md"` — keep docs lint-clean.
+- Env notes: the npm proxy is age-gated, so `src/web/atcsim-shell/.npmrc` sets `min-release-age=7`; if `azd`/Azure auth is unavailable, validate infra with `az bicep build`.
+
+**Scope guards (read before editing):**
+
+- `src/web/atcsim-shell/**` → `../docs/SD.md`; if auth touched, `../docs/SECURITY.md`.
+- `src/apis/**`, `../api/openapi.yaml` → `../docs/SD.md`; AI/command-mapping → `../docs/AI.md`; data → `../docs/DATA.md`.
+- `infra/**`, `azure.yaml` → `../docs/SECURITY.md` + relevant `../docs/adr/`; enforce residency and deny public data endpoints.
+- `docs/**`, `docs/adr/**` → keep ADRs/contracts in sync and markdownlint-clean.
+
+**Delivery gates (hard):**
+
+- Traceability `FR-##`/`NFR-##` → `US-###` → tests/evals → evidence in every PR.
+- Golden-phraseology / command-mapping regressions must not merge.
+- EA (`AG-E-03`) architecture sign-off and RAI (`AG-E-06`) review before production-affecting merges.
+- Each sprint has a dedicated GitHub issue (backlog + WIP); feature work in a `.worktrees/` worktree on a `feat/` branch; merge `--no-ff`; push to origin only on explicit request.

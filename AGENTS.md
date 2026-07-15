@@ -192,6 +192,27 @@ Custom agents that accelerate the **build**. Each is a drop-in `.agent.md` under
 | **AG-E-05 ATC Domain Expert** | ICAO/R-T phraseology SME; Swiss dialect/place-name nuance; validates read-backs; builds golden phraseology fixtures. | [./.github/agents/atc-domain-expert.agent.md](./.github/agents/atc-domain-expert.agent.md) |
 | **AG-E-06 Responsible-AI & Compliance Officer** | RAI six principles, Transparency Notes, DPIA prompts, content safety, fairness/dialect-bias evaluation. | [./.github/agents/responsible-ai-officer.agent.md](./.github/agents/responsible-ai-officer.agent.md) |
 
+### 4.1 Delivery agents (execution mode) and process docs
+
+The role agents above define **who/expertise**. Complementing them, **delivery
+agents** define **execution mode** — they run the delegated issue → PR → merge
+workflow and defer to the role agents and human gates:
+
+| Delivery agent | One-line role | File |
+| --- | --- | --- |
+| **Feature** | Bounded feature/bug fix end-to-end with evidence. | [./.github/agents/feature.agent.md](./.github/agents/feature.agent.md) |
+| **Test** | Targeted tests + golden-phraseology evals; regression prevention. | [./.github/agents/test.agent.md](./.github/agents/test.agent.md) |
+| **Infra** | Bicep/`azd` changes with residency and rollback safety. | [./.github/agents/infra.agent.md](./.github/agents/infra.agent.md) |
+| **Docs** | Docs/ADR consistency, markdownlint, quality Mermaid. | [./.github/agents/docs.agent.md](./.github/agents/docs.agent.md) |
+| **Release** | Merge readiness, traceability, `--no-ff` merge, issue closure. | [./.github/agents/release.agent.md](./.github/agents/release.agent.md) |
+
+Process docs governing all agents: the delegated workflow
+[./.github/agents/AGENT_WORKFLOW.md](./.github/agents/AGENT_WORKFLOW.md), the
+human-only actions in
+[./.github/agents/NON_DELEGABLE_WORK.md](./.github/agents/NON_DELEGABLE_WORK.md),
+and the delivery/quality metrics in
+[./.github/agents/KPI_BASELINE.md](./.github/agents/KPI_BASELINE.md).
+
 Repo-wide behaviour common to all custom agents lives in [./.github/copilot-instructions.md](./.github/copilot-instructions.md) (anonymization, residency, "no operational ATC", cite CAF/WAF/RAI). The build RACI mapping these agents to workstreams is in [PERSONAS-JOURNEY.md](./docs/PERSONAS-JOURNEY.md) §6.
 
 ---
