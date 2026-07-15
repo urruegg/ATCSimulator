@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "ATCSim Shell: Open in Edge",
+      "type": "msedge",
+      "request": "launch",
+      "url": "http://127.0.0.1:5173",
+      "webRoot": "${workspaceFolder}/src/web/atcsim-shell",
+      "preLaunchTask": "ATCSim Shell: Start Dev Server"
+    },
+    {
+      "name": "ATCSim Shell: Open in Chrome",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://127.0.0.1:5173",
+      "webRoot": "${workspaceFolder}/src/web/atcsim-shell",
+      "preLaunchTask": "ATCSim Shell: Start Dev Server"
+    }
+  ]
+}

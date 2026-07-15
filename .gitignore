@@ -19,5 +19,7 @@ azd.env
 .idea/
 # Local worktrees
 .worktrees/
+# Superpowers session artifacts
+.superpowers/
 # Local scratch
 *.local.md
