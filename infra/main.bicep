@@ -9,6 +9,8 @@ param tags object = {}
 
 var resourceToken = uniqueString(resourceGroup().id)
 var keyVaultName = take('${prefix}kv${resourceToken}', 24)
+var foundryName = take('${prefix}fdry${resourceToken}', 24)
+var foundryEndpoint = 'wss://${foundryName}.services.ai.azure.com'
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: '${prefix}-law-${resourceToken}'
@@ -80,7 +82,24 @@ module voiceAgentApi './modules/apiapp.bicep' = {
     keyVaultName: keyVault.outputs.name
     // Voice agent runs in mock mode for the PoC; Foundry secrets are wired via
     // Key Vault in production (private endpoint). See note on flightDataApi.
-    appSettings: []
+    // The Voice Live endpoint is derived from the Foundry account name so the
+    // broker can reach the control channel without a circular module reference.
+    appSettings: [
+      {
+        name: 'VoiceLive__Endpoint'
+        value: foundryEndpoint
+      }
+    ]
+  }
+}
+
+module foundry './modules/foundry.bicep' = {
+  name: 'foundry'
+  params: {
+    name: foundryName
+    location: location
+    tags: tags
+    brokerPrincipalId: voiceAgentApi.outputs.principalId
   }
 }
 
@@ -101,3 +120,5 @@ output webHostName string = web.outputs.defaultHostName
 output flightDataApiHostName string = flightDataApi.outputs.defaultHostName
 output voiceAgentApiHostName string = voiceAgentApi.outputs.defaultHostName
 output applicationInsightsName string = appInsights.outputs.name
+output foundryName string = foundry.outputs.name
+output foundryEndpoint string = foundryEndpoint

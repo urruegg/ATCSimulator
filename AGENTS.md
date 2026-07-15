@@ -158,6 +158,8 @@ Each agent below lists **Purpose · Inputs → Outputs · Realizing Azure/AI ser
 | AG-F-07 | Scenario variability | schema → variations | Scenario engine + AOAI | Bounded schema; instructor-approved |
 | AG-F-08 | Report summarization (UC1) | reports → draft summaries | AOAI / Copilot Studio + LMS | Advisory draft; instructor approves |
 
+> **Demo-plane realization (Voice Live + Foundry Agent Service, [ADR-0004](./docs/adr/ADR-0004-voice-live-foundry-agent.md)).** On the demo plane the runtime collapses onto the managed **Azure Voice Live API** with a Foundry agent brain: **AG-F-02 (ASR/STT)**, **AG-F-05 (TTS)**, and the AG-F-01 read-back run **inside Voice Live** (WebRTC-direct media); **AG-F-03 (intent/phraseology)** is the Foundry agent's reasoning + tool selection; **AG-F-04 (Simulator Command)** remains the deterministic disposer, realized as **server-side `function_call` validation + dispatch in the `voice-agent-api` broker** (the browser never commands the simulator). Production (Scope 1) keeps the decomposed in-country mapping above.
+
 ---
 
 ## 3. Side-effect & safety control matrix

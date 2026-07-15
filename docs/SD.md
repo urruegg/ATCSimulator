@@ -78,6 +78,8 @@ Full agent specifications (inputs/outputs, guardrails, side effects, human-in-th
 
 **Objective:** trainee selects an aircraft from a **public live-flight feed** and runs a **real-time voice** scenario with the Virtual Pilot. **No personal data. No operational ATC.**
 
+> **Demo voice loop updated ([ADR-0004](./adr/ADR-0004-voice-live-foundry-agent.md)).** The demo real-time loop now uses the **Azure Voice Live API + Foundry Agent Service** (managed speech-to-speech, **WebRTC-direct** media) instead of the hand-orchestrated `gpt-realtime` wiring of [ADR-0001](./adr/ADR-0001-realtime-model-region.md). The `voice-agent-api` **broker holds the Voice Live control channel server-side** and remains the deterministic disposer for simulator commands; the browser handles audio media only. Production (Scope 1) is unchanged.
+
 ```mermaid
 flowchart TB
     User([Trainee — browser + headset]) --> FE[Static web client<br/>Azure Static Web Apps]
