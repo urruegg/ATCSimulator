@@ -1,11 +1,22 @@
 ﻿# scripts/bootstrap-entra.ps1
-# HUMAN-RUN: creates the web (SPA) and API app registrations for user sign-in.
-# Requires: az login with rights to create app registrations.
+# HUMAN-RUN: creates the web (SPA) and API app registrations for user sign-in, and
+# (optionally) grants the data-plane "Foundry User" role so human builders can
+# create agents in the Foundry portal.
+# Requires: az login with rights to create app registrations (and, for the Foundry
+# role assignment, rights to write role assignments on the target account).
 param(
   [Parameter(Mandatory = $true)] [string] $TenantId,
   [Parameter(Mandatory = $true)] [string] $SubscriptionId,
   [string] $Prefix = "atcsim",
-  [string[]] $WebRedirectUris = @("http://localhost:5173")
+  [string[]] $WebRedirectUris = @("http://localhost:5173"),
+  # Optional: grant the data-plane "Foundry User" role (required to build agents in
+  # the Foundry portal; otherwise it blocks with "You don't have permission to
+  # build agents in this project."). When -FoundryAccountName and -ResourceGroup
+  # are supplied, each principal in -FoundryUserObjectIds (defaults to the
+  # signed-in user) is granted the role at the account scope.
+  [string] $FoundryAccountName,
+  [string] $ResourceGroup,
+  [string[]] $FoundryUserObjectIds = @()
 )
 
 $ErrorActionPreference = "Stop"
@@ -58,6 +69,26 @@ foreach ($appId in @($webApp.appId, $apiApp.appId)) {
   if (-not $existingSp) { az ad sp create --id $appId | Out-Null }
 }
 
+# Grant the data-plane "Foundry User" role so human builders can create agents in
+# the Foundry portal. Idempotent; only runs when a Foundry account is supplied.
+# RBAC propagation can take a few minutes on the Cognitive Services data plane, so
+# a hard refresh / re-login may be needed before the portal reflects the change.
+if ($FoundryAccountName -and $ResourceGroup) {
+  $foundryScope = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.CognitiveServices/accounts/$FoundryAccountName"
+  $principals = @($FoundryUserObjectIds | Where-Object { $_ })
+  if (-not $principals) { $principals = @(az ad signed-in-user show --query id -o tsv) }
+  foreach ($principalId in $principals) {
+    $has = az role assignment list --assignee $principalId --scope $foundryScope --query "[?roleDefinitionName=='Foundry User'] | length(@)" -o tsv
+    if ($has -eq "0") {
+      az role assignment create --assignee $principalId --role "Foundry User" --scope $foundryScope | Out-Null
+      Write-Host "Assigned 'Foundry User' to $principalId on $FoundryAccountName"
+    }
+    else {
+      Write-Host "'Foundry User' already assigned to $principalId on $FoundryAccountName"
+    }
+  }
+}
+
 Write-Host "TENANT_ID=$TenantId"
 Write-Host "WEB_CLIENT_ID=$($webApp.appId)"
 Write-Host "API_CLIENT_ID=$($apiApp.appId)"
@@ -65,3 +96,6 @@ Write-Host "API_SCOPE=$apiIdentifierUri/access_as_user"
 Write-Host "NOTE: after the first deploy, re-run this script with the deployed web hostnames to register them as SPA redirect URIs (additive), e.g.:"
 Write-Host "  ./scripts/bootstrap-entra.ps1 -TenantId <t> -SubscriptionId <s> -WebRedirectUris @('http://localhost:5173','https://<sit-web-host>/','https://<prod-web-host>/')"
 Write-Host "  (MSAL uses redirectUri '/', so include the trailing slash on each hostname.)"
+Write-Host "NOTE: to let a human build agents in the Foundry portal, grant the 'Foundry User' role, e.g.:"
+Write-Host "  ./scripts/bootstrap-entra.ps1 -TenantId <t> -SubscriptionId <s> -FoundryAccountName <foundry-acct> -ResourceGroup <rg> [-FoundryUserObjectIds @('<oid1>','<oid2>')]"
+Write-Host "  (Data-plane RBAC can take a few minutes to propagate; hard refresh or re-login in the portal afterward.)"
