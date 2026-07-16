@@ -14,7 +14,7 @@ resource maps 'Microsoft.Maps/accounts@2023-06-01' = {
 }
 
 // Azure Maps Data Reader (data-plane) for the flight-data identity.
-var azureMapsDataReader = '423170ca-a8f6-4b0f-8487-9e4eb8f49bfc'
+var azureMapsDataReader = '423170ca-a8f6-4b0f-8487-9e4eb8f49bfa'
 resource roleAssign 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(maps.id, readerPrincipalId, azureMapsDataReader)
   scope: maps
