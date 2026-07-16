@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 320" width="1040" height="320" role="img" aria-label="ATCSimulator logo with tagline">
+  <rect x="0" y="0" width="1040" height="320" fill="#FFFFFF"/>
+  <g transform="translate(24,20) scale(0.82)">
+    <defs><linearGradient id="pLT" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#0E72B4"/><stop offset="0.5" stop-color="#1FA9D6"/><stop offset="1" stop-color="#22B07B"/>
+    </linearGradient></defs>
+    <path d="M46,212 C130,196 150,150 258,74" fill="none" stroke="url(#pLT)" stroke-width="14" stroke-linecap="round"/>
+    <g transform="translate(205,104) rotate(-40)">
+      <path d="M-20,-12 L22,0 L-20,12 L-9,0 Z" fill="#15324F"/><path d="M-20,-12 L-9,0 L-20,12 Z" fill="#2C5E86"/>
+    </g>
+    <circle cx="46" cy="212" r="18" fill="#E30613"/>
+    <g transform="translate(46,212)"><rect x="-11" y="-4" width="22" height="8" rx="1.5" fill="#FFFFFF"/><rect x="-4" y="-11" width="8" height="22" rx="1.5" fill="#FFFFFF"/></g>
+    <circle cx="150" cy="146" r="30" fill="#0E72B4"/>
+    <g transform="translate(150,146) scale(0.82)" fill="#FFFFFF">
+      <circle cx="0" cy="-20" r="2.4"/><rect x="-1.4" y="-20" width="2.8" height="6" rx="1"/>
+      <polygon points="-11,-13 11,-13 9,-5 -9,-5"/><rect x="-6" y="-5" width="12" height="3"/>
+      <polygon points="-5,-2 5,-2 8,13 -8,13"/><rect x="-10" y="12" width="20" height="4" rx="1.5"/>
+    </g>
+    <circle cx="258" cy="74" r="38" fill="#22B07B"/>
+    <g transform="translate(258,74) scale(1.5)"><path d="M-14,1 L-4,12 L15,-12" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></g>
+  </g>
+  <text x="322" y="122" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="74" font-weight="700" fill="#173250" letter-spacing="-1">ATCSimulator</text>
+  <text x="326" y="160" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="21" font-weight="600" fill="#5D6C7B" letter-spacing="2.6">SWISS ATC TRAINING SIMULATOR</text>
+  <line x1="326" y1="196" x2="1004" y2="196" stroke="#E1E7EC" stroke-width="2"/>
+  <text x="326" y="244" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="27" font-weight="500" fill="#0E72B4">Every clearance, rehearsed &#8212; in Swiss hands.</text>
+</svg>
