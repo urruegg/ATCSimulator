@@ -61,6 +61,9 @@ jobs:
           entra-client-id: ${{ vars.WEB_CLIENT_ID }}
           entra-tenant-id: ${{ vars.AZURE_TENANT_ID }}
           api-scope: ${{ vars.API_SCOPE }}
+          # Unset today -> empty -> per-app hostname fallback. Set post-cutover
+          # to https://apisit.atcsim.swissshub.com.
+          api-base-url: ${{ vars.API_BASE_URL }}
 
   deploy-prod:
     runs-on: ubuntu-latest
@@ -82,3 +85,6 @@ jobs:
           entra-client-id: ${{ vars.WEB_CLIENT_ID }}
           entra-tenant-id: ${{ vars.AZURE_TENANT_ID }}
           api-scope: ${{ vars.API_SCOPE }}
+          # Unset today -> empty -> per-app hostname fallback. Set post-cutover
+          # to https://api.atcsim.swissshub.com.
+          api-base-url: ${{ vars.API_BASE_URL }}
