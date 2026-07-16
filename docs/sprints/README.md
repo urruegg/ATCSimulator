@@ -25,3 +25,7 @@ Each sprint document should:
 - link to the relevant spec
 - link to the relevant plan
 - describe expected delivery evidence
+
+## Index
+
+- [2026-07-16-poc-outcome-and-next-sprint-foundation.md](./2026-07-16-poc-outcome-and-next-sprint-foundation.md) — PoC outcome (both PoCs validated) and the foundation carried into the next sprint.
