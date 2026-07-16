@@ -10,7 +10,7 @@
 | Status | Draft for Customer workshop (4 August 2026) |
 | Classification | Public — anonymized demo |
 
-**Related documents:** [SD.md](./SD.md) · [AI.md](./AI.md) · [BVA.md](./BVA.md) · [COMPLIANCE.md](./COMPLIANCE.md) · [SECURITY.md](./SECURITY.md) · [adr/ADR-0001-realtime-model-region.md](./adr/ADR-0001-realtime-model-region.md) · [adr/ADR-0003-split-plane-data-residency.md](./adr/ADR-0003-split-plane-data-residency.md)
+**Related documents:** [SD.md](./SD.md) · [AI.md](./AI.md) · [BVA.md](./BVA.md) · [COMPLIANCE.md](./COMPLIANCE.md) · [SECURITY.md](./SECURITY.md) · [adr/ADR-0001-realtime-model-region.md](./adr/ADR-0001-realtime-model-region.md) · [adr/ADR-0003-split-plane-data-residency.md](./adr/ADR-0003-split-plane-data-residency.md) · [adr/ADR-0005-shared-platform-frontdoor-dns.md](./adr/ADR-0005-shared-platform-frontdoor-dns.md) · [adr/ADR-0006-azure-maps-keyless-auth.md](./adr/ADR-0006-azure-maps-keyless-auth.md)
 
 ---
 
@@ -81,6 +81,9 @@ The single most consequential finding for ATCSimulator:
 | B5 | **Azure Functions** | Event glue (feed polling, post-processing) | GA | GA | GA | — |
 | B6 | **Azure Web PubSub / SignalR** | Real-time audio/control channel (WebSocket) | GA | GA | GA | Co-locate with compute/model. |
 | B7 | **Azure Event Grid / Service Bus** | Async events between agents | GA | GA | GA | — |
+| B8 | **Azure Front Door Standard** (`fdswissshub`) | Shared public entry: path-routes the single `api` host to two App Services; managed TLS ([ADR-0005](./adr/ADR-0005-shared-platform-frontdoor-dns.md)) | Global | Global | Global | Shared `swissshub` RG; fronts `app`/`appsit`/`api`/`apisit`.atcsim.swissshub.com; origin lock. |
+| B9 | **Azure DNS** (`swissshub.com` zone) | Shared authoritative DNS for the platform domain ([ADR-0005](./adr/ADR-0005-shared-platform-frontdoor-dns.md)) | Global | Global | Global | GoDaddy delegates via NS (human gate); zone must be named as the FQDN; shared `swissshub` RG. |
+| B10 | **Azure Maps** | Demo map tiles for the ZRH real-flight UX (keyless) ([ADR-0006](./adr/ADR-0006-azure-maps-keyless-auth.md)) | Global | Global | Global | Browser SDK authenticated via a backend token endpoint (Managed Identity + Azure Maps Data Reader); no key in the client. |
 
 ### 3.3 Data & analytics
 

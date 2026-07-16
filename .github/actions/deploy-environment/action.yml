@@ -7,6 +7,10 @@ inputs:
   entra-client-id: { required: true }
   entra-tenant-id: { required: true }
   api-scope: { required: true }
+  # Single Front Door host (e.g. https://apisit.atcsim.swissshub.com) that
+  # path-routes both APIs. Empty until DNS delegation + Front Door go-live
+  # (human gate); see the web build step for the safe per-app fallback.
+  api-base-url: { required: false, default: '' }
 runs:
   using: composite
   steps:
@@ -96,8 +100,13 @@ runs:
         VITE_ENTRA_CLIENT_ID: ${{ inputs.entra-client-id }}
         VITE_ENTRA_TENANT_ID: ${{ inputs.entra-tenant-id }}
         VITE_API_SCOPE: ${{ inputs.api-scope }}
-        VITE_FLIGHT_API_BASE_URL: ${{ steps.outputs.outputs.flight }}
-        VITE_VOICE_API_BASE_URL: ${{ steps.outputs.outputs.voice }}
+        # When api-base-url is set, point the web build at the single path-routed
+        # Front Door host (api[sit].atcsim.swissshub.com). Until DNS delegation +
+        # Front Door go-live (human gate), the var stays unset -> empty string ->
+        # fall back to the per-app *.azurewebsites.net hostnames so current
+        # SIT/PROD deploys keep working. Flip the env var post-cutover, no code change.
+        VITE_FLIGHT_API_BASE_URL: ${{ inputs.api-base-url != '' && inputs.api-base-url || steps.outputs.outputs.flight }}
+        VITE_VOICE_API_BASE_URL: ${{ inputs.api-base-url != '' && inputs.api-base-url || steps.outputs.outputs.voice }}
       run: |
         retry() { local n=1; until "$@"; do [ $n -ge 3 ] && return 1; echo "::warning::attempt $n failed; retrying in 20s"; n=$((n+1)); sleep 20; done; }
         npm ci

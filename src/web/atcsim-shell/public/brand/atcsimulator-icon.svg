@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="ATCSimulator app icon">
+  <defs>
+    <linearGradient id="g" x1="0.1" y1="1" x2="0.95" y2="0">
+      <stop offset="0" stop-color="#0E72B4"/><stop offset="0.5" stop-color="#1FA9D6"/><stop offset="1" stop-color="#22B07B"/>
+    </linearGradient>
+    <clipPath id="t"><rect x="0" y="0" width="512" height="512" rx="112"/></clipPath>
+    <filter id="s" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="5" stdDeviation="9" flood-color="#08131F" flood-opacity="0.30"/></filter>
+  </defs>
+  <g clip-path="url(#t)">
+    <!-- Swiss diagonal panel: white top-left, control navy bottom-right -->
+    <polygon points="0,0 512,0 0,512" fill="#FFFFFF"/>
+    <polygon points="512,0 512,512 0,512" fill="#15324F"/>
+    <line x1="512" y1="0" x2="0" y2="512" stroke="#E7ECF1" stroke-width="2"/>
+
+    <!-- Swiss cross (flag) -->
+    <g transform="translate(74,80)">
+      <rect x="0" y="0" width="132" height="132" rx="20" fill="#E30613"/>
+      <rect x="19" y="52" width="94" height="28" rx="2" fill="#FFFFFF"/>
+      <rect x="52" y="19" width="28" height="94" rx="2" fill="#FFFFFF"/>
+    </g>
+
+    <!-- radar scan arcs from the control-tower node -->
+    <g fill="none" stroke="#1FA9D6" stroke-width="4" stroke-linecap="round" opacity="0.55">
+      <path d="M372,332 A44,44 0 0 1 388,378"/>
+      <path d="M388,318 A64,64 0 0 1 412,392"/>
+    </g>
+
+    <!-- journey path: start -> control -> success -->
+    <g filter="url(#s)">
+      <path d="M232,442 C322,420 342,352 452,258" fill="none" stroke="url(#g)" stroke-width="16" stroke-linecap="round"/>
+
+      <!-- climbing aircraft (paper-plane) between control and success -->
+      <g transform="translate(398,312) rotate(-40)">
+        <path d="M-18,-11 L20,0 L-18,11 L-8,0 Z" fill="#FFFFFF"/>
+        <path d="M-18,-11 L-8,0 L-18,11 Z" fill="#CFE0EC"/>
+      </g>
+
+      <!-- Step 1: trainee start -->
+      <circle cx="232" cy="442" r="24" fill="#FFFFFF"/><circle cx="232" cy="442" r="9" fill="#15324F"/>
+
+      <!-- Step 2: ATC control tower -->
+      <circle cx="346" cy="352" r="35" fill="#0E72B4"/>
+      <g transform="translate(346,352) scale(0.92)" fill="#FFFFFF">
+        <circle cx="0" cy="-20" r="2.4"/>
+        <rect x="-1.4" y="-20" width="2.8" height="6" rx="1"/>
+        <polygon points="-11,-13 11,-13 9,-5 -9,-5"/>
+        <rect x="-6" y="-5" width="12" height="3"/>
+        <polygon points="-5,-2 5,-2 8,13 -8,13"/>
+        <rect x="-10" y="12" width="20" height="4" rx="1.5"/>
+      </g>
+
+      <!-- Step 3: cleared / qualified -->
+      <circle cx="452" cy="258" r="40" fill="#22B07B"/>
+      <g transform="translate(452,258) scale(1.35)"><path d="M-14,1 L-4,12 L15,-12" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    </g>
+  </g>
+</svg>

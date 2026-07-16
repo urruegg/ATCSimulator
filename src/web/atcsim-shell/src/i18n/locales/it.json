@@ -1,0 +1,27 @@
+{
+  "app": {
+    "title": "ATCSimulator"
+  },
+  "nav": {
+    "map": "Mappa",
+    "chat": "Chat"
+  },
+  "header": {
+    "language": "Lingua",
+    "airport": "Aeroporto",
+    "signOut": "Disconnetti",
+    "switchAccount": "Cambia account"
+  },
+  "map": {
+    "selectAdvisory": "Seleziona un aeromobile sulla mappa per iniziare"
+  },
+  "chat": {
+    "atc": "ATC",
+    "pilot": "Pilota",
+    "talk": "Parla",
+    "syntheticDisclosure": "La voce del pilota virtuale è sintetica (generata dall'IA)."
+  },
+  "settings": {
+    "refresh": "Aggiorna"
+  }
+}

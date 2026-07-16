@@ -15,7 +15,8 @@ az account set --subscription $SubscriptionId
 
 # Register resource providers used by the infra (subscription-scoped, one-time).
 # The least-privilege deployer identity is RG-scoped and cannot self-register these.
-foreach ($ns in 'Microsoft.Web', 'Microsoft.KeyVault', 'Microsoft.OperationalInsights', 'Microsoft.Insights', 'Microsoft.ManagedIdentity', 'Microsoft.CognitiveServices') {
+# Microsoft.Maps/Cdn/Network back the shared platform (Azure Maps, Azure Front Door, Azure DNS).
+foreach ($ns in 'Microsoft.Web', 'Microsoft.KeyVault', 'Microsoft.OperationalInsights', 'Microsoft.Insights', 'Microsoft.ManagedIdentity', 'Microsoft.CognitiveServices', 'Microsoft.Maps', 'Microsoft.Cdn', 'Microsoft.Network') {
     az provider register --namespace $ns | Out-Null
 }
 
@@ -41,6 +42,28 @@ foreach ($env in $Environments) {
     } | ConvertTo-Json -Compress
     $cred | az ad app federated-credential create --id $appId --parameters '@-' | Out-Null
 }
+
+# --- Shared cross-solution platform (RG 'swissshub': Azure DNS + Front Door) -------
+# The shared template (infra/shared/main.bicep) is *subscription-scoped* and creates
+# the 'swissshub' RG itself, so CD runs `az deployment sub create`. The 'deploy-shared'
+# CD job reuses the 'sit' federated credential/environment (it runs before deploy-sit),
+# so no extra federated credential is needed.
+$sharedRg = 'swissshub'
+$dnsZoneContributorRoleId = 'befefa01-2a29-4197-83a8-272ff33ce314' # DNS Zone Contributor (built-in)
+az group create -n $sharedRg -l $Location | Out-Null
+$sharedScope = "/subscriptions/$SubscriptionId/resourceGroups/$sharedRg"
+# Manage shared-RG resources (DNS zone, Front Door profile) — RG-scoped least privilege.
+az role assignment create --assignee $appId --role 'Contributor' --scope $sharedScope 2>$null | Out-Null
+# Data-plane: create/update DNS record sets (apex/CNAME/_dnsauth TXT) for custom domains + TLS.
+az role assignment create --assignee $appId --role $dnsZoneContributorRoleId --scope $sharedScope 2>$null | Out-Null
+
+# Subscription-scoped Contributor: REQUIRED so `az deployment sub create` can create the
+# 'swissshub' RG via the subscription-scoped shared template. This is intentionally broader
+# than the RG-scoped least-privilege grants above; it is the minimum role that allows a
+# subscription deployment to create a resource group. Scope tighter (pre-create the RG
+# out-of-band and drop this grant) if the broader blast radius is unacceptable.
+$subScope = "/subscriptions/$SubscriptionId"
+az role assignment create --assignee $appId --role 'Contributor' --scope $subScope 2>$null | Out-Null
 
 $tenantId = (az account show --query tenantId -o tsv)
 Write-Host "AZURE_CLIENT_ID=$appId"

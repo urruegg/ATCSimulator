@@ -1,122 +1,145 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  Card,
-  CardHeader,
-  Spinner,
-  Text,
-  Title2,
-  makeStyles,
-  tokens,
-} from '@fluentui/react-components';
-import { fetchAircraft } from './aircraftApi';
-import type { Aircraft } from './types';
+import { useEffect, useRef } from 'react';
+import * as atlas from 'azure-maps-control';
+import 'azure-maps-control/dist/atlas.min.css';
+import { Dropdown, Option, Text, makeStyles, tokens } from '@fluentui/react-components';
+import { useTranslation } from 'react-i18next';
+import { useAppState } from '../../state/AppStateContext';
+import { fetchMapsToken } from './mapAuth';
+import { useFlightPolling } from './useFlightPolling';
+import { SelectedFlightHeader } from './SelectedFlightHeader';
 
-const SWITZERLAND_BOUNDS = '47.7,8.3,47.2,8.8';
+// ZRH bounding box as N,S,W,E (matches the flight-data API contract).
+const ZRH_BOUNDS = '47.7,47.2,8.3,8.8';
+// Map center as [lon, lat] (Azure Maps position order).
+const ZRH_CENTER: [number, number] = [8.55, 47.45];
+const CADENCE_OPTIONS = [2, 5, 10] as const;
+
+// Same-origin when unset; the flight-data API also brokers the Maps token.
+const flightBase = (import.meta.env.VITE_FLIGHT_API_BASE_URL ?? '').replace(/\/$/, '');
 
 const useStyles = makeStyles({
   root: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalL,
-    padding: tokens.spacingHorizontalL,
-  },
-  nav: {
-    display: 'flex',
-    gap: tokens.spacingHorizontalM,
-  },
-  mapHost: {
-    height: '480px',
+    position: 'relative',
+    height: '100%',
     width: '100%',
-    borderRadius: tokens.borderRadiusMedium,
-    backgroundColor: tokens.colorNeutralBackground3,
+    overflow: 'hidden',
+  },
+  overlayTop: {
+    position: 'absolute',
+    top: tokens.spacingVerticalM,
+    left: tokens.spacingHorizontalM,
+    right: tokens.spacingHorizontalM,
+    zIndex: 1,
+    // Let map pan/zoom gestures pass through the advisory strip.
+    pointerEvents: 'none',
+  },
+  cadence: {
+    position: 'absolute',
+    right: tokens.spacingHorizontalM,
+    bottom: tokens.spacingVerticalM,
+    zIndex: 1,
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  list: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-    gap: tokens.spacingHorizontalM,
-  },
-  selected: {
-    padding: tokens.spacingHorizontalM,
+    columnGap: tokens.spacingHorizontalXS,
+    padding: tokens.spacingHorizontalS,
     borderRadius: tokens.borderRadiusMedium,
-    backgroundColor: tokens.colorNeutralBackground2,
+    backgroundColor: tokens.colorNeutralBackground1,
+    boxShadow: tokens.shadow8,
   },
 });
 
 export function AircraftMapPage() {
   const styles = useStyles();
-  const [aircraft, setAircraft] = useState<Aircraft[]>([]);
-  const [selected, setSelected] = useState<Aircraft | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
+  const { setSelectedFlight, refreshCadenceSec, setRefreshCadenceSec } = useAppState();
 
+  const mapHostRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<atlas.Map | null>(null);
+
+  const { aircraft } = useFlightPolling(ZRH_BOUNDS, refreshCadenceSec);
+
+  // Create the Azure Maps instance once. The SDK needs a real DOM host + WebGL,
+  // so under jsdom it is mocked (see the test); the host guard keeps init a
+  // no-op when there is no element to mount into.
   useEffect(() => {
-    let active = true;
+    const host = mapHostRef.current;
+    if (!host) return;
 
-    fetchAircraft(SWITZERLAND_BOUNDS)
-      .then((items) => {
-        if (active) {
-          setAircraft(items);
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setError('Unable to load aircraft from the flight-data API.');
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setLoading(false);
-        }
-      });
+    const map = new atlas.Map(host, {
+      center: ZRH_CENTER,
+      zoom: 8,
+      authOptions: {
+        // String is erased to the enum member at build; runtime stays a plain
+        // string so the mocked SDK (no AuthenticationType export) still works.
+        authType: 'anonymous' as atlas.AuthenticationType,
+        clientId: import.meta.env.VITE_MAPS_CLIENT_ID,
+        getToken: async (resolve, reject) => {
+          try {
+            resolve(await fetchMapsToken(flightBase));
+          } catch (e) {
+            reject(e as Error);
+          }
+        },
+      },
+    });
+    mapRef.current = map;
 
     return () => {
-      active = false;
+      map.dispose();
+      mapRef.current = null;
     };
   }, []);
 
+  // Refresh HTML markers whenever the live aircraft set changes. Selecting a
+  // marker is advisory only — it never commands the simulator directly.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    map.markers.clear();
+    for (const a of aircraft) {
+      const marker = new atlas.HtmlMarker({ position: [a.longitude, a.latitude] });
+      map.events.add('click', marker, () => {
+        setSelectedFlight({
+          callsign: a.callsign,
+          aircraftType: a.aircraftType,
+          registration: a.registration ?? undefined,
+          latitude: a.latitude,
+          longitude: a.longitude,
+          altitudeFt: a.altitudeFt,
+          headingDeg: a.headingDeg,
+          groundSpeedKt: a.groundSpeedKt,
+        });
+      });
+      map.markers.add(marker);
+    }
+  }, [aircraft, setSelectedFlight]);
+
   return (
     <div className={styles.root}>
-      <Title2>PoC 1 — Aircraft selection</Title2>
-      <nav className={styles.nav}>
-        <Link to="/">Aircraft map</Link>
-        <Link to="/voice">Voice agent</Link>
-      </nav>
+      <div id="azure-map-host" ref={mapHostRef} style={{ position: 'absolute', inset: 0 }} />
 
-      <div id="azure-map-host" className={styles.mapHost}>
-        <Text>Azure Maps host</Text>
+      <div className={styles.overlayTop}>
+        <SelectedFlightHeader />
       </div>
 
-      {loading && <Spinner label="Loading aircraft…" />}
-      {error && <Text>{error}</Text>}
-
-      <div className={styles.list}>
-        {aircraft.map((item) => (
-          <Card key={item.callsign} onClick={() => setSelected(item)}>
-            <CardHeader
-              header={<Text weight="semibold">{item.callsign}</Text>}
-              description={<Text>{item.aircraftType}</Text>}
-            />
-          </Card>
-        ))}
+      <div className={styles.cadence}>
+        <Text size={200}>{t('settings.refresh')}</Text>
+        <Dropdown
+          aria-label={t('settings.refresh')}
+          value={`${refreshCadenceSec}s`}
+          selectedOptions={[String(refreshCadenceSec)]}
+          onOptionSelect={(_, data) => {
+            if (data.optionValue) setRefreshCadenceSec(Number(data.optionValue));
+          }}
+        >
+          {CADENCE_OPTIONS.map((c) => (
+            <Option key={c} value={String(c)} text={`${c}s`}>
+              {`${c}s`}
+            </Option>
+          ))}
+        </Dropdown>
       </div>
-
-      {selected && (
-        <div className={styles.selected}>
-          <Text weight="semibold">
-            {selected.callsign} · {selected.aircraftType}
-          </Text>
-          <br />
-          <Text>
-            {selected.latitude.toFixed(3)}, {selected.longitude.toFixed(3)} · FL
-            {Math.round(selected.altitudeFt / 100)} · {selected.headingDeg}° ·{' '}
-            {selected.groundSpeedKt} kt
-          </Text>
-        </div>
-      )}
     </div>
   );
 }

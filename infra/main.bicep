@@ -11,6 +11,9 @@ var resourceToken = uniqueString(resourceGroup().id)
 var keyVaultName = take('${prefix}kv${resourceToken}', 24)
 var foundryName = take('${prefix}fdry${resourceToken}', 24)
 var foundryEndpoint = 'wss://${foundryName}.services.ai.azure.com'
+// Computed once and shared by the flightDataApi app setting and the maps
+// module name param to avoid a circular module reference.
+var mapsName = take('${prefix}map${resourceToken}', 20)
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: '${prefix}-law-${resourceToken}'
@@ -66,7 +69,21 @@ module flightDataApi './modules/apiapp.bicep' = {
     // The demo vault is policy-locked (public network access disabled) and the
     // App Service has no VNet/private endpoint in the PoC, so Key Vault
     // references cannot resolve. Production restores KV + private endpoint.
-    appSettings: []
+    appSettings: [
+      {
+        name: 'Maps__AccountName'
+        value: mapsName
+      }
+    ]
+  }
+}
+
+module maps './modules/maps.bicep' = {
+  name: 'maps'
+  params: {
+    name: mapsName
+    tags: tags
+    readerPrincipalId: flightDataApi.outputs.principalId
   }
 }
 
@@ -122,3 +139,4 @@ output voiceAgentApiHostName string = voiceAgentApi.outputs.defaultHostName
 output applicationInsightsName string = appInsights.outputs.name
 output foundryName string = foundry.outputs.name
 output foundryEndpoint string = foundryEndpoint
+output mapsAccountName string = maps.outputs.name

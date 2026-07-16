@@ -148,7 +148,47 @@ Then validate in the browser:
 - [ ] §5.2 recording (once the agent is published).
 - [ ] Traceability note: requirement (`FR-##`/`NFR-##`) → story (`US-###`) → this evidence.
 
-## 7. Rollback / cleanup
+## 7. ZRH UX + shared platform validation (sprint #5)
+
+Extends the runbook for the ZRH real-flight UX and shared platform (issue #5).
+
+### 7.1 Local validation gate (pre-merge)
+
+Run from the sprint worktree/branch; all must pass before merge:
+
+```powershell
+dotnet test tests/apis/AtcSim.FlightDataApi.Tests/AtcSim.FlightDataApi.Tests.csproj
+dotnet test tests/apis/AtcSim.VoiceAgentApi.Tests/AtcSim.VoiceAgentApi.Tests.csproj
+npm run test --prefix src/web/atcsim-shell
+npm run build --prefix src/web/atcsim-shell
+az bicep build --file infra/main.bicep
+az bicep build --file infra/shared/main.bicep
+```
+
+Expected: FlightData 5/5, VoiceAgent 12/12, frontend 33/33 + build succeeds, both Bicep templates compile.
+
+### 7.2 Deployed UX checks (signed in)
+
+1. **Shell:** sign in; confirm the Teams-like left rail (Map/Chat, Fluent icons + labels), brandkit logo top-left, and that switching the header **language** (EN/DE/FR/IT) re-translates all views. Confirm the airport dropdown shows **ZRH** and a disabled **GVA — coming soon**.
+2. **Map view:** the ZRH Azure Map renders live FR24-sandbox flights in one view; the refresh cadence control (default 5 s) is present; clicking an aircraft selects it and updates the real-time selected-flight header; with nothing selected the advisory shows.
+3. **Chat view:** the selected flight arms the chat; the ATC (left) / Pilot (right) columns show role-tagged transcribed turns; the synthetic-voice disclosure (`DP-16`) is visible. (Live speech-to-speech requires the Foundry agent publish — §5.2.)
+
+### 7.3 Shared platform checks (after DNS delegation + Front Door go-live)
+
+1. **DNS delegation:** `Resolve-DnsName -Type NS swissshub.com` returns the Azure name servers (after the GoDaddy NS change).
+2. **Custom domains over HTTPS via Front Door:**
+
+```powershell
+foreach ($h in 'https://appsit.atcsim.swissshub.com','https://apisit.atcsim.swissshub.com/health') {
+  try { "$h -> $((Invoke-WebRequest -UseBasicParsing $h -TimeoutSec 60).StatusCode)" } catch { "$h -> $($_.Exception.Message)" }
+}
+```
+
+Expected: 200 with a valid Front Door-managed certificate; the `api` host path-routes `/api/aircraft` + `/api/maps/token` to flight-data and `/api/voice/*` to voice-agent.
+
+**Human gates:** GoDaddy NS change · Foundry agent publish · PROD approval.
+
+## 8. Rollback / cleanup
 
 No destructive steps are in this runbook. SIT resources persist between runs; to
 tear down a SIT environment, follow the recovery section of the

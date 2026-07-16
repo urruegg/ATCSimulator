@@ -30,3 +30,5 @@ Each runbook should:
 
 - [cicd-deployment-runbook.md](./cicd-deployment-runbook.md) — bootstrap, deploy, and verify the SIT and PROD cloud environments.
 - [poc-e2e-validation-runbook.md](./poc-e2e-validation-runbook.md) — validate the two PoCs end-to-end on SIT and capture the PoC evidence.
+- [godaddy-dns-delegation-runbook.md](./godaddy-dns-delegation-runbook.md) — delegate `swissshub.com` from GoDaddy to Azure DNS (human, non-delegable).
+- [foundry-agent-publish-runbook.md](./foundry-agent-publish-runbook.md) — publish the virtual-pilot Foundry agent and enable the live Voice Live loop.
