@@ -45,6 +45,14 @@ Set-Content -Path $apiFile -Value $apiBody -Encoding utf8
 az rest --method PATCH --uri "https://graph.microsoft.com/v1.0/applications/$($apiApp.id)" --headers "Content-Type=application/json" --body "@$apiFile" | Out-Null
 Remove-Item $apiFile -Force
 
+# Ensure a service principal (enterprise app) exists for each app registration.
+# Token issuance for the API scope requires the API to have a service principal
+# in this tenant; without it, sign-in fails with AADSTS650052.
+foreach ($appId in @($webApp.appId, $apiApp.appId)) {
+  $existingSp = az ad sp list --filter "appId eq '$appId'" --query "[0].id" -o tsv
+  if (-not $existingSp) { az ad sp create --id $appId | Out-Null }
+}
+
 Write-Host "TENANT_ID=$TenantId"
 Write-Host "WEB_CLIENT_ID=$($webApp.appId)"
 Write-Host "API_CLIENT_ID=$($apiApp.appId)"
