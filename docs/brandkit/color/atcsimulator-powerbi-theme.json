@@ -1,0 +1,22 @@
+{
+  "name": "ATCSimulator",
+  "dataColors": [
+    "#0E72B4",
+    "#15324F",
+    "#1FA9D6",
+    "#5A6CF0",
+    "#22B07B",
+    "#E30613",
+    "#E8A200",
+    "#B8BDC2"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#173250",
+  "tableAccent": "#0E72B4",
+  "good": "#22B07B",
+  "neutral": "#E8A200",
+  "bad": "#E30613",
+  "maximum": "#0B5B90",
+  "center": "#15324F",
+  "minimum": "#EEF5FA"
+}
