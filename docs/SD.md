@@ -105,6 +105,7 @@ flowchart TB
 
 ### Demo design notes
 
+- **Public entry via Azure Front Door.** Public traffic enters through the shared **Azure Front Door `fdswissshub`** profile, which **path-routes the single `api` host** to the flight-data and voice-agent App Services (Front Door-managed TLS, origin lock) and fronts the `app`/`appsit`/`api`/`apisit` hostnames under `atcsim.swissshub.com`; the browser map authenticates keylessly via a backend token endpoint. See [ADR-0005](./adr/ADR-0005-shared-platform-frontdoor-dns.md) and [ADR-0006](./adr/ADR-0006-azure-maps-keyless-auth.md).
 - **Real-time speech-to-speech.** The demo uses the **Azure OpenAI real-time audio model** (speech-in/speech-out with tool calling) for the tightest latency and the "art of the possible" effect. Per [BOM.md](./BOM.md) §7, this model runs in **Sweden Central (EU)** or **East US 2 (US)** — **not yet in Switzerland North**. Because the demo carries **no personal data**, either region is acceptable; **Sweden Central is preferred** to keep data in the EU boundary (see [ADR-0001](./adr/ADR-0001-realtime-model-region.md)).
 - **Deterministic control.** The model calls **tools/functions with a fixed schema** (`select_aircraft`, `set_heading`, `set_altitude`, `set_speed`, `read_back`) — the model never invents commands (NFR-21). The Simulator Command Agent validates and dispatches.
 - **Aircraft from a public feed.** The flight-feed connector (read-only) fetches a live aircraft (callsign/type/position/altitude/heading) to seed the scenario (`data/scenarios/sample-scenario.json`).
