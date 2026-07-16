@@ -18,9 +18,33 @@ env:
   LOCATION: swedencentral
 
 jobs:
+  deploy-shared:
+    runs-on: ubuntu-latest
+    # Reuse the 'sit' environment: it carries the OIDC federated credential
+    # (subject repo:...:environment:sit) and the AZURE_* variables, and has no
+    # reviewer gate. This job runs the subscription-scoped shared platform
+    # template (creates the 'swissshub' RG + Azure DNS; Front Door stays off).
+    environment: sit
+    concurrency: deploy-shared
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Deploy shared platform (DNS + Front Door)
+        shell: bash
+        run: |
+          az deployment sub create \
+            --location swedencentral \
+            --template-file infra/shared/main.bicep \
+            --name shared-platform
+
   deploy-sit:
     runs-on: ubuntu-latest
     environment: sit
+    needs: deploy-shared
     concurrency: deploy-sit
     steps:
       - uses: actions/checkout@v4
