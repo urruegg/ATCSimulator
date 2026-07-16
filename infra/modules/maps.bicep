@@ -26,3 +26,4 @@ resource roleAssign 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 }
 
 output name string = maps.name
+output clientId string = maps.properties.uniqueId

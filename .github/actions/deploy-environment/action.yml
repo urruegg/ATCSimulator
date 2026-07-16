@@ -50,10 +50,12 @@ runs:
         WEB=$(az deployment group show -g ${{ inputs.resource-group }} -n main --query properties.outputs.webHostName.value -o tsv)
         FLIGHT=$(az deployment group show -g ${{ inputs.resource-group }} -n main --query properties.outputs.flightDataApiHostName.value -o tsv)
         VOICE=$(az deployment group show -g ${{ inputs.resource-group }} -n main --query properties.outputs.voiceAgentApiHostName.value -o tsv)
+        MAPS_CLIENT_ID=$(az deployment group show -g ${{ inputs.resource-group }} -n main --query properties.outputs.mapsClientId.value -o tsv)
         echo "kv=$KV" >> "$GITHUB_OUTPUT"
         echo "web=https://$WEB" >> "$GITHUB_OUTPUT"
         echo "flight=https://$FLIGHT" >> "$GITHUB_OUTPUT"
         echo "voice=https://$VOICE" >> "$GITHUB_OUTPUT"
+        echo "maps_client_id=$MAPS_CLIENT_ID" >> "$GITHUB_OUTPUT"
 
     - name: Configure FR24 token
       shell: bash
@@ -107,6 +109,7 @@ runs:
         # SIT/PROD deploys keep working. Flip the env var post-cutover, no code change.
         VITE_FLIGHT_API_BASE_URL: ${{ inputs.api-base-url != '' && inputs.api-base-url || steps.outputs.outputs.flight }}
         VITE_VOICE_API_BASE_URL: ${{ inputs.api-base-url != '' && inputs.api-base-url || steps.outputs.outputs.voice }}
+        VITE_MAPS_CLIENT_ID: ${{ steps.outputs.outputs.maps_client_id }}
       run: |
         retry() { local n=1; until "$@"; do [ $n -ge 3 ] && return 1; echo "::warning::attempt $n failed; retrying in 20s"; n=$((n+1)); sleep 20; done; }
         npm ci

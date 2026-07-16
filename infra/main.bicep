@@ -140,3 +140,4 @@ output applicationInsightsName string = appInsights.outputs.name
 output foundryName string = foundry.outputs.name
 output foundryEndpoint string = foundryEndpoint
 output mapsAccountName string = maps.outputs.name
+output mapsClientId string = maps.outputs.clientId
