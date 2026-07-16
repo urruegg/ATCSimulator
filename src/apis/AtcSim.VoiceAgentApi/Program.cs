@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using System.Text.Json;
 using AtcSim.VoiceAgentApi.Contracts;
 using AtcSim.VoiceAgentApi.Options;
 using AtcSim.VoiceAgentApi.Services;
@@ -12,6 +13,7 @@ builder.Services.AddSingleton<SimCommandValidator>();
 builder.Services.AddSingleton<MockSimulatorAdapter>();
 builder.Services.AddSingleton<FunctionCallHandler>();
 builder.Services.AddSingleton<VoiceLiveControlChannel>();
+builder.Services.AddSingleton<TranscriptHub>();
 
 var webOrigin = builder.Configuration["Web:Origin"];
 builder.Services.AddCors(options =>
@@ -59,12 +61,25 @@ app.MapPost("/api/voice/session", async (
     return Results.Ok(new SdpAnswerResponse(answer));
 });
 
-app.MapPost("/api/voice/transcript", (TranscriptEvent transcriptEvent, ILoggerFactory loggerFactory) =>
+app.MapPost("/api/voice/transcript", (TranscriptEvent transcriptEvent, TranscriptHub hub, ILoggerFactory loggerFactory) =>
 {
     // Audit only; no personal data in the demo. Never log audio payloads.
     loggerFactory.CreateLogger("Debrief")
         .LogInformation("transcript {Role} @ {Ts}ms", transcriptEvent.Role, transcriptEvent.TimestampMs);
+    hub.Publish(transcriptEvent);
     return Results.Accepted();
+});
+
+app.MapGet("/api/voice/transcript/stream", async (TranscriptHub hub, HttpContext ctx, CancellationToken ct) =>
+{
+    ctx.Response.Headers.Append("Content-Type", "text/event-stream");
+    ctx.Response.Headers.Append("Cache-Control", "no-cache");
+    await foreach (var evt in hub.Subscribe(ct))
+    {
+        var json = JsonSerializer.Serialize(evt);
+        await ctx.Response.WriteAsync($"data: {json}\n\n", ct);
+        await ctx.Response.Body.FlushAsync(ct);
+    }
 });
 
 app.Run();
