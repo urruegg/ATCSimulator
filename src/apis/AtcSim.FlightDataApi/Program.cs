@@ -1,5 +1,6 @@
 using AtcSim.FlightDataApi.Options;
 using AtcSim.FlightDataApi.Services;
+using Azure.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,10 @@ builder.Services.AddHttpClient<IFlightFeedService, Fr24FlightFeedService>(client
 {
 	client.BaseAddress = new Uri("https://fr24api.flightradar24.com/api/");
 });
+
+builder.Services.Configure<MapsOptions>(builder.Configuration.GetSection("Maps"));
+builder.Services.AddSingleton<TokenCredential>(_ => new Azure.Identity.DefaultAzureCredential());
+builder.Services.AddSingleton<MapsTokenService>();
 
 var webOrigin = builder.Configuration["Web:Origin"];
 builder.Services.AddCors(options =>
@@ -36,6 +41,8 @@ app.MapGet("/api/aircraft", async (string bounds, IFlightFeedService service, Ca
 	var aircraft = await service.GetAircraftAsync(bounds, ct);
 	return Results.Ok(aircraft);
 });
+app.MapGet("/api/maps/token", async (MapsTokenService svc, CancellationToken ct) =>
+	Results.Ok(new { token = await svc.GetTokenAsync(ct) }));
 
 app.Run();
 
