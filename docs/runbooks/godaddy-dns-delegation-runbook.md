@@ -26,7 +26,7 @@ Delegate the public domain `swissshub.com` from **GoDaddy** to the shared **Azur
 
 ## Prerequisites
 
-- The shared platform is deployed (Azure DNS zone `swissshub.com` exists in RG `swissshub`) — via the CD `deploy-shared` job or `az deployment sub create --location swedencentral --template-file infra/shared/main.bicep --name shared-platform`.
+- The shared platform is deployed (Azure DNS zone `swissshub.com` exists in RG `swissshub`) — via the CD `deploy-shared` job or `az deployment group create --resource-group swissshub --template-file infra/shared/main.bicep --name shared-platform`.
 - Access to the GoDaddy account that owns `swissshub.com`.
 - `az login` with at least Reader on RG `swissshub`.
 

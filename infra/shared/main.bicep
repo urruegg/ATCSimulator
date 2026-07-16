@@ -1,9 +1,8 @@
-﻿targetScope = 'subscription'
+﻿// RG-scoped: deploys into the pre-existing shared resource group (default
+// 'swissshub'), created once by scripts/bootstrap-cicd.ps1 with elevated
+// rights. This avoids granting the CI identity any subscription-scope role
+// (least privilege) - CI needs only Contributor on the shared RG.
 
-@description('Azure region for the shared resource group metadata.')
-param location string = 'swedencentral'
-@description('Name of the shared resource group (cross-solution).')
-param sharedResourceGroupName string = 'swissshub'
 @description('Public DNS zone (FQDN).')
 param dnsZoneName string = 'swissshub.com'
 @description('Resource tags.')
@@ -29,14 +28,7 @@ param appLabel string = ''
 @description('DNS label (relative to the zone) for the api custom domain, e.g. apisit.atcsim.')
 param apiLabel string = ''
 
-resource sharedRg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
-  name: sharedResourceGroupName
-  location: location
-  tags: tags
-}
-
 module frontdoor './modules/frontdoor.bicep' = if (deployFrontDoor) {
-  scope: sharedRg
   name: 'frontdoor'
   params: {
     webOriginHostName: webOriginHostName
@@ -49,7 +41,6 @@ module frontdoor './modules/frontdoor.bicep' = if (deployFrontDoor) {
 }
 
 module dns './modules/dns.bicep' = {
-  scope: sharedRg
   name: 'dns'
   params: {
     zoneName: dnsZoneName
@@ -62,7 +53,7 @@ module dns './modules/dns.bicep' = {
   }
 }
 
-output sharedResourceGroupName string = sharedRg.name
+output sharedResourceGroupName string = resourceGroup().name
 output dnsZoneName string = dns.outputs.zoneName
 output nameServers array = dns.outputs.nameServers
 output frontDoorEndpointHostName string = deployFrontDoor ? frontdoor!.outputs.endpointHostName : ''

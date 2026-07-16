@@ -44,10 +44,11 @@ foreach ($env in $Environments) {
 }
 
 # --- Shared cross-solution platform (RG 'swissshub': Azure DNS + Front Door) -------
-# The shared template (infra/shared/main.bicep) is *subscription-scoped* and creates
-# the 'swissshub' RG itself, so CD runs `az deployment sub create`. The 'deploy-shared'
-# CD job reuses the 'sit' federated credential/environment (it runs before deploy-sit),
-# so no extra federated credential is needed.
+# The shared template (infra/shared/main.bicep) is *RG-scoped* and deploys into the
+# pre-existing 'swissshub' RG created below, so CD runs `az deployment group create`.
+# The 'deploy-shared' CD job reuses the 'sit' federated credential/environment (it runs
+# before deploy-sit), so no extra federated credential is needed. CI holds only
+# Contributor + DNS Zone Contributor on this RG - no subscription-scope role.
 $sharedRg = 'swissshub'
 $dnsZoneContributorRoleId = 'befefa01-2a29-4197-83a8-272ff33ce314' # DNS Zone Contributor (built-in)
 az group create -n $sharedRg -l $Location | Out-Null
@@ -56,14 +57,6 @@ $sharedScope = "/subscriptions/$SubscriptionId/resourceGroups/$sharedRg"
 az role assignment create --assignee $appId --role 'Contributor' --scope $sharedScope 2>$null | Out-Null
 # Data-plane: create/update DNS record sets (apex/CNAME/_dnsauth TXT) for custom domains + TLS.
 az role assignment create --assignee $appId --role $dnsZoneContributorRoleId --scope $sharedScope 2>$null | Out-Null
-
-# Subscription-scoped Contributor: REQUIRED so `az deployment sub create` can create the
-# 'swissshub' RG via the subscription-scoped shared template. This is intentionally broader
-# than the RG-scoped least-privilege grants above; it is the minimum role that allows a
-# subscription deployment to create a resource group. Scope tighter (pre-create the RG
-# out-of-band and drop this grant) if the broader blast radius is unacceptable.
-$subScope = "/subscriptions/$SubscriptionId"
-az role assignment create --assignee $appId --role 'Contributor' --scope $subScope 2>$null | Out-Null
 
 $tenantId = (az account show --query tenantId -o tsv)
 Write-Host "AZURE_CLIENT_ID=$appId"

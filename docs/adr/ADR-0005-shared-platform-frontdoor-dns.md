@@ -36,6 +36,7 @@ Adopt a shared, cross-solution resource group **`swissshub`** that hosts a singl
 - **Azure Front Door Standard `fdswissshub`** fronts all public hostnames — `app`, `appsit`, `api`, `apisit` under `*.atcsim.swissshub.com`.
 - Front Door **path-routes the single `api` host** to the **flight-data** and **voice-agent** App Services (one hostname, two origins).
 - **Front Door-managed TLS** issues/renews certificates for the fronted hostnames; **origin lock** ensures the App Service origins accept traffic only from `fdswissshub`.
+- **Deployment scope:** the shared template is **resource-group-scoped** into the **pre-existing** `swissshub` RG (created once during CI bootstrap with elevated rights); CD runs `az deployment group create`, keeping the CI identity free of any subscription-scope grant (least privilege).
 
 ## Consequences
 
@@ -47,7 +48,7 @@ Adopt a shared, cross-solution resource group **`swissshub`** that hosts a singl
 
 ### Negative / trade-offs
 
-- Adds **Azure Front Door + Azure DNS** components and a **subscription-scoped deployment** for the shared `swissshub` resource group (beyond the per-solution resource-group scope).
+- Adds **Azure Front Door + Azure DNS** components in the shared `swissshub` resource group (beyond the per-solution resource-group scope). The RG is **pre-created once** (human bootstrap) and CD deploys the shared template **RG-scoped** (`az deployment group create`), so the CI identity needs only **Contributor on `swissshub`** — no subscription-scope role (least privilege).
 - The DNS zone **must be named `swissshub.com`** (Azure requires the FQDN), so the shared naming convention is constrained by the domain.
 - **Human gate:** the **GoDaddy NS change** delegating `swissshub.com` to Azure DNS is a manual, out-of-band action that must complete before Front Door-managed TLS and hostname routing work end to end.
 

@@ -22,8 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     # Reuse the 'sit' environment: it carries the OIDC federated credential
     # (subject repo:...:environment:sit) and the AZURE_* variables, and has no
-    # reviewer gate. This job runs the subscription-scoped shared platform
-    # template (creates the 'swissshub' RG + Azure DNS; Front Door stays off).
+    # reviewer gate. This job runs the RG-scoped shared platform template into
+    # the pre-existing 'swissshub' RG (Azure DNS; Front Door stays off). The RG
+    # is created once by scripts/bootstrap-cicd.ps1; CI holds only Contributor
+    # on that RG (no subscription-scope role - least privilege).
     environment: sit
     concurrency: deploy-shared
     steps:
@@ -36,8 +38,8 @@ jobs:
       - name: Deploy shared platform (DNS + Front Door)
         shell: bash
         run: |
-          az deployment sub create \
-            --location swedencentral \
+          az deployment group create \
+            --resource-group swissshub \
             --template-file infra/shared/main.bicep \
             --name shared-platform
 
