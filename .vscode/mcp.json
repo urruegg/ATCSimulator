@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/servers/main/schema.json",
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "fr24-api-key",
+      "description": "FR24 API key (sandbox or production). Stored in VS Code secret storage; never committed.",
+      "password": true
+    }
+  ],
+  "servers": {
+    "fr24api": {
+      "command": "npx",
+      "args": ["-y", "@flightradar24/fr24api-mcp@latest"],
+      "env": {
+        "FR24_API_KEY": "${input:fr24-api-key}"
+      }
+    }
+  }
+}

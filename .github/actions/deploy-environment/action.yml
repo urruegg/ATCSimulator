@@ -14,6 +14,22 @@ runs:
       shell: bash
       run: az group create -n ${{ inputs.resource-group }} -l swedencentral
 
+    - name: Validate inputs and parameter file
+      shell: bash
+      run: |
+        set -euo pipefail
+        test -n "${{ inputs.resource-group }}"
+        test -n "${{ inputs.environment }}"
+        test -f "infra/parameters/${{ inputs.environment }}.bicepparam"
+
+    - name: What-if (preview)
+      shell: bash
+      run: |
+        az deployment group what-if \
+          -g ${{ inputs.resource-group }} \
+          -f infra/main.bicep \
+          -p infra/parameters/${{ inputs.environment }}.bicepparam
+
     - name: Provision infrastructure
       shell: bash
       run: |
