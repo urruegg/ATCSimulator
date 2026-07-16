@@ -29,3 +29,4 @@ Each sprint document should:
 ## Index
 
 - [2026-07-16-poc-outcome-and-next-sprint-foundation.md](./2026-07-16-poc-outcome-and-next-sprint-foundation.md) — PoC outcome (both PoCs validated) and the foundation carried into the next sprint.
+- [2026-07-16-sprint-zrh-realflight-ux.md](./2026-07-16-sprint-zrh-realflight-ux.md) — ZRH real-flight UX + shared platform (issue #5).
