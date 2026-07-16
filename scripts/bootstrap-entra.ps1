@@ -17,7 +17,12 @@ $apiName = "$Prefix-api"
 # Web app (SPA platform for MSAL.js auth-code + PKCE). Reuse if it already exists.
 $webApp = az ad app list --display-name $webName --query "[0]" -o json | ConvertFrom-Json
 if (-not $webApp) { $webApp = az ad app create --display-name $webName --sign-in-audience AzureADMyOrg | ConvertFrom-Json }
-$spaBody = @{ spa = @{ redirectUris = $WebRedirectUris } } | ConvertTo-Json -Depth 5
+# Merge (union) with any already-registered SPA redirect URIs so re-running with
+# deployed sit/prod hostnames is additive and never drops existing entries.
+$existingUris = az ad app show --id $webApp.appId --query "spa.redirectUris" -o json | ConvertFrom-Json
+if (-not $existingUris) { $existingUris = @() }
+$mergedUris = @($existingUris + $WebRedirectUris | Where-Object { $_ } | Select-Object -Unique)
+$spaBody = @{ spa = @{ redirectUris = $mergedUris } } | ConvertTo-Json -Depth 5
 $spaFile = New-TemporaryFile
 Set-Content -Path $spaFile -Value $spaBody -Encoding utf8
 az rest --method PATCH --uri "https://graph.microsoft.com/v1.0/applications/$($webApp.id)" --headers "Content-Type=application/json" --body "@$spaFile" | Out-Null
@@ -57,4 +62,6 @@ Write-Host "TENANT_ID=$TenantId"
 Write-Host "WEB_CLIENT_ID=$($webApp.appId)"
 Write-Host "API_CLIENT_ID=$($apiApp.appId)"
 Write-Host "API_SCOPE=$apiIdentifierUri/access_as_user"
-Write-Host "NOTE: after deployment, add the sit/prod web hostnames as SPA redirect URIs."
+Write-Host "NOTE: after the first deploy, re-run this script with the deployed web hostnames to register them as SPA redirect URIs (additive), e.g.:"
+Write-Host "  ./scripts/bootstrap-entra.ps1 -TenantId <t> -SubscriptionId <s> -WebRedirectUris @('http://localhost:5173','https://<sit-web-host>/','https://<prod-web-host>/')"
+Write-Host "  (MSAL uses redirectUri '/', so include the trailing slash on each hostname.)"
