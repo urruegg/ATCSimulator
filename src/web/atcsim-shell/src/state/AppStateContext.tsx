@@ -6,6 +6,7 @@
   useState,
   type ReactNode,
 } from 'react';
+import { DEFAULT_AIRPORT_CODE, findAirport, type Airport } from '../data/airports';
 
 /**
  * A flight selected by the trainee/instructor for the ZRH real-flight scenario.
@@ -27,35 +28,36 @@ export interface SelectedFlight {
   groundSpeedKt?: number;
 }
 
-export interface AirportOption {
-  code: string;
-  enabled: boolean;
-}
+export type ThemeMode = 'light' | 'dark';
 
-/** Only ZRH is enabled for the demo; GVA is a "coming soon" placeholder. */
-export const AIRPORTS: readonly AirportOption[] = [
-  { code: 'ZRH', enabled: true },
-  { code: 'GVA', enabled: false },
-] as const;
-
-const DEFAULT_AIRPORT = 'ZRH';
 const DEFAULT_REFRESH_CADENCE_SEC = 5;
 const DEFAULT_LANGUAGE = 'en';
+const DEFAULT_THEME_MODE: ThemeMode = 'light';
 
 const STORAGE_KEYS = {
   refreshCadenceSec: 'atcsim.refreshCadenceSec',
   language: 'atcsim.language',
+  themeMode: 'atcsim.themeMode',
+  railExpanded: 'atcsim.railExpanded',
+  airport: 'atcsim.airport',
 } as const;
 
 export interface AppState {
   airport: string;
+  selectedAirport: Airport;
   selectedFlight: SelectedFlight | null;
   language: string;
   refreshCadenceSec: number;
+  themeMode: ThemeMode;
+  railExpanded: boolean;
   setAirport: (code: string) => void;
   setSelectedFlight: (flight: SelectedFlight | null) => void;
   setLanguage: (lang: string) => void;
   setRefreshCadenceSec: (n: number) => void;
+  setThemeMode: (mode: ThemeMode) => void;
+  toggleThemeMode: () => void;
+  setRailExpanded: (expanded: boolean) => void;
+  toggleRail: () => void;
 }
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
@@ -88,12 +90,20 @@ function writeStored(key: string, value: string): void {
   }
 }
 
-function isAirportEnabled(code: string): boolean {
-  return AIRPORTS.some((a) => a.code === code && a.enabled);
+function readStoredBoolean(key: string, fallback: boolean): boolean {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw === null ? fallback : raw === 'true';
+  } catch {
+    return fallback;
+  }
 }
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
-  const [airport, setAirportState] = useState<string>(DEFAULT_AIRPORT);
+  const [airport, setAirportState] = useState<string>(() => {
+    const stored = readStoredString(STORAGE_KEYS.airport, DEFAULT_AIRPORT_CODE);
+    return findAirport(stored) ? stored : DEFAULT_AIRPORT_CODE;
+  });
   const [selectedFlight, setSelectedFlightState] = useState<SelectedFlight | null>(null);
   const [language, setLanguageState] = useState<string>(() =>
     readStoredString(STORAGE_KEYS.language, DEFAULT_LANGUAGE),
@@ -104,12 +114,19 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     writeStored(STORAGE_KEYS.refreshCadenceSec, String(initial));
     return initial;
   });
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(() =>
+    readStoredString(STORAGE_KEYS.themeMode, DEFAULT_THEME_MODE) === 'dark' ? 'dark' : 'light',
+  );
+  const [railExpanded, setRailExpandedState] = useState<boolean>(() =>
+    readStoredBoolean(STORAGE_KEYS.railExpanded, false),
+  );
 
   const setAirport = useCallback((code: string) => {
-    if (!isAirportEnabled(code)) return; // reject disabled/unknown airports
+    if (!findAirport(code)) return; // reject unknown airports
     setAirportState((current) => {
       if (current === code) return current;
       setSelectedFlightState(null); // reset selection when the airport changes
+      writeStored(STORAGE_KEYS.airport, code);
       return code;
     });
   }, []);
@@ -128,26 +145,71 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     writeStored(STORAGE_KEYS.refreshCadenceSec, String(n));
   }, []);
 
+  const setThemeMode = useCallback((mode: ThemeMode) => {
+    setThemeModeState(mode);
+    writeStored(STORAGE_KEYS.themeMode, mode);
+  }, []);
+
+  const toggleThemeMode = useCallback(() => {
+    setThemeModeState((current) => {
+      const next: ThemeMode = current === 'dark' ? 'light' : 'dark';
+      writeStored(STORAGE_KEYS.themeMode, next);
+      return next;
+    });
+  }, []);
+
+  const setRailExpanded = useCallback((expanded: boolean) => {
+    setRailExpandedState(expanded);
+    writeStored(STORAGE_KEYS.railExpanded, String(expanded));
+  }, []);
+
+  const toggleRail = useCallback(() => {
+    setRailExpandedState((current) => {
+      const next = !current;
+      writeStored(STORAGE_KEYS.railExpanded, String(next));
+      return next;
+    });
+  }, []);
+
+  const selectedAirport = useMemo<Airport>(
+    () => findAirport(airport) ?? findAirport(DEFAULT_AIRPORT_CODE)!,
+    [airport],
+  );
+
   const value = useMemo<AppState>(
     () => ({
       airport,
+      selectedAirport,
       selectedFlight,
       language,
       refreshCadenceSec,
+      themeMode,
+      railExpanded,
       setAirport,
       setSelectedFlight,
       setLanguage,
       setRefreshCadenceSec,
+      setThemeMode,
+      toggleThemeMode,
+      setRailExpanded,
+      toggleRail,
     }),
     [
       airport,
+      selectedAirport,
       selectedFlight,
       language,
       refreshCadenceSec,
+      themeMode,
+      railExpanded,
       setAirport,
       setSelectedFlight,
       setLanguage,
       setRefreshCadenceSec,
+      setThemeMode,
+      toggleThemeMode,
+      setRailExpanded,
+      toggleRail,
     ],
   );
 

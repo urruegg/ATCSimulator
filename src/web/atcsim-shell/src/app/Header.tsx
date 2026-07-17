@@ -1,6 +1,7 @@
 import { makeStyles, tokens } from '@fluentui/react-components';
 import { AirportPicker } from './header/AirportPicker';
 import { LanguagePicker } from './header/LanguagePicker';
+import { ThemeToggle } from './header/ThemeToggle';
 import { UserMenu } from './header/UserMenu';
 
 const useStyles = makeStyles({
@@ -25,6 +26,7 @@ export function Header() {
     <header className={styles.root}>
       <img src="/brand/atcsimulator-icon.svg" alt="ATCSimulator" height={28} />
       <div className={styles.spacer} />
+      <ThemeToggle />
       <LanguagePicker />
       <AirportPicker />
       <UserMenu />

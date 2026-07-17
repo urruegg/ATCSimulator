@@ -86,16 +86,11 @@ describe('AircraftMapPage', () => {
     expect(screen.getByRole('note')).toBeInTheDocument();
   });
 
-  it('renders the refresh-cadence control', () => {
-    renderPage();
-    expect(screen.getByRole('combobox')).toBeInTheDocument();
-  });
-
   it('renders map controls and recenters to the airport anchor on click', () => {
     renderPage();
     expect(screen.getByRole('button', { name: /zoom in/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /zoom out/i })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /recenter/i }));
-    expect(setCamera).toHaveBeenCalledWith({ center: [8.565183, 47.454554], zoom: 14 });
+    expect(setCamera).toHaveBeenCalledWith({ center: [8.54917, 47.46472], zoom: 14 });
   });
 });

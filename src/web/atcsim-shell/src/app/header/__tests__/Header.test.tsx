@@ -62,15 +62,12 @@ describe('Header', () => {
     expect(logo).toHaveAttribute('src', '/brand/atcsimulator-icon.svg');
   });
 
-  it('airport control lists ZRH and a disabled "GVA \u2014 coming soon"', () => {
+  it('airport control lists Swiss airports as "<IATA> <Name>"', () => {
     renderHeader();
     fireEvent.click(screen.getByRole('combobox', { name: /airport/i }));
 
-    expect(screen.getByRole('option', { name: 'ZRH' })).toBeInTheDocument();
-
-    const gva = screen.getByRole('option', { name: 'GVA \u2014 coming soon' });
-    expect(gva).toBeInTheDocument();
-    expect(gva).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('option', { name: 'ZRH Zurich Airport' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'GVA Geneva Airport' })).toBeInTheDocument();
   });
 
   it('user menu shows the sign-out and switch-account items when opened', () => {

@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Header } from './Header';
 import { AppRail } from './AppRail';
+import { BottomRibbon } from './BottomRibbon';
 
 // Structural layout kept as inline styles so the full-height contract is
 // deterministic (and testable) regardless of the CSS-in-JS runtime.
@@ -33,6 +34,7 @@ export function AppShell() {
           <Outlet />
         </main>
       </div>
+      <BottomRibbon />
     </div>
   );
 }

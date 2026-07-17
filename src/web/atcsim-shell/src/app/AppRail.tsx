@@ -1,32 +1,51 @@
 import { NavLink } from 'react-router-dom';
-import { makeStyles, mergeClasses, tokens } from '@fluentui/react-components';
-import { Chat24Regular, Map24Regular } from '@fluentui/react-icons';
+import { Button, makeStyles, mergeClasses, tokens } from '@fluentui/react-components';
+import { Chat24Regular, Map24Regular, Navigation24Regular } from '@fluentui/react-icons';
 import { useTranslation } from 'react-i18next';
+import { useAppState } from '../state/AppStateContext';
 
 const useStyles = makeStyles({
   rail: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'stretch',
-    width: '64px',
+    width: '56px',
     flexShrink: 0,
     rowGap: tokens.spacingVerticalXS,
-    paddingTop: tokens.spacingVerticalM,
+    paddingTop: tokens.spacingVerticalS,
+    paddingLeft: tokens.spacingHorizontalXS,
+    paddingRight: tokens.spacingHorizontalXS,
     borderRight: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
     backgroundColor: tokens.colorNeutralBackground2,
+    transitionProperty: 'width',
+    transitionDuration: tokens.durationNormal,
+  },
+  railExpanded: {
+    width: '208px',
+  },
+  toggle: {
+    alignSelf: 'flex-start',
+    marginBottom: tokens.spacingVerticalXS,
   },
   item: {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
-    rowGap: tokens.spacingVerticalXXS,
+    columnGap: tokens.spacingHorizontalS,
     paddingTop: tokens.spacingVerticalS,
     paddingBottom: tokens.spacingVerticalS,
+    paddingLeft: tokens.spacingHorizontalS,
+    paddingRight: tokens.spacingHorizontalS,
     color: tokens.colorNeutralForeground2,
     textDecoration: 'none',
-    fontSize: tokens.fontSizeBase200,
-    lineHeight: tokens.lineHeightBase200,
+    fontSize: tokens.fontSizeBase300,
+    lineHeight: tokens.lineHeightBase300,
     borderRadius: tokens.borderRadiusMedium,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+  },
+  itemCollapsed: {
+    justifyContent: 'center',
   },
   itemActive: {
     color: tokens.colorBrandForeground1,
@@ -44,6 +63,7 @@ interface RailItem {
 export function AppRail() {
   const styles = useStyles();
   const { t } = useTranslation();
+  const { railExpanded, toggleRail } = useAppState();
 
   const items: RailItem[] = [
     { to: '/', labelKey: 'nav.map', icon: <Map24Regular aria-hidden /> },
@@ -51,7 +71,19 @@ export function AppRail() {
   ];
 
   return (
-    <nav className={styles.rail} aria-label={t('app.title')}>
+    <nav
+      className={mergeClasses(styles.rail, railExpanded && styles.railExpanded)}
+      aria-label={t('app.title')}
+    >
+      <Button
+        className={styles.toggle}
+        appearance="subtle"
+        icon={<Navigation24Regular />}
+        aria-label={railExpanded ? t('nav.collapse') : t('nav.expand')}
+        aria-expanded={railExpanded}
+        title={railExpanded ? t('nav.collapse') : t('nav.expand')}
+        onClick={toggleRail}
+      />
       {items.map((item) => {
         const label = t(item.labelKey);
         return (
@@ -59,12 +91,18 @@ export function AppRail() {
             key={item.to}
             to={item.to}
             end
+            aria-label={label}
+            title={label}
             className={({ isActive }) =>
-              mergeClasses(styles.item, isActive && styles.itemActive)
+              mergeClasses(
+                styles.item,
+                !railExpanded && styles.itemCollapsed,
+                isActive && styles.itemActive,
+              )
             }
           >
             {item.icon}
-            <span>{label}</span>
+            {railExpanded && <span>{label}</span>}
           </NavLink>
         );
       })}

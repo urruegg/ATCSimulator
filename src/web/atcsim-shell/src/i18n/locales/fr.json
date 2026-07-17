@@ -4,13 +4,17 @@
   },
   "nav": {
     "map": "Carte",
-    "chat": "Chat"
+    "chat": "Chat",
+    "expand": "Développer la navigation",
+    "collapse": "Réduire la navigation"
   },
   "header": {
     "language": "Langue",
     "airport": "Aéroport",
     "signOut": "Se déconnecter",
-    "switchAccount": "Changer de compte"
+    "switchAccount": "Changer de compte",
+    "darkMode": "Mode sombre",
+    "lightMode": "Mode clair"
   },
   "map": {
     "selectAdvisory": "Sélectionnez un aéronef sur la carte pour commencer",

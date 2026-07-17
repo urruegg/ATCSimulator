@@ -4,13 +4,17 @@
   },
   "nav": {
     "map": "Map",
-    "chat": "Chat"
+    "chat": "Chat",
+    "expand": "Expand navigation",
+    "collapse": "Collapse navigation"
   },
   "header": {
     "language": "Language",
     "airport": "Airport",
     "signOut": "Sign out",
-    "switchAccount": "Switch account"
+    "switchAccount": "Switch account",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode"
   },
   "map": {
     "selectAdvisory": "Select an aircraft on the map to begin",

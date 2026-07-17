@@ -35,5 +35,5 @@ const statusLight: Partial<Theme> = {
 } as Partial<Theme>;
 
 export const atcSimulatorLightTheme: Theme = { ...createLightTheme(atcSimulatorBrand), ...brandFix, ...statusLight };
-export const atcSimulatorDarkTheme:  Theme = { ...createDarkTheme(atcSimulatorBrand) };
+export const atcSimulatorDarkTheme:  Theme = { ...createDarkTheme(atcSimulatorBrand), ...brandFix };
 // <FluentProvider theme={atcSimulatorLightTheme}><App/></FluentProvider>

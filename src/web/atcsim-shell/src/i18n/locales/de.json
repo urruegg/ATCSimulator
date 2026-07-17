@@ -4,13 +4,17 @@
   },
   "nav": {
     "map": "Karte",
-    "chat": "Chat"
+    "chat": "Chat",
+    "expand": "Navigation erweitern",
+    "collapse": "Navigation einklappen"
   },
   "header": {
     "language": "Sprache",
     "airport": "Flughafen",
     "signOut": "Abmelden",
-    "switchAccount": "Konto wechseln"
+    "switchAccount": "Konto wechseln",
+    "darkMode": "Dunkelmodus",
+    "lightMode": "Hellmodus"
   },
   "map": {
     "selectAdvisory": "Wählen Sie ein Flugzeug auf der Karte aus, um zu beginnen",

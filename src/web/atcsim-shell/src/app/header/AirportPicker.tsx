@@ -1,7 +1,8 @@
 import { Dropdown, Option, makeStyles, tokens } from '@fluentui/react-components';
 import { Location24Regular } from '@fluentui/react-icons';
 import { useTranslation } from 'react-i18next';
-import { AIRPORTS, useAppState } from '../../state/AppStateContext';
+import { useAppState } from '../../state/AppStateContext';
+import { AIRPORTS, airportCode, airportLabel } from '../../data/airports';
 
 const useStyles = makeStyles({
   root: {
@@ -11,34 +12,25 @@ const useStyles = makeStyles({
   },
 });
 
-function airportLabel(code: string, enabled: boolean): string {
-  return enabled ? code : `${code} \u2014 coming soon`;
-}
-
 export function AirportPicker() {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { airport, setAirport } = useAppState();
+  const { airport, selectedAirport, setAirport } = useAppState();
 
   return (
     <div className={styles.root}>
       <Location24Regular aria-hidden="true" />
       <Dropdown
         aria-label={t('header.airport')}
-        value={airport}
+        value={airportLabel(selectedAirport)}
         selectedOptions={[airport]}
         onOptionSelect={(_, data) => {
           if (data.optionValue) setAirport(data.optionValue);
         }}
       >
         {AIRPORTS.map((a) => (
-          <Option
-            key={a.code}
-            value={a.code}
-            text={airportLabel(a.code, a.enabled)}
-            disabled={!a.enabled}
-          >
-            {airportLabel(a.code, a.enabled)}
+          <Option key={a.icao} value={airportCode(a)} text={airportLabel(a)}>
+            {airportLabel(a)}
           </Option>
         ))}
       </Dropdown>

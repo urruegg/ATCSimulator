@@ -4,22 +4,31 @@ import { FluentProvider } from '@fluentui/react-components';
 import { RouterProvider } from 'react-router-dom';
 import { msalConfig } from './auth/msalConfig';
 import { ProtectedRoute } from './auth/ProtectedRoute';
-import { AppStateProvider } from './state/AppStateContext';
-import { atcSimulatorLightTheme } from './theme/atcsimulatorTheme';
+import { AppStateProvider, useAppState } from './state/AppStateContext';
+import { atcSimulatorDarkTheme, atcSimulatorLightTheme } from './theme/atcsimulatorTheme';
 import { router } from './app/router';
 
 const msal = new PublicClientApplication(msalConfig);
 
+// Reads the theme mode from app state so the light/dark toggle re-themes live.
+function ThemedShell() {
+  const { themeMode } = useAppState();
+  const theme = themeMode === 'dark' ? atcSimulatorDarkTheme : atcSimulatorLightTheme;
+  return (
+    <FluentProvider theme={theme} style={{ minHeight: '100vh' }}>
+      <ProtectedRoute>
+        <RouterProvider router={router} />
+      </ProtectedRoute>
+    </FluentProvider>
+  );
+}
+
 export function App() {
   return (
     <MsalProvider instance={msal}>
-      <FluentProvider theme={atcSimulatorLightTheme}>
-        <AppStateProvider>
-          <ProtectedRoute>
-            <RouterProvider router={router} />
-          </ProtectedRoute>
-        </AppStateProvider>
-      </FluentProvider>
+      <AppStateProvider>
+        <ThemedShell />
+      </AppStateProvider>
     </MsalProvider>
   );
 }

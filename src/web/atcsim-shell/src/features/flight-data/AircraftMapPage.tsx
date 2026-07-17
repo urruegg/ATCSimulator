@@ -1,21 +1,17 @@
 import { useEffect, useRef } from 'react';
 import * as atlas from 'azure-maps-control';
 import 'azure-maps-control/dist/atlas.min.css';
-import { Button, Dropdown, Option, Text, makeStyles, tokens } from '@fluentui/react-components';
+import { Button, Text, makeStyles, tokens } from '@fluentui/react-components';
 import { Add24Regular, Subtract24Regular, Target24Regular } from '@fluentui/react-icons';
 import { useTranslation } from 'react-i18next';
 import { useAppState } from '../../state/AppStateContext';
 import { fetchMapsToken } from './mapAuth';
 import { useFlightPolling } from './useFlightPolling';
 import { SelectedFlightHeader } from './SelectedFlightHeader';
+import { airportBounds } from '../../data/airports';
 
-// ZRH bounding box as N,S,W,E (matches the flight-data API contract).
-const ZRH_BOUNDS = '47.7,47.2,8.3,8.8';
-// Map anchor (Zurich Airport) as [lon, lat] (Azure Maps position order), with a
-// runway-level zoom so the airport and its runways are in view.
-const ZRH_CENTER: [number, number] = [8.565183, 47.454554];
-const ZRH_ZOOM = 14;
-const CADENCE_OPTIONS = [2, 5, 10] as const;
+// Runway-level zoom so the selected airport and its runways are in view.
+const AIRPORT_ZOOM = 14;
 
 // Same-origin when unset; the flight-data API also brokers the Maps token.
 const flightBase = (import.meta.env.VITE_FLIGHT_API_BASE_URL ?? '').replace(/\/$/, '');
@@ -36,16 +32,7 @@ const useStyles = makeStyles({
     // Let map pan/zoom gestures pass through the advisory strip.
     pointerEvents: 'none',
   },
-  cadence: {
-    display: 'flex',
-    alignItems: 'center',
-    columnGap: tokens.spacingHorizontalXS,
-    padding: tokens.spacingHorizontalS,
-    borderRadius: tokens.borderRadiusMedium,
-    backgroundColor: tokens.colorNeutralBackground1,
-    boxShadow: tokens.shadow8,
-  },
-  // Bottom-right stack: map controls sit directly above the refresh control.
+  // Bottom-right stack of map controls.
   controls: {
     position: 'absolute',
     right: tokens.spacingHorizontalM,
@@ -78,12 +65,12 @@ const useStyles = makeStyles({
 export function AircraftMapPage() {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { setSelectedFlight, refreshCadenceSec, setRefreshCadenceSec } = useAppState();
+  const { setSelectedFlight, refreshCadenceSec, selectedAirport } = useAppState();
 
   const mapHostRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<atlas.Map | null>(null);
 
-  const { aircraft, error } = useFlightPolling(ZRH_BOUNDS, refreshCadenceSec);
+  const { aircraft, error } = useFlightPolling(airportBounds(selectedAirport), refreshCadenceSec);
 
   // Create the Azure Maps instance once. The SDK needs a real DOM host + WebGL,
   // so under jsdom it is mocked (see the test); the host guard keeps init a
@@ -93,8 +80,8 @@ export function AircraftMapPage() {
     if (!host) return;
 
     const map = new atlas.Map(host, {
-      center: ZRH_CENTER,
-      zoom: ZRH_ZOOM,
+      center: [selectedAirport.lon, selectedAirport.lat],
+      zoom: AIRPORT_ZOOM,
       authOptions: {
         // String is erased to the enum member at build; runtime stays a plain
         // string so the mocked SDK (no AuthenticationType export) still works.
@@ -142,15 +129,27 @@ export function AircraftMapPage() {
     }
   }, [aircraft, setSelectedFlight]);
 
-  // Map controls: recenter to the airport anchor, and zoom in/out.
-  const recenter = () => mapRef.current?.setCamera({ center: ZRH_CENTER, zoom: ZRH_ZOOM });
+  // Recenter the camera when the selected airport changes.
+  useEffect(() => {
+    mapRef.current?.setCamera({
+      center: [selectedAirport.lon, selectedAirport.lat],
+      zoom: AIRPORT_ZOOM,
+    });
+  }, [selectedAirport]);
+
+  // Map controls: recenter to the current airport anchor, and zoom in/out.
+  const recenter = () =>
+    mapRef.current?.setCamera({
+      center: [selectedAirport.lon, selectedAirport.lat],
+      zoom: AIRPORT_ZOOM,
+    });
   const zoomIn = () => {
     const map = mapRef.current;
-    if (map) map.setCamera({ zoom: (map.getCamera().zoom ?? ZRH_ZOOM) + 1 });
+    if (map) map.setCamera({ zoom: (map.getCamera().zoom ?? AIRPORT_ZOOM) + 1 });
   };
   const zoomOut = () => {
     const map = mapRef.current;
-    if (map) map.setCamera({ zoom: (map.getCamera().zoom ?? ZRH_ZOOM) - 1 });
+    if (map) map.setCamera({ zoom: (map.getCamera().zoom ?? AIRPORT_ZOOM) - 1 });
   };
 
   return (
@@ -186,23 +185,6 @@ export function AircraftMapPage() {
             aria-label={t('map.zoomOut')}
             onClick={zoomOut}
           />
-        </div>
-        <div className={styles.cadence}>
-          <Text size={200}>{t('settings.refresh')}</Text>
-          <Dropdown
-            aria-label={t('settings.refresh')}
-            value={`${refreshCadenceSec}s`}
-            selectedOptions={[String(refreshCadenceSec)]}
-            onOptionSelect={(_, data) => {
-              if (data.optionValue) setRefreshCadenceSec(Number(data.optionValue));
-            }}
-          >
-            {CADENCE_OPTIONS.map((c) => (
-              <Option key={c} value={String(c)} text={`${c}s`}>
-                {`${c}s`}
-              </Option>
-            ))}
-          </Dropdown>
         </div>
       </div>
     </div>

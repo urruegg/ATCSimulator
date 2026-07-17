@@ -4,13 +4,17 @@
   },
   "nav": {
     "map": "Mappa",
-    "chat": "Chat"
+    "chat": "Chat",
+    "expand": "Espandi navigazione",
+    "collapse": "Comprimi navigazione"
   },
   "header": {
     "language": "Lingua",
     "airport": "Aeroporto",
     "signOut": "Disconnetti",
-    "switchAccount": "Cambia account"
+    "switchAccount": "Cambia account",
+    "darkMode": "Modalità scura",
+    "lightMode": "Modalità chiara"
   },
   "map": {
     "selectAdvisory": "Seleziona un aeromobile sulla mappa per iniziare",
