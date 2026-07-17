@@ -1,9 +1,15 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { AppStateProvider } from '../../../state/AppStateContext';
 import { AircraftMapPage } from '../AircraftMapPage';
 import '../../../i18n';
+
+// Shared camera spies so tests can assert recenter/zoom behaviour.
+const { setCamera, getCamera } = vi.hoisted(() => ({
+  setCamera: vi.fn(),
+  getCamera: vi.fn(() => ({ zoom: 14 })),
+}));
 
 // Azure Maps needs WebGL + a real DOM host, neither of which exists under
 // jsdom, so the SDK (and its CSS side-effect import) are mocked.
@@ -11,6 +17,8 @@ vi.mock('azure-maps-control', () => ({
   Map: vi.fn(() => ({
     events: { add: vi.fn() },
     markers: { add: vi.fn(), clear: vi.fn() },
+    setCamera,
+    getCamera,
     dispose: vi.fn(),
   })),
   HtmlMarker: vi.fn(() => ({})),
@@ -81,5 +89,13 @@ describe('AircraftMapPage', () => {
   it('renders the refresh-cadence control', () => {
     renderPage();
     expect(screen.getByRole('combobox')).toBeInTheDocument();
+  });
+
+  it('renders map controls and recenters to the airport anchor on click', () => {
+    renderPage();
+    expect(screen.getByRole('button', { name: /zoom in/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /zoom out/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /recenter/i }));
+    expect(setCamera).toHaveBeenCalledWith({ center: [8.565183, 47.454554], zoom: 14 });
   });
 });

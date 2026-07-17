@@ -45,6 +45,10 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     rowGap: tokens.spacingVerticalS,
   },
+  placeholder: {
+    color: tokens.colorNeutralForeground3,
+    fontStyle: 'italic',
+  },
   bubbleLeft: {
     alignSelf: 'flex-start',
     maxWidth: '90%',
@@ -91,14 +95,18 @@ export function ChatPage() {
 
   const renderBubbles = (list: TranscriptEntry[], side: 'left' | 'right') => (
     <div className={styles.messages}>
-      {list.map((entry, index) => (
-        <div
-          key={`${entry.ts}-${index}`}
-          className={side === 'left' ? styles.bubbleLeft : styles.bubbleRight}
-        >
-          <Text>{entry.text}</Text>
-        </div>
-      ))}
+      {list.length === 0 ? (
+        <Text className={styles.placeholder}>{t('chat.waiting')}</Text>
+      ) : (
+        list.map((entry, index) => (
+          <div
+            key={`${entry.ts}-${index}`}
+            className={side === 'left' ? styles.bubbleLeft : styles.bubbleRight}
+          >
+            <Text>{entry.text}</Text>
+          </div>
+        ))
+      )}
     </div>
   );
 

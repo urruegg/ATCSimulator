@@ -13,13 +13,19 @@
     "switchAccount": "Cambia account"
   },
   "map": {
-    "selectAdvisory": "Seleziona un aeromobile sulla mappa per iniziare"
+    "selectAdvisory": "Seleziona un aeromobile sulla mappa per iniziare",
+    "controls": "Controlli mappa",
+    "recenter": "Ricentra sull'aeroporto",
+    "zoomIn": "Ingrandisci",
+    "zoomOut": "Riduci",
+    "feedError": "Feed voli in tempo reale non disponibile (limite di frequenza) — nuovo tentativo…"
   },
   "chat": {
     "atc": "ATC",
     "pilot": "Pilota",
     "talk": "Parla",
-    "syntheticDisclosure": "La voce del pilota virtuale è sintetica (generata dall'IA)."
+    "syntheticDisclosure": "La voce del pilota virtuale è sintetica (generata dall'IA).",
+    "waiting": "In attesa di radiotelefonia…"
   },
   "settings": {
     "refresh": "Aggiorna"

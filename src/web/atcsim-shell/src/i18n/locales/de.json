@@ -13,13 +13,19 @@
     "switchAccount": "Konto wechseln"
   },
   "map": {
-    "selectAdvisory": "Wählen Sie ein Flugzeug auf der Karte aus, um zu beginnen"
+    "selectAdvisory": "Wählen Sie ein Flugzeug auf der Karte aus, um zu beginnen",
+    "controls": "Kartensteuerung",
+    "recenter": "Auf Flughafen zentrieren",
+    "zoomIn": "Vergrössern",
+    "zoomOut": "Verkleinern",
+    "feedError": "Live-Flugdaten nicht verfügbar (Ratenlimit) – erneuter Versuch…"
   },
   "chat": {
     "atc": "ATC",
     "pilot": "Pilot",
     "talk": "Sprechen",
-    "syntheticDisclosure": "Die Stimme des virtuellen Piloten ist synthetisch (KI-generiert)."
+    "syntheticDisclosure": "Die Stimme des virtuellen Piloten ist synthetisch (KI-generiert).",
+    "waiting": "Warte auf Sprechfunk…"
   },
   "settings": {
     "refresh": "Aktualisieren"

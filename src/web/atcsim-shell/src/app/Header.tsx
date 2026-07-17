@@ -23,7 +23,7 @@ export function Header() {
   const styles = useStyles();
   return (
     <header className={styles.root}>
-      <img src="/brand/atcsimulator-logo.svg" alt="ATCSimulator" height={28} />
+      <img src="/brand/atcsimulator-icon.svg" alt="ATCSimulator" height={28} />
       <div className={styles.spacer} />
       <LanguagePicker />
       <AirportPicker />

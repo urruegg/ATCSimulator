@@ -13,13 +13,19 @@
     "switchAccount": "Changer de compte"
   },
   "map": {
-    "selectAdvisory": "Sélectionnez un aéronef sur la carte pour commencer"
+    "selectAdvisory": "Sélectionnez un aéronef sur la carte pour commencer",
+    "controls": "Contrôles de la carte",
+    "recenter": "Recentrer sur l'aéroport",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière",
+    "feedError": "Flux de vols en direct indisponible (limite de débit) — nouvelle tentative…"
   },
   "chat": {
     "atc": "ATC",
     "pilot": "Pilote",
     "talk": "Parler",
-    "syntheticDisclosure": "La voix du pilote virtuel est synthétique (générée par IA)."
+    "syntheticDisclosure": "La voix du pilote virtuel est synthétique (générée par IA).",
+    "waiting": "En attente de radiotéléphonie…"
   },
   "settings": {
     "refresh": "Actualiser"

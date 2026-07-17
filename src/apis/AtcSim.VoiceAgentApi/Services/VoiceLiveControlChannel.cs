@@ -8,13 +8,18 @@ using Microsoft.Extensions.Options;
 
 namespace AtcSim.VoiceAgentApi.Services;
 
-public sealed class VoiceLiveControlChannel(IOptions<VoiceLiveOptions> options, FunctionCallHandler handler)
+public sealed class VoiceLiveControlChannel(
+    IOptions<VoiceLiveOptions> options,
+    FunctionCallHandler handler,
+    ILogger<VoiceLiveControlChannel> logger)
 {
     private static readonly TokenRequestContext TokenScope = new(new[] { "https://ai.azure.com/.default" });
     private readonly TokenCredential _credential = new DefaultAzureCredential();
 
-    // Opens the control WS, negotiates SDP, returns the SDP answer, then pumps
-    // control events (tool calls handled server-side) until the socket closes.
+    // Opens the Voice Live control WS, negotiates SDP, and RETURNS the SDP answer
+    // as soon as it arrives so the browser can complete the WebRTC handshake. The
+    // control channel (server-side function-call validation/dispatch) then keeps
+    // running in the background for the session's lifetime.
     public async Task<string> NegotiateAsync(string sdpOffer, CancellationToken ct)
     {
         var o = options.Value;
@@ -23,33 +28,71 @@ public sealed class VoiceLiveControlChannel(IOptions<VoiceLiveOptions> options, 
             ? $"agent_id={o.AgentId}&project_id={o.ProjectId}"
             : $"model={o.Model}";
         var uri = new Uri($"{o.Endpoint}/voice-live/realtime/calls?api-version={o.ApiVersion}&{idPart}");
+        logger.LogInformation("Voice Live: connecting {Uri}", uri);
 
-        using var ws = new ClientWebSocket();
+        var ws = new ClientWebSocket();
         ws.Options.SetRequestHeader("Authorization", $"Bearer {token.Token}");
-        await ws.ConnectAsync(uri, ct);
-
-        var create = JsonSerializer.Serialize(new { type = "rtc.call.sdp.create", sdp_offer = sdpOffer });
-        await SendAsync(ws, create, ct);
-
-        // Configure tools/session immediately after negotiation.
-        await SendAsync(ws, VoiceLiveToolSchema.BuildSessionUpdate(), ct);
-
-        string? answer = null;
-        var buffer = new byte[16 * 1024];
-        while (ws.State == WebSocketState.Open && !ct.IsCancellationRequested)
+        try
         {
-            var msg = await ReceiveAsync(ws, buffer, ct);
-            if (msg is null) break;
-            using var doc = JsonDocument.Parse(msg);
-            var type = doc.RootElement.GetProperty("type").GetString();
+            await ws.ConnectAsync(uri, ct);
+            logger.LogInformation("Voice Live: WS connected; sending SDP offer + session config");
+            await SendAsync(ws, JsonSerializer.Serialize(new { type = "rtc.call.sdp.create", sdp_offer = sdpOffer }), ct);
 
-            if (type == "rtc.call.sdp.created")
+            // Configure tools/session immediately after negotiation.
+            await SendAsync(ws, VoiceLiveToolSchema.BuildSessionUpdate(), ct);
+
+            var buffer = new byte[16 * 1024];
+            while (ws.State == WebSocketState.Open && !ct.IsCancellationRequested)
             {
-                answer = doc.RootElement.GetProperty("sdp_answer").GetString();
-                // Do not break: keep the channel open to handle tool calls.
+                var msg = await ReceiveAsync(ws, buffer, ct);
+                if (msg is null) break;
+                using var doc = JsonDocument.Parse(msg);
+                var type = doc.RootElement.GetProperty("type").GetString();
+
+                if (type == "rtc.call.sdp.created")
+                {
+                    var answer = doc.RootElement.GetProperty("sdp_answer").GetString()
+                        ?? throw new InvalidOperationException("Voice Live returned an empty SDP answer.");
+                    logger.LogInformation("Voice Live: SDP answer received; backgrounding control pump");
+                    // Hand the socket to a background pump for the session lifetime.
+                    _ = Task.Run(() => PumpControlChannelAsync(ws));
+                    return answer;
+                }
+
+                if (type == "error")
+                {
+                    logger.LogError("Voice Live: error during negotiation: {Message}", msg);
+                    throw new InvalidOperationException("Voice Live returned an error during negotiation.");
+                }
             }
-            else if (type == "response.function_call_arguments.done")
+
+            throw new InvalidOperationException("No SDP answer received from Voice Live.");
+        }
+        catch
+        {
+            ws.Dispose();
+            throw;
+        }
+    }
+
+    // Long-lived control pump: validates and dispatches server-side function calls
+    // until the socket closes. Runs on its own lifetime (not the HTTP request's
+    // cancellation token, which is cancelled once the SDP answer is returned).
+    private async Task PumpControlChannelAsync(ClientWebSocket ws)
+    {
+        var buffer = new byte[16 * 1024];
+        try
+        {
+            while (ws.State == WebSocketState.Open)
             {
+                var msg = await ReceiveAsync(ws, buffer, CancellationToken.None);
+                if (msg is null) break;
+                using var doc = JsonDocument.Parse(msg);
+                if (doc.RootElement.GetProperty("type").GetString() != "response.function_call_arguments.done")
+                {
+                    continue;
+                }
+
                 var name = doc.RootElement.GetProperty("name").GetString()!;
                 var callId = doc.RootElement.GetProperty("call_id").GetString()!;
                 var args = doc.RootElement.GetProperty("arguments").GetString() ?? "{}";
@@ -59,14 +102,18 @@ public sealed class VoiceLiveControlChannel(IOptions<VoiceLiveOptions> options, 
                     type = "conversation.item.create",
                     item = new { type = "function_call_output", call_id = callId, output },
                 });
-                await SendAsync(ws, item, ct);
-                await SendAsync(ws, JsonSerializer.Serialize(new { type = "response.create" }), ct);
+                await SendAsync(ws, item, CancellationToken.None);
+                await SendAsync(ws, JsonSerializer.Serialize(new { type = "response.create" }), CancellationToken.None);
             }
-
-            if (answer is not null && ct.IsCancellationRequested) break;
         }
-
-        return answer ?? throw new InvalidOperationException("No SDP answer received from Voice Live.");
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Voice Live: control pump ended");
+        }
+        finally
+        {
+            ws.Dispose();
+        }
     }
 
     private static Task SendAsync(ClientWebSocket ws, string json, CancellationToken ct) =>

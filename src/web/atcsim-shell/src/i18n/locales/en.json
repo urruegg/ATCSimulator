@@ -13,13 +13,19 @@
     "switchAccount": "Switch account"
   },
   "map": {
-    "selectAdvisory": "Select an aircraft on the map to begin"
+    "selectAdvisory": "Select an aircraft on the map to begin",
+    "controls": "Map controls",
+    "recenter": "Recenter on airport",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "feedError": "Live flight feed unavailable (rate-limited) — retrying…"
   },
   "chat": {
     "atc": "ATC",
     "pilot": "Pilot",
     "talk": "Talk",
-    "syntheticDisclosure": "The virtual pilot voice is synthetic (AI-generated)."
+    "syntheticDisclosure": "The virtual pilot voice is synthetic (AI-generated).",
+    "waiting": "Waiting for R/T…"
   },
   "settings": {
     "refresh": "Refresh"

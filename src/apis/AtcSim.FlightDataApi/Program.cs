@@ -36,10 +36,18 @@ if (string.IsNullOrWhiteSpace(webOrigin))
 }
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "flight-data-api" }));
-app.MapGet("/api/aircraft", async (string bounds, IFlightFeedService service, CancellationToken ct) =>
+app.MapGet("/api/aircraft", async (string bounds, IFlightFeedService service, ILoggerFactory loggerFactory, CancellationToken ct) =>
 {
-	var aircraft = await service.GetAircraftAsync(bounds, ct);
-	return Results.Ok(aircraft);
+	try
+	{
+		var aircraft = await service.GetAircraftAsync(bounds, ct);
+		return Results.Ok(aircraft);
+	}
+	catch (FlightFeedRateLimitedException)
+	{
+		loggerFactory.CreateLogger("FlightData").LogWarning("FR24 rate limited (429); returning 503.");
+		return Results.Json(new { error = "rate_limited" }, statusCode: StatusCodes.Status503ServiceUnavailable);
+	}
 });
 app.MapGet("/api/maps/token", async (MapsTokenService svc, CancellationToken ct) =>
 	Results.Ok(new { token = await svc.GetTokenAsync(ct) }));

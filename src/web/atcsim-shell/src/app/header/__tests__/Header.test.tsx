@@ -59,7 +59,7 @@ describe('Header', () => {
     renderHeader();
     const logo = screen.getByAltText('ATCSimulator');
     expect(logo).toBeInTheDocument();
-    expect(logo).toHaveAttribute('src', '/brand/atcsimulator-logo.svg');
+    expect(logo).toHaveAttribute('src', '/brand/atcsimulator-icon.svg');
   });
 
   it('airport control lists ZRH and a disabled "GVA \u2014 coming soon"', () => {

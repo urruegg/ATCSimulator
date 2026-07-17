@@ -16,6 +16,11 @@ public sealed class Fr24FlightFeedService(HttpClient httpClient, IOptions<Fr24Op
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
         using var response = await httpClient.SendAsync(request, cancellationToken);
+        if ((int)response.StatusCode == 429)
+        {
+            throw new FlightFeedRateLimitedException();
+        }
+
         response.EnsureSuccessStatusCode();
 
         await using var content = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -35,3 +40,6 @@ public sealed class Fr24FlightFeedService(HttpClient httpClient, IOptions<Fr24Op
             .ToArray();
     }
 }
+
+/// <summary>Thrown when the upstream flight feed (FR24) is rate-limiting (HTTP 429).</summary>
+public sealed class FlightFeedRateLimitedException() : Exception("Flight feed rate limited (429).");
