@@ -24,11 +24,16 @@ public sealed class VoiceLiveControlChannel(
     {
         var o = options.Value;
         var token = await _credential.GetTokenAsync(TokenScope, ct);
+        // Agent binding uses hyphenated query params plus an agent-access-token
+        // (see how-to-voice-agent-integration). The token is passed as a query
+        // param (encrypted over wss) and must NEVER be logged.
         var idPart = o.AgentId is { Length: > 0 }
-            ? $"agent_id={o.AgentId}&project_id={o.ProjectId}"
+            ? $"agent-id={o.AgentId}&agent-project-name={o.ProjectId}&agent-access-token={Uri.EscapeDataString(token.Token)}"
             : $"model={o.Model}";
         var uri = new Uri($"{o.Endpoint}/voice-live/realtime/calls?api-version={o.ApiVersion}&{idPart}");
-        logger.LogInformation("Voice Live: connecting {Uri}", uri);
+        logger.LogInformation(
+            "Voice Live: connecting agent={AgentId} project={ProjectId} model={Model}",
+            o.AgentId ?? "(none)", o.ProjectId ?? "(none)", o.Model);
 
         var ws = new ClientWebSocket();
         ws.Options.SetRequestHeader("Authorization", $"Bearer {token.Token}");

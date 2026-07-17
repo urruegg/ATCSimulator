@@ -7,6 +7,9 @@ param prefix string = 'atcsim'
 @description('Resource tags applied to all resources.')
 param tags object = {}
 
+@description('Foundry agent name bound to the Voice Live broker (published out-of-band via the Foundry agent runbook).')
+param voiceLiveAgentId string = 'atcsim-virtual-pilot'
+
 var resourceToken = uniqueString(resourceGroup().id)
 var keyVaultName = take('${prefix}kv${resourceToken}', 24)
 var foundryName = take('${prefix}fdry${resourceToken}', 24)
@@ -105,6 +108,14 @@ module voiceAgentApi './modules/apiapp.bicep' = {
       {
         name: 'VoiceLive__Endpoint'
         value: foundryEndpoint
+      }
+      {
+        name: 'VoiceLive__AgentId'
+        value: voiceLiveAgentId
+      }
+      {
+        name: 'VoiceLive__ProjectId'
+        value: '${foundryName}-project'
       }
     ]
   }

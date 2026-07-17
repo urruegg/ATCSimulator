@@ -67,13 +67,13 @@ const useStyles = makeStyles({
 
 /** ATC = trainee/controller side (left column). */
 function isAtc(role: string): boolean {
-  const r = role.toLowerCase();
+  const r = (role ?? '').toLowerCase();
   return r.startsWith('atc') || r.startsWith('controller');
 }
 
 /** Pilot = virtual-pilot/agent side (right column). */
 function isPilot(role: string): boolean {
-  const r = role.toLowerCase();
+  const r = (role ?? '').toLowerCase();
   return r.startsWith('pilot') || r.startsWith('agent');
 }
 

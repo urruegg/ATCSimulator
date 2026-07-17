@@ -14,8 +14,10 @@ export function useLiveTranscript(voiceBaseUrl: string): TranscriptEntry[] {
     });
     es.onmessage = (e) => {
       try {
-        const m = JSON.parse(e.data) as { role: string; text: string; timestampMs: number };
-        setEntries((prev) => [...prev, { role: m.role, text: m.text, ts: m.timestampMs }]);
+        const m = JSON.parse(e.data) as { role?: string; text?: string; timestampMs?: number };
+        // Skip keep-alives / malformed events that lack a role or text.
+        if (typeof m.role !== 'string' || typeof m.text !== 'string') return;
+        setEntries((prev) => [...prev, { role: m.role!, text: m.text!, ts: m.timestampMs ?? Date.now() }]);
       } catch {
         /* ignore non-JSON keep-alives */
       }
