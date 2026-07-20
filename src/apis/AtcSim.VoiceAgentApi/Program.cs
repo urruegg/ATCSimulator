@@ -14,6 +14,7 @@ builder.Services.AddSingleton<MockSimulatorAdapter>();
 builder.Services.AddSingleton<FunctionCallHandler>();
 builder.Services.AddSingleton<VoiceLiveControlChannel>();
 builder.Services.AddSingleton<TranscriptHub>();
+builder.Services.AddSingleton<MockScenarioService>();
 
 var webOrigin = builder.Configuration["Web:Origin"];
 builder.Services.AddCors(options =>
@@ -80,6 +81,18 @@ app.MapGet("/api/voice/transcript/stream", async (TranscriptHub hub, HttpContext
         await ctx.Response.WriteAsync($"data: {json}\n\n", ct);
         await ctx.Response.Body.FlushAsync(ct);
     }
+});
+
+app.MapGet("/api/voice/scenarios", (MockScenarioService svc) => Results.Ok(svc.List()));
+
+app.MapPost("/api/voice/scenario/turn", (ScenarioTurnRequest request, MockScenarioService svc) =>
+        Results.Ok(svc.Turn(request)));
+
+app.MapGet("/api/voice/capabilities", (Microsoft.Extensions.Options.IOptions<VoiceLiveOptions> voiceLive) =>
+{
+        var o = voiceLive.Value;
+        var liveAvailable = !string.IsNullOrWhiteSpace(o.AgentId) && !string.IsNullOrWhiteSpace(o.ProjectId);
+        return Results.Ok(new { liveAvailable, mockAvailable = true });
 });
 
 app.Run();
