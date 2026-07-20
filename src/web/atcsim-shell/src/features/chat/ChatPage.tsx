@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Text, makeStyles, tokens } from '@fluentui/react-components';
 import { Airplane24Regular, Headset24Regular } from '@fluentui/react-icons';
 import { SelectedFlightHeader } from '../flight-data/SelectedFlightHeader';
+import { ScenarioPicker } from '../simulator/ScenarioPicker';
 import { MicControl } from './MicControl';
 import { useLiveTranscript, type TranscriptEntry } from './useLiveTranscript';
 
@@ -113,6 +114,7 @@ export function ChatPage() {
   return (
     <div data-testid="chat-page" className={styles.root}>
       <SelectedFlightHeader />
+      <ScenarioPicker voiceBaseUrl={VOICE_BASE_URL} />
       <div className={styles.columns}>
         <section className={styles.column} aria-label={t('chat.atc')}>
           <div className={styles.columnHeader}>

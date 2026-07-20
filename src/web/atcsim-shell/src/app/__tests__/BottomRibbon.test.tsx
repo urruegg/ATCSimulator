@@ -39,7 +39,7 @@ beforeAll(() => {
 });
 
 describe('BottomRibbon', () => {
-  it('hosts the refresh-cadence control', () => {
+  it('shows the last-updated time when flights have loaded', () => {
     render(
       <FluentProvider theme={webLightTheme}>
         <AppStateProvider>
@@ -47,6 +47,7 @@ describe('BottomRibbon', () => {
         </AppStateProvider>
       </FluentProvider>,
     );
-    expect(screen.getByRole('combobox', { name: /refresh/i })).toBeInTheDocument();
+    // With no load yet, shows the dash placeholder.
+    expect(screen.getByText(/last updated/i)).toBeInTheDocument();
   });
 });

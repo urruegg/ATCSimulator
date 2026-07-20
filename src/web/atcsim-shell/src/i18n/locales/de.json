@@ -22,14 +22,24 @@
     "recenter": "Auf Flughafen zentrieren",
     "zoomIn": "Vergrössern",
     "zoomOut": "Verkleinern",
-    "feedError": "Live-Flugdaten nicht verfügbar (Ratenlimit) – erneuter Versuch…"
+    "refresh": "Flüge aktualisieren",
+    "feedError": "Live-Flugdaten nicht verfügbar (Ratenlimit) – erneuter Versuch…",
+    "lastUpdated": "Zuletzt aktualisiert {{time}}"
+  },
+  "scenario": {
+    "label": "Szenario",
+    "placeholder": "Szenarien suchen…"
   },
   "chat": {
     "atc": "ATC",
     "pilot": "Pilot",
     "talk": "Sprechen",
     "syntheticDisclosure": "Die Stimme des virtuellen Piloten ist synthetisch (KI-generiert).",
-    "waiting": "Warte auf Sprechfunk…"
+    "waiting": "Warte auf Sprechfunk…",
+    "selectScenarioFirst": "Flugzeug und Szenario auswählen, um zu beginnen"
+  },
+  "voice": {
+    "engineLive": "Live-Sprach-Engine (Vorschau)"
   },
   "settings": {
     "refresh": "Aktualisieren"

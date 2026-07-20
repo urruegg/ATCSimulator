@@ -1,0 +1,69 @@
+{
+  "$schema": "https://atcsimulator.example/schemas/scenario/v0.1.json",
+  "schemaVersion": "0.1",
+  "metadata": {
+    "id": "EX-04",
+    "goldenId": "G-04",
+    "name": {
+      "en": "Traffic info to IFR",
+      "de": "Traffic Info an IFR",
+      "fr": "Information de trafic à un IFR",
+      "it": "Informazioni sul traffico a un IFR"
+    },
+    "description": "Beispiel 4: Traffic advisory to an IFR flight with a spatial constraint (maintain south of the IGS axis). Demo fixture backing the mock-scenario voice loop (backend catalog id EX-04).",
+    "airportIcao": "LSZH",
+    "airportName": "Zurich Airport",
+    "controlPosition": "Zurich Departure (DEP)",
+    "aircraftClass": "IFR",
+    "difficulty": "intermediate",
+    "primaryLanguage": "en",
+    "supportedLanguages": ["en", "de-CH", "fr-CH", "it-CH"],
+    "expectedCommands": ["TRAFFIC_INFO"],
+    "phraseologyStandard": "ICAO Annex 10 Vol II / ICAO Doc 9432 (Manual of Radiotelephony)",
+    "scope": "demo",
+    "personalData": false,
+    "operationalUse": false,
+    "version": "0.1",
+    "tags": ["traffic-advisory", "ifr", "spatial-constraint", "igs-axis", "golden-set"],
+    "relatedDocuments": {
+      "goldenSet": "../../../docs/AI.md#71-golden-phraseology-test-set-fixtures",
+      "sampleSchema": "../sample-scenario.json",
+      "api": "../../../api/openapi.yaml"
+    }
+  },
+  "disclosure": {
+    "syntheticVoices": true,
+    "publicDataOnly": true,
+    "noPersonalData": true,
+    "notForOperationalAtc": true,
+    "notice": "Virtual-pilot voices are machine-generated (standard neural voices). Aircraft data is derived from a public live-flight feed. This scenario contains no personal data and MUST NOT be connected to live/operational ATC (CON-01, CON-03)."
+  },
+  "primaryAircraft": {
+    "callsign": "NJE396J",
+    "telephony": "Fraction 396J",
+    "registration": "CS-DTA",
+    "typeIcao": "C68A",
+    "wakeCategory": "M",
+    "flightRules": "IFR",
+    "flightPhase": "climb",
+    "source": "public-feed"
+  },
+  "script": [
+    {
+      "stepId": "STEP-01",
+      "goldenId": "G-04",
+      "order": 1,
+      "type": "atc_instruction",
+      "targetCallsign": "NJE396J",
+      "expectedAtcTransmission": "NJE396J, opposite traffic 11 o'clock position 6 miles 4'900 feet climbing eastbound, maintain south of the IGS axis.",
+      "expectedCommands": [
+        { "type": "SELECT_AIRCRAFT", "callsign": "NJE396J" },
+        { "type": "TRAFFIC_INFO", "clockPosition": 11, "distanceNm": 6, "altitudeFt": 4900, "movement": "climbing eastbound" },
+        { "type": "REPORT_POINT", "reportName": "MAINTAIN_SOUTH_OF_IGS_AXIS" }
+      ],
+      "expectedReadBack": "Looking out, maintaining south of the IGS axis, NJE396J.",
+      "phraseologyPoints": ["traffic advisory (clock/distance/level/movement)", "spatial constraint (IGS axis)", "IFR read-back"],
+      "exercises": "Traffic advisory to IFR; spatial constraint read-back."
+    }
+  ]
+}

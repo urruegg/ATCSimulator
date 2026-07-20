@@ -22,14 +22,24 @@
     "recenter": "Recentrer sur l'aéroport",
     "zoomIn": "Zoom avant",
     "zoomOut": "Zoom arrière",
-    "feedError": "Flux de vols en direct indisponible (limite de débit) — nouvelle tentative…"
+    "refresh": "Actualiser les vols",
+    "feedError": "Flux de vols en direct indisponible (limite de débit) — nouvelle tentative…",
+    "lastUpdated": "Dernière mise à jour {{time}}"
+  },
+  "scenario": {
+    "label": "Scénario",
+    "placeholder": "Rechercher des scénarios…"
   },
   "chat": {
     "atc": "ATC",
     "pilot": "Pilote",
     "talk": "Parler",
     "syntheticDisclosure": "La voix du pilote virtuel est synthétique (générée par IA).",
-    "waiting": "En attente de radiotéléphonie…"
+    "waiting": "En attente de radiotéléphonie…",
+    "selectScenarioFirst": "Sélectionnez un avion et un scénario pour commencer"
+  },
+  "voice": {
+    "engineLive": "Moteur vocal en direct (préversion)"
   },
   "settings": {
     "refresh": "Actualiser"

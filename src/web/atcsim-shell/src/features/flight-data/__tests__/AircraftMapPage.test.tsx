@@ -11,6 +11,14 @@ const { setCamera, getCamera } = vi.hoisted(() => ({
   getCamera: vi.fn(() => ({ zoom: 14 })),
 }));
 
+// A stable timestamp for the mocked hook. Returning `new Date()` inline would
+// hand back a fresh object every render; AircraftMapPage writes lastUpdated
+// into AppState via an effect, so a changing identity triggers an infinite
+// render→setState→render loop (memory grows until the worker OOMs on CI).
+const { mockLastUpdated } = vi.hoisted(() => ({
+  mockLastUpdated: new Date('2026-07-20T00:00:00.000Z'),
+}));
+
 // Azure Maps needs WebGL + a real DOM host, neither of which exists under
 // jsdom, so the SDK (and its CSS side-effect import) are mocked.
 vi.mock('azure-maps-control', () => ({
@@ -28,8 +36,14 @@ vi.mock('azure-maps-control', () => ({
 vi.mock('azure-maps-control/dist/atlas.min.css', () => ({}));
 
 // Keep the page deterministic: no live polling in the test.
-vi.mock('../useFlightPolling', () => ({
-  useFlightPolling: () => ({ aircraft: [], error: null }),
+vi.mock('../useFlightData', () => ({
+  useFlightData: () => ({
+    aircraft: [],
+    error: null,
+    loading: false,
+    lastUpdated: mockLastUpdated,
+    refresh: vi.fn(),
+  }),
 }));
 
 beforeAll(() => {
@@ -92,5 +106,10 @@ describe('AircraftMapPage', () => {
     expect(screen.getByRole('button', { name: /zoom out/i })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /recenter/i }));
     expect(setCamera).toHaveBeenCalledWith({ center: [8.54917, 47.46472], zoom: 14 });
+  });
+
+  it('renders a refresh flights control', () => {
+    renderPage();
+    expect(screen.getByRole('button', { name: /refresh flights/i })).toBeInTheDocument();
   });
 });

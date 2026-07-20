@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { describe, expect, it, beforeAll, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { ChatPage } from '../ChatPage';
@@ -21,6 +21,55 @@ const { startVoiceSessionMock } = vi.hoisted(() => ({
 vi.mock('../../../voice/voiceLiveClient', () => ({
   startVoiceSession: startVoiceSessionMock,
 }));
+
+vi.mock('../../simulator/scenarioApi', () => ({
+  fetchScenarios: vi.fn().mockResolvedValue([]),
+  fetchCapabilities: vi.fn().mockResolvedValue({ liveAvailable: false, mockAvailable: true }),
+  fetchSpeechToken: vi.fn().mockResolvedValue({ token: 't', region: 'switzerlandnorth' }),
+  postScenarioTurn: vi.fn().mockResolvedValue({
+    accepted: true,
+    command: 'SET_HEADING',
+    readBackText: 'ok',
+    phraseologyFlags: [],
+  }),
+}));
+
+vi.mock('../speechClient', () => ({
+  createSpeechClient: vi.fn(() => ({
+    recognizeOnce: vi.fn().mockResolvedValue('heading 290'),
+    speak: vi.fn().mockResolvedValue(undefined),
+  })),
+}));
+
+beforeAll(() => {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+  globalThis.IntersectionObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords() {
+      return [];
+    }
+  } as unknown as typeof IntersectionObserver;
+  if (!window.matchMedia) {
+    window.matchMedia = ((q: string) => ({
+      matches: false,
+      media: q,
+      onchange: null,
+      addListener() {},
+      removeListener() {},
+      addEventListener() {},
+      removeEventListener() {},
+      dispatchEvent() {
+        return false;
+      },
+    })) as unknown as typeof window.matchMedia;
+  }
+});
 
 beforeEach(() => {
   startVoiceSessionMock.mockReset();

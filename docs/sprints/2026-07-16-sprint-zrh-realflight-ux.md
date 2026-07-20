@@ -37,7 +37,7 @@ Deliver the ZRH real-flight experience (Teams-like shell, extended Map + live Ch
 
 - Signed-in ZRH map with live flights; select → armed Chat view (screens).
 - Live chat: spoken read-back of an accepted command + rejection of an out-of-range command; both sides transcribed (recording).
-- Language switch re-translates all views; GVA disabled.
+- Language switch re-translates all views; airport dropdown lists all Swiss airports (full scope), ZRH default.
 - Custom domains reachable over HTTPS via Front Door.
 - Frontend (Vitest) + backend (xUnit) green; `az bicep build` clean; golden-phraseology evals remain the merge gate.
 

@@ -1,10 +1,9 @@
-﻿import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { AppStateProvider, useAppState } from '../AppStateContext';
 
 const STORAGE_KEYS = {
-  refreshCadenceSec: 'atcsim.refreshCadenceSec',
   language: 'atcsim.language',
 } as const;
 
@@ -15,12 +14,6 @@ function wrapper({ children }: { children: ReactNode }) {
 describe('AppStateContext', () => {
   beforeEach(() => {
     localStorage.clear();
-  });
-
-  it('defaults refreshCadenceSec to 5 and persists it to localStorage', () => {
-    const { result } = renderHook(() => useAppState(), { wrapper });
-    expect(result.current.refreshCadenceSec).toBe(5);
-    expect(localStorage.getItem(STORAGE_KEYS.refreshCadenceSec)).toBe('5');
   });
 
   it('rejects an unknown airport code and keeps ZRH', () => {
@@ -60,12 +53,19 @@ describe('AppStateContext', () => {
     expect(result.current.selectedFlight?.callsign).toBe('SWR123');
   });
 
-  it('persists refreshCadenceSec to localStorage when changed', () => {
+  it('records the flights-updated time', () => {
     const { result } = renderHook(() => useAppState(), { wrapper });
-    act(() => {
-      result.current.setRefreshCadenceSec(10);
-    });
-    expect(result.current.refreshCadenceSec).toBe(10);
-    expect(localStorage.getItem(STORAGE_KEYS.refreshCadenceSec)).toBe('10');
+    const now = new Date();
+    act(() => result.current.setFlightsUpdatedAt(now));
+    expect(result.current.flightsUpdatedAt).toBe(now);
+  });
+
+  it('holds and resets the selected scenario', () => {
+    const { result } = renderHook(() => useAppState(), { wrapper });
+    act(() => result.current.setSelectedScenario({ id: 'EX-01', title: { en: 'x' }, aircraftClass: 'airliner', expectedCommands: [] }));
+    expect(result.current.selectedScenario?.id).toBe('EX-01');
+    // Changing the airport clears the scenario (gating reset).
+    act(() => result.current.setAirport('GVA'));
+    expect(result.current.selectedScenario).toBeNull();
   });
 });

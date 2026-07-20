@@ -184,6 +184,89 @@ The **Agnostic API** (APIM façade, [SECURITY.md](./SECURITY.md) §3, NFR-08) de
 | **Schema validation at APIM** | Requests/responses validated against the OpenAPI schema; reject-on-violation. |
 | **Versioning** | Contract versioned; breaking changes gated (change control, [AI.md](./AI.md) §9). |
 
+### 5.3 Voice scenario contracts (mock voice loop)
+
+Four new endpoints on the VoiceAgentApi broker (base path `/api/voice`) support the mock scenario voice loop with Azure AI Speech STT/TTS:
+
+**`GET /api/voice/capabilities` → Voice engine availability.**
+
+```json
+{
+  "liveAvailable": false,
+  "mockAvailable": true
+}
+```
+
+- `liveAvailable` is true only when VoiceLive AgentId AND ProjectId are configured; drives the mock↔live UI toggle.
+- `mockAvailable` is always true for the deterministic mock scenario path.
+
+**`GET /api/voice/scenarios` → Scenario catalog.**
+
+```json
+[
+  {
+    "id": "EX-01",
+    "title": {
+      "en": "Airliner instruction",
+      "de": "Anweisung an Verkehrsflugzeug",
+      "fr": "…",
+      "it": "…"
+    },
+    "aircraftClass": "airliner",
+    "expectedCommands": ["SET_HEADING", "SET_FLIGHT_LEVEL"],
+    "scope": "demo",
+    "personalData": false
+  }
+]
+```
+
+- Four seeded scenarios (EX-01..EX-04): airliner (SET_HEADING, SET_FLIGHT_LEVEL), light (REPORT_POINT), any (TRAFFIC_INFO), IFR (TRAFFIC_INFO).
+- Localized titles (en/de/fr/it); public/synthetic data only (`personalData: false`).
+
+**`GET /api/voice/speech/token` → Azure AI Speech authorization token.**
+
+```json
+{
+  "token": "<short-lived-token>",
+  "region": "switzerlandnorth",
+  "scope": "demo",
+  "personalData": false
+}
+```
+
+- Short-lived authorization token minted server-side via the broker's Managed Identity (no key in the browser).
+- Region is **Switzerland North** for in-country audio processing.
+- Audio stays within Azure; no third-party routing (design decision D2).
+
+**`POST /api/voice/scenario/turn` → Process scenario turn.**
+
+Request:
+
+```json
+{
+  "scenarioId": "EX-01",
+  "atcTranscript": "Swiss 456, turn right heading 270 degrees and climb flight level 370."
+}
+```
+
+Response (ScenarioTurnResponse):
+
+```json
+{
+  "accepted": true,
+  "command": "SET_HEADING",
+  "readBackText": "Turning right heading 270 degrees and climbing to flight level 370, Swiss 456.",
+  "phraseologyFlags": [],
+  "scope": "demo",
+  "personalData": false
+}
+```
+
+- Runs the deterministic SimCommandValidator → FunctionCallHandler/MockSimulatorAdapter boundary.
+- Publishes ATC and Pilot transcript events via TranscriptHub.
+- No LLM; demo scope; no persistence this sprint.
+- `phraseologyFlags` array contains any deviations from ICAO/Swiss phraseology standards.
+
 > The OpenAPI stub at [`../api/openapi.yaml`](../api/openapi.yaml) is the authoritative interface definition; keep this section and the stub in sync.
 
 ---
