@@ -65,12 +65,17 @@ const useStyles = makeStyles({
 export function AircraftMapPage() {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { setSelectedFlight, selectedAirport } = useAppState();
+  const { setSelectedFlight, selectedAirport, setFlightsUpdatedAt } = useAppState();
 
   const mapHostRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<atlas.Map | null>(null);
 
-  const { aircraft, error, loading, refresh } = useFlightData(SWITZERLAND_BOUNDS);
+  const { aircraft, error, loading, lastUpdated, refresh } = useFlightData(SWITZERLAND_BOUNDS);
+
+  // Publish the last-updated time to AppState so BottomRibbon can display it.
+  useEffect(() => {
+    if (lastUpdated) setFlightsUpdatedAt(lastUpdated);
+  }, [lastUpdated, setFlightsUpdatedAt]);
 
   // Create the Azure Maps instance once. The SDK needs a real DOM host + WebGL,
   // so under jsdom it is mocked (see the test); the host guard keeps init a

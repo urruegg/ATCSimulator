@@ -23,7 +23,8 @@
     "zoomIn": "Ingrandisci",
     "zoomOut": "Riduci",
     "refresh": "Aggiorna voli",
-    "feedError": "Feed voli in tempo reale non disponibile (limite di frequenza) — nuovo tentativo…"
+    "feedError": "Feed voli in tempo reale non disponibile (limite di frequenza) — nuovo tentativo…",
+    "lastUpdated": "Ultimo aggiornamento {{time}}"
   },
   "chat": {
     "atc": "ATC",

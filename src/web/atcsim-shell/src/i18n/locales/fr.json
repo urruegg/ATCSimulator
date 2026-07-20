@@ -23,7 +23,8 @@
     "zoomIn": "Zoom avant",
     "zoomOut": "Zoom arrière",
     "refresh": "Actualiser les vols",
-    "feedError": "Flux de vols en direct indisponible (limite de débit) — nouvelle tentative…"
+    "feedError": "Flux de vols en direct indisponible (limite de débit) — nouvelle tentative…",
+    "lastUpdated": "Dernière mise à jour {{time}}"
   },
   "chat": {
     "atc": "ATC",

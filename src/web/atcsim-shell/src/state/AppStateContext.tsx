@@ -30,12 +30,10 @@ export interface SelectedFlight {
 
 export type ThemeMode = 'light' | 'dark';
 
-const DEFAULT_REFRESH_CADENCE_SEC = 5;
 const DEFAULT_LANGUAGE = 'en';
 const DEFAULT_THEME_MODE: ThemeMode = 'light';
 
 const STORAGE_KEYS = {
-  refreshCadenceSec: 'atcsim.refreshCadenceSec',
   language: 'atcsim.language',
   themeMode: 'atcsim.themeMode',
   railExpanded: 'atcsim.railExpanded',
@@ -47,31 +45,20 @@ export interface AppState {
   selectedAirport: Airport;
   selectedFlight: SelectedFlight | null;
   language: string;
-  refreshCadenceSec: number;
   themeMode: ThemeMode;
   railExpanded: boolean;
+  flightsUpdatedAt: Date | null;
   setAirport: (code: string) => void;
   setSelectedFlight: (flight: SelectedFlight | null) => void;
   setLanguage: (lang: string) => void;
-  setRefreshCadenceSec: (n: number) => void;
   setThemeMode: (mode: ThemeMode) => void;
   toggleThemeMode: () => void;
   setRailExpanded: (expanded: boolean) => void;
   toggleRail: () => void;
+  setFlightsUpdatedAt: (d: Date) => void;
 }
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
-
-function readStoredNumber(key: string, fallback: number): number {
-  try {
-    const raw = localStorage.getItem(key);
-    if (raw === null) return fallback;
-    const parsed = Number(raw);
-    return Number.isFinite(parsed) ? parsed : fallback;
-  } catch {
-    return fallback;
-  }
-}
 
 function readStoredString(key: string, fallback: string): string {
   try {
@@ -108,18 +95,13 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<string>(() =>
     readStoredString(STORAGE_KEYS.language, DEFAULT_LANGUAGE),
   );
-  const [refreshCadenceSec, setRefreshCadenceSecState] = useState<number>(() => {
-    const initial = readStoredNumber(STORAGE_KEYS.refreshCadenceSec, DEFAULT_REFRESH_CADENCE_SEC);
-    // Persist the effective default so it is present on first load.
-    writeStored(STORAGE_KEYS.refreshCadenceSec, String(initial));
-    return initial;
-  });
   const [themeMode, setThemeModeState] = useState<ThemeMode>(() =>
     readStoredString(STORAGE_KEYS.themeMode, DEFAULT_THEME_MODE) === 'dark' ? 'dark' : 'light',
   );
   const [railExpanded, setRailExpandedState] = useState<boolean>(() =>
     readStoredBoolean(STORAGE_KEYS.railExpanded, false),
   );
+  const [flightsUpdatedAt, setFlightsUpdatedAtState] = useState<Date | null>(null);
 
   const setAirport = useCallback((code: string) => {
     if (!findAirport(code)) return; // reject unknown airports
@@ -138,11 +120,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const setLanguage = useCallback((lang: string) => {
     setLanguageState(lang);
     writeStored(STORAGE_KEYS.language, lang);
-  }, []);
-
-  const setRefreshCadenceSec = useCallback((n: number) => {
-    setRefreshCadenceSecState(n);
-    writeStored(STORAGE_KEYS.refreshCadenceSec, String(n));
   }, []);
 
   const setThemeMode = useCallback((mode: ThemeMode) => {
@@ -171,6 +148,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const setFlightsUpdatedAt = useCallback((d: Date) => setFlightsUpdatedAtState(d), []);
+
   const selectedAirport = useMemo<Airport>(
     () => findAirport(airport) ?? findAirport(DEFAULT_AIRPORT_CODE)!,
     [airport],
@@ -182,34 +161,34 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       selectedAirport,
       selectedFlight,
       language,
-      refreshCadenceSec,
       themeMode,
       railExpanded,
+      flightsUpdatedAt,
       setAirport,
       setSelectedFlight,
       setLanguage,
-      setRefreshCadenceSec,
       setThemeMode,
       toggleThemeMode,
       setRailExpanded,
       toggleRail,
+      setFlightsUpdatedAt,
     }),
     [
       airport,
       selectedAirport,
       selectedFlight,
       language,
-      refreshCadenceSec,
       themeMode,
       railExpanded,
+      flightsUpdatedAt,
       setAirport,
       setSelectedFlight,
       setLanguage,
-      setRefreshCadenceSec,
       setThemeMode,
       toggleThemeMode,
       setRailExpanded,
       toggleRail,
+      setFlightsUpdatedAt,
     ],
   );
 

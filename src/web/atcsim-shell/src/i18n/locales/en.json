@@ -23,7 +23,8 @@
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
     "refresh": "Refresh flights",
-    "feedError": "Live flight feed unavailable (rate-limited) — retrying…"
+    "feedError": "Live flight feed unavailable (rate-limited) — retrying…",
+    "lastUpdated": "Last updated {{time}}"
   },
   "chat": {
     "atc": "ATC",

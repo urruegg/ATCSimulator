@@ -1,8 +1,6 @@
-import { Dropdown, Option, Text, makeStyles, tokens } from '@fluentui/react-components';
+import { Text, makeStyles, tokens } from '@fluentui/react-components';
 import { useTranslation } from 'react-i18next';
 import { useAppState } from '../state/AppStateContext';
-
-const CADENCE_OPTIONS = [2, 5, 10] as const;
 
 const useStyles = makeStyles({
   root: {
@@ -16,45 +14,20 @@ const useStyles = makeStyles({
     borderTop: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
     backgroundColor: tokens.colorNeutralBackground2,
   },
-  spacer: {
-    flexGrow: 1,
-  },
-  refresh: {
-    display: 'flex',
-    alignItems: 'center',
-    columnGap: tokens.spacingHorizontalXS,
-  },
+  spacer: { flexGrow: 1 },
 });
 
-/**
- * Full-width bottom ribbon (mirrors the header). Hosts the global refresh-cadence
- * control that drives live flight-data polling.
- */
+/** Full-width bottom ribbon. Shows when the flight set was last loaded. */
 export function BottomRibbon() {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { refreshCadenceSec, setRefreshCadenceSec } = useAppState();
+  const { flightsUpdatedAt } = useAppState();
+  const time = flightsUpdatedAt ? flightsUpdatedAt.toLocaleTimeString() : '—';
 
   return (
     <footer className={styles.root}>
       <div className={styles.spacer} />
-      <div className={styles.refresh}>
-        <Text size={200}>{t('settings.refresh')}</Text>
-        <Dropdown
-          aria-label={t('settings.refresh')}
-          value={`${refreshCadenceSec}s`}
-          selectedOptions={[String(refreshCadenceSec)]}
-          onOptionSelect={(_, data) => {
-            if (data.optionValue) setRefreshCadenceSec(Number(data.optionValue));
-          }}
-        >
-          {CADENCE_OPTIONS.map((c) => (
-            <Option key={c} value={String(c)} text={`${c}s`}>
-              {`${c}s`}
-            </Option>
-          ))}
-        </Dropdown>
-      </div>
+      <Text size={200}>{t('map.lastUpdated', { time })}</Text>
     </footer>
   );
 }

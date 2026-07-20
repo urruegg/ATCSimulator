@@ -23,7 +23,8 @@
     "zoomIn": "Vergrössern",
     "zoomOut": "Verkleinern",
     "refresh": "Flüge aktualisieren",
-    "feedError": "Live-Flugdaten nicht verfügbar (Ratenlimit) – erneuter Versuch…"
+    "feedError": "Live-Flugdaten nicht verfügbar (Ratenlimit) – erneuter Versuch…",
+    "lastUpdated": "Zuletzt aktualisiert {{time}}"
   },
   "chat": {
     "atc": "ATC",
