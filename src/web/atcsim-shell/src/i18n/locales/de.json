@@ -26,6 +26,10 @@
     "feedError": "Live-Flugdaten nicht verfügbar (Ratenlimit) – erneuter Versuch…",
     "lastUpdated": "Zuletzt aktualisiert {{time}}"
   },
+  "scenario": {
+    "label": "Szenario",
+    "placeholder": "Szenarien suchen…"
+  },
   "chat": {
     "atc": "ATC",
     "pilot": "Pilot",

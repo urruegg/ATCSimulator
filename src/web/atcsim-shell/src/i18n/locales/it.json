@@ -26,6 +26,10 @@
     "feedError": "Feed voli in tempo reale non disponibile (limite di frequenza) — nuovo tentativo…",
     "lastUpdated": "Ultimo aggiornamento {{time}}"
   },
+  "scenario": {
+    "label": "Scenario",
+    "placeholder": "Cerca scenari…"
+  },
   "chat": {
     "atc": "ATC",
     "pilot": "Pilota",

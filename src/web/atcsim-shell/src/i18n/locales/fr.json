@@ -26,6 +26,10 @@
     "feedError": "Flux de vols en direct indisponible (limite de débit) — nouvelle tentative…",
     "lastUpdated": "Dernière mise à jour {{time}}"
   },
+  "scenario": {
+    "label": "Scénario",
+    "placeholder": "Rechercher des scénarios…"
+  },
   "chat": {
     "atc": "ATC",
     "pilot": "Pilote",

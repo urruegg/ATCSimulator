@@ -26,6 +26,10 @@
     "feedError": "Live flight feed unavailable (rate-limited) — retrying…",
     "lastUpdated": "Last updated {{time}}"
   },
+  "scenario": {
+    "label": "Scenario",
+    "placeholder": "Search scenarios…"
+  },
   "chat": {
     "atc": "ATC",
     "pilot": "Pilot",
