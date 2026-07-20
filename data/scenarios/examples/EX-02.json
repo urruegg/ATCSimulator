@@ -1,0 +1,69 @@
+{
+  "$schema": "https://atcsimulator.example/schemas/scenario/v0.1.json",
+  "schemaVersion": "0.1",
+  "metadata": {
+    "id": "EX-02",
+    "goldenId": "G-02",
+    "name": {
+      "en": "Waypoint instruction to light aircraft",
+      "de": "Wegpunktanweisung an Kleinflugzeug",
+      "fr": "Instruction de point de report à un avion léger",
+      "it": "Istruzione di waypoint a velivolo leggero"
+    },
+    "description": "Beispiel 2: Waypoint crossing clearance with a conditional report to a light aircraft. Demo fixture backing the mock-scenario voice loop (backend catalog id EX-02).",
+    "airportIcao": "LSZH",
+    "airportName": "Zurich Airport",
+    "controlPosition": "Zurich Departure (DEP)",
+    "aircraftClass": "light",
+    "difficulty": "intermediate",
+    "primaryLanguage": "en",
+    "supportedLanguages": ["en", "de-CH", "fr-CH", "it-CH"],
+    "expectedCommands": ["REPORT_POINT"],
+    "phraseologyStandard": "ICAO Annex 10 Vol II / ICAO Doc 9432 (Manual of Radiotelephony)",
+    "scope": "demo",
+    "personalData": false,
+    "operationalUse": false,
+    "version": "0.1",
+    "tags": ["waypoint", "conditional-report", "swiss-toponyms", "qnh", "golden-set"],
+    "relatedDocuments": {
+      "goldenSet": "../../../docs/AI.md#71-golden-phraseology-test-set-fixtures",
+      "sampleSchema": "../sample-scenario.json",
+      "api": "../../../api/openapi.yaml"
+    }
+  },
+  "disclosure": {
+    "syntheticVoices": true,
+    "publicDataOnly": true,
+    "noPersonalData": true,
+    "notForOperationalAtc": true,
+    "notice": "Virtual-pilot voices are machine-generated (standard neural voices). Aircraft data is derived from a public live-flight feed. This scenario contains no personal data and MUST NOT be connected to live/operational ATC (CON-01, CON-03)."
+  },
+  "primaryAircraft": {
+    "callsign": "N123AB",
+    "telephony": "November 123 Alpha Bravo",
+    "registration": "N123AB",
+    "typeIcao": "BE58",
+    "wakeCategory": "L",
+    "flightPhase": "cruise",
+    "source": "public-feed"
+  },
+  "script": [
+    {
+      "stepId": "STEP-01",
+      "goldenId": "G-02",
+      "order": 1,
+      "type": "atc_instruction",
+      "targetCallsign": "N123AB",
+      "expectedAtcTransmission": "N123AB, crossing to Schrattenfluh approved, descend 5'000 feet, QNH 1019, report crossing completed.",
+      "expectedCommands": [
+        { "type": "SELECT_AIRCRAFT", "callsign": "N123AB" },
+        { "type": "SET_ALTITUDE", "feet": 5000 },
+        { "type": "SET_QNH", "value": 1019 },
+        { "type": "REPORT_POINT", "reportName": "CROSSING_COMPLETED" }
+      ],
+      "expectedReadBack": "Crossing to Schrattenfluh approved and descending to 5,000 feet, QNH 1019, call you completed N123AB.",
+      "phraseologyPoints": ["Swiss toponym (Schrattenfluh)", "altitude in feet with QNH", "conditional report read-back"],
+      "exercises": "Toponym recognition; QNH; conditional report."
+    }
+  ]
+}

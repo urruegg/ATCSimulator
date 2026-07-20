@@ -1,0 +1,71 @@
+{
+  "$schema": "https://atcsimulator.example/schemas/scenario/v0.1.json",
+  "schemaVersion": "0.1",
+  "metadata": {
+    "id": "EX-01",
+    "goldenId": "G-01",
+    "name": {
+      "en": "Instruction to airliner",
+      "de": "Anweisung an Verkehrsflugzeug",
+      "fr": "Instruction à un avion de ligne",
+      "it": "Istruzione a un aereo di linea"
+    },
+    "description": "Beispiel 1: Radar vector plus climb instruction to a departing airliner. Demo fixture backing the mock-scenario voice loop (backend catalog id EX-01).",
+    "airportIcao": "LSZH",
+    "airportName": "Zurich Airport",
+    "controlPosition": "Zurich Departure (DEP)",
+    "aircraftClass": "airliner",
+    "difficulty": "intermediate",
+    "primaryLanguage": "en",
+    "supportedLanguages": ["en", "de-CH", "fr-CH", "it-CH"],
+    "expectedCommands": ["SET_HEADING", "SET_FLIGHT_LEVEL"],
+    "phraseologyStandard": "ICAO Annex 10 Vol II / ICAO Doc 9432 (Manual of Radiotelephony)",
+    "scope": "demo",
+    "personalData": false,
+    "operationalUse": false,
+    "version": "0.1",
+    "tags": ["departure", "radar-vectors", "level-change", "golden-set"],
+    "relatedDocuments": {
+      "goldenSet": "../../../docs/AI.md#71-golden-phraseology-test-set-fixtures",
+      "sampleSchema": "../sample-scenario.json",
+      "api": "../../../api/openapi.yaml"
+    }
+  },
+  "disclosure": {
+    "syntheticVoices": true,
+    "publicDataOnly": true,
+    "noPersonalData": true,
+    "notForOperationalAtc": true,
+    "notice": "Virtual-pilot voices are machine-generated (standard neural voices). Aircraft data is derived from a public live-flight feed. This scenario contains no personal data and MUST NOT be connected to live/operational ATC (CON-01, CON-03)."
+  },
+  "primaryAircraft": {
+    "callsign": "SWR456",
+    "telephony": "Swiss 456",
+    "registration": "HB-IJW",
+    "typeIcao": "A320",
+    "wakeCategory": "M",
+    "operator": "SWR",
+    "origin": "LSZH",
+    "destination": "LEBL",
+    "flightPhase": "climb",
+    "source": "public-feed"
+  },
+  "script": [
+    {
+      "stepId": "STEP-01",
+      "goldenId": "G-01",
+      "order": 1,
+      "type": "atc_instruction",
+      "targetCallsign": "SWR456",
+      "expectedAtcTransmission": "Swiss 456, turn right heading 290 degrees, and climb flight level 370.",
+      "expectedCommands": [
+        { "type": "SELECT_AIRCRAFT", "callsign": "SWR456" },
+        { "type": "SET_HEADING", "direction": "RIGHT", "degrees": 290 },
+        { "type": "SET_FLIGHT_LEVEL", "value": 370 }
+      ],
+      "expectedReadBack": "Turning right heading 290 degrees and climbing to flight level 370, Swiss 456.",
+      "phraseologyPoints": ["callsign echo", "heading with turn direction", "level change (flight level)"],
+      "exercises": "Standard vector + climb; callsign read-back discipline."
+    }
+  ]
+}

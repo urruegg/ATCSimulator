@@ -1,0 +1,67 @@
+{
+  "$schema": "https://atcsimulator.example/schemas/scenario/v0.1.json",
+  "schemaVersion": "0.1",
+  "metadata": {
+    "id": "EX-03",
+    "goldenId": "G-04",
+    "name": {
+      "en": "Traffic info",
+      "de": "Traffic Info",
+      "fr": "Information de trafic",
+      "it": "Informazioni sul traffico"
+    },
+    "description": "Beispiel 3: Traffic advisory (clock position, distance, level, movement) with an acceptable partial read-back. Demo fixture backing the mock-scenario voice loop (backend catalog id EX-03).",
+    "airportIcao": "LSZH",
+    "airportName": "Zurich Airport",
+    "controlPosition": "Zurich Departure (DEP)",
+    "aircraftClass": "any",
+    "difficulty": "intermediate",
+    "primaryLanguage": "en",
+    "supportedLanguages": ["en", "de-CH", "fr-CH", "it-CH"],
+    "expectedCommands": ["TRAFFIC_INFO"],
+    "phraseologyStandard": "ICAO Annex 10 Vol II / ICAO Doc 9432 (Manual of Radiotelephony)",
+    "scope": "demo",
+    "personalData": false,
+    "operationalUse": false,
+    "version": "0.1",
+    "tags": ["traffic-advisory", "clock-position", "look-out", "golden-set"],
+    "relatedDocuments": {
+      "goldenSet": "../../../docs/AI.md#71-golden-phraseology-test-set-fixtures",
+      "sampleSchema": "../sample-scenario.json",
+      "api": "../../../api/openapi.yaml"
+    }
+  },
+  "disclosure": {
+    "syntheticVoices": true,
+    "publicDataOnly": true,
+    "noPersonalData": true,
+    "notForOperationalAtc": true,
+    "notice": "Virtual-pilot voices are machine-generated (standard neural voices). Aircraft data is derived from a public live-flight feed. This scenario contains no personal data and MUST NOT be connected to live/operational ATC (CON-01, CON-03)."
+  },
+  "primaryAircraft": {
+    "callsign": "NJE396J",
+    "telephony": "Fraction 396J",
+    "registration": "CS-DTA",
+    "typeIcao": "C68A",
+    "wakeCategory": "M",
+    "flightPhase": "climb",
+    "source": "public-feed"
+  },
+  "script": [
+    {
+      "stepId": "STEP-01",
+      "goldenId": "G-04",
+      "order": 1,
+      "type": "atc_instruction",
+      "targetCallsign": "NJE396J",
+      "expectedAtcTransmission": "NJE396J, opposite traffic 11 o'clock position 6 miles 4'900 feet climbing eastbound.",
+      "expectedCommands": [
+        { "type": "SELECT_AIRCRAFT", "callsign": "NJE396J" },
+        { "type": "TRAFFIC_INFO", "clockPosition": 11, "distanceNm": 6, "altitudeFt": 4900, "movement": "climbing eastbound" }
+      ],
+      "expectedReadBack": "Looking out NJE396J.",
+      "phraseologyPoints": ["traffic advisory (clock/distance/level/movement)", "minimal correct read-back"],
+      "exercises": "Traffic advisory; acceptable partial read-back."
+    }
+  ]
+}
