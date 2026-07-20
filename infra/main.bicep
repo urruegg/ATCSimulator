@@ -17,6 +17,7 @@ var foundryEndpoint = 'wss://${foundryName}.services.ai.azure.com'
 // Computed once and shared by the flightDataApi app setting and the maps
 // module name param to avoid a circular module reference.
 var mapsName = take('${prefix}map${resourceToken}', 20)
+var speechName = take('${prefix}spch${resourceToken}', 24)
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: '${prefix}-law-${resourceToken}'
@@ -104,6 +105,8 @@ module voiceAgentApi './modules/apiapp.bicep' = {
     // Key Vault in production (private endpoint). See note on flightDataApi.
     // The Voice Live endpoint is derived from the Foundry account name so the
     // broker can reach the control channel without a circular module reference.
+    // Speech region is static to avoid circular dependency; Speech__ResourceId
+    // is injected post-deploy via Key Vault (production) or directly (PoC).
     appSettings: [
       {
         name: 'VoiceLive__Endpoint'
@@ -117,7 +120,21 @@ module voiceAgentApi './modules/apiapp.bicep' = {
         name: 'VoiceLive__ProjectId'
         value: '${foundryName}-project'
       }
+      {
+        name: 'Speech__Region'
+        value: 'switzerlandnorth'
+      }
     ]
+  }
+}
+
+module speech './modules/speech.bicep' = {
+  name: 'speech'
+  params: {
+    name: speechName
+    location: 'switzerlandnorth'
+    tags: tags
+    userPrincipalId: voiceAgentApi.outputs.principalId
   }
 }
 
@@ -152,3 +169,6 @@ output foundryName string = foundry.outputs.name
 output foundryEndpoint string = foundryEndpoint
 output mapsAccountName string = maps.outputs.name
 output mapsClientId string = maps.outputs.clientId
+output speechAccountName string = speech.outputs.name
+output speechRegion string = 'switzerlandnorth'
+output speechEndpoint string = speech.outputs.endpoint
