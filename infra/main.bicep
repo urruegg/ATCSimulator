@@ -18,6 +18,10 @@ var foundryEndpoint = 'wss://${foundryName}.services.ai.azure.com'
 // module name param to avoid a circular module reference.
 var mapsName = take('${prefix}map${resourceToken}', 20)
 var speechName = take('${prefix}spch${resourceToken}', 24)
+// Custom-subdomain endpoint derived from the deterministic account name so the
+// broker can be configured without a circular module reference (mirrors the
+// foundryEndpoint pattern). Entra auth requires this host, not the regional one.
+var speechEndpoint = 'https://${speechName}.cognitiveservices.azure.com/'
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: '${prefix}-law-${resourceToken}'
@@ -105,8 +109,9 @@ module voiceAgentApi './modules/apiapp.bicep' = {
     // Key Vault in production (private endpoint). See note on flightDataApi.
     // The Voice Live endpoint is derived from the Foundry account name so the
     // broker can reach the control channel without a circular module reference.
-    // Speech region is static to avoid circular dependency; Speech__ResourceId
-    // is injected post-deploy via Key Vault (production) or directly (PoC).
+    // Speech region + endpoint are static (derived from the account name) to
+    // avoid a circular dependency; Speech__ResourceId is injected post-deploy
+    // via Key Vault (production) or directly (PoC).
     appSettings: [
       {
         name: 'VoiceLive__Endpoint'
@@ -123,6 +128,10 @@ module voiceAgentApi './modules/apiapp.bicep' = {
       {
         name: 'Speech__Region'
         value: 'switzerlandnorth'
+      }
+      {
+        name: 'Speech__Endpoint'
+        value: speechEndpoint
       }
     ]
   }
