@@ -30,7 +30,7 @@ Deliver a Teams-like React experience for **ZRH real flight data**, in one combi
 | D3 | Chat fidelity | **Full live loop** — Azure Voice Live + Foundry agent; ATC (mic) and Pilot both transcribed |
 | D4 | Shell layout | **Teams-like left app rail** (Fluent icons + labels) + global header |
 | D5 | Languages | **EN / DE / FR / IT**, switchable in header, persisted |
-| D6 | Airport selector | **ZRH** enabled; **GVA — coming soon** (disabled) |
+| D6 | Airport selector | **All Swiss airports** selectable (full scope, 21 in `data/airports.ts`); **ZRH** is the default anchor |
 | D7 | Map refresh | **User setting**, default **~5 s** polling |
 | D8 | Flight data source | **FR24 sandbox** (public data only) |
 | D9 | Azure Maps auth | **Keyless** — backend token endpoint via Managed Identity (no key in browser) |
@@ -94,7 +94,7 @@ flowchart TB
 | `color/atcsimulator-theme.ts` | `src/theme/atcsimulatorTheme.ts` (adapt imports) |
 | `color/atcsimulator-tokens.css` | `src/theme/tokens.css` (imported in `main.tsx`) |
 
-**Header behaviors:** language switch re-translates all views; airport switch clears the selected flight and re-centers the map; cadence setting re-times polling; UserMenu shows the MSAL account with **Sign out** and **Sign in with another account**. `GVA` option disabled ("coming soon").
+**Header behaviors:** language switch re-translates all views; airport switch clears the selected flight and re-centers the map; cadence setting re-times polling; UserMenu shows the MSAL account with **Sign out** and **Sign in with another account**. The airport dropdown lists **all Swiss airports** (full scope); **ZRH** is the default.
 
 **Conventions (shell-wide):** Fluent UI icons everywhere feasible; brandkit logo top-left; every main view maximizes vertically to the app-window height.
 
@@ -138,15 +138,15 @@ flowchart TB
 
 ## 10. Testing & validation
 
-- **Frontend (Vitest):** language switch; disabled GVA; `AppStateContext` persistence; map polling hook; selected-flight header advisory state; Maps token fetch; chat transcript rendering + synthetic-voice disclosure present.
-- **Backend (xUnit):** `/api/maps/token` returns a token via Managed Identity (mocked credential); airport→bbox mapping; existing Voice Live validator/dispatch tests remain green (11/11).
+- **Frontend (Vitest):** language switch; all-Swiss-airports picker; `AppStateContext` persistence; map polling hook; selected-flight header advisory state; Maps token fetch; chat transcript rendering + synthetic-voice disclosure present.
+- **Backend (xUnit):** `/api/maps/token` returns a token via Managed Identity (mocked credential); airport→bbox mapping; existing Voice Live validator/dispatch tests remain green (12/12).
 - **Infra:** `az bicep build` for shared + solution templates; Front Door route + custom-domain validation; DNS delegation check.
 - **E2E:** extend the [PoC E2E validation runbook](../runbooks/poc-e2e-validation-runbook.md) — signed-in map with live ZRH flights, select → live chat read-back, language switch, custom-domain reachability + TLS.
 - Golden-phraseology / command-mapping evals remain the merge gate.
 
 ## 11. Out of scope (YAGNI)
 
-- GVA (and other airports) live data; FR24 production feed; talking-head avatar; Custom Neural Voice; in-country (Switzerland North) Voice Live; multi-solution onboarding of other repos onto the shared services (the shared RG is created to allow it, but wiring other solutions is separate work).
+- FR24 **production** feed (the demo uses the FR24 sandbox for all Swiss airports); talking-head avatar; Custom Neural Voice; in-country (Switzerland North) Voice Live; multi-solution onboarding of other repos onto the shared services (the shared RG is created to allow it, but wiring other solutions is separate work).
 
 ## 12. Open items / dependencies
 

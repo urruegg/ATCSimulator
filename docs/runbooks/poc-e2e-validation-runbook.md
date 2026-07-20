@@ -165,13 +165,32 @@ az bicep build --file infra/main.bicep
 az bicep build --file infra/shared/main.bicep
 ```
 
-Expected: FlightData 5/5, VoiceAgent 12/12, frontend 33/33 + build succeeds, both Bicep templates compile.
+Expected: FlightData 5/5, VoiceAgent 12/12, frontend 36/36 + build succeeds, both Bicep templates compile.
 
 ### 7.2 Deployed UX checks (signed in)
 
-1. **Shell:** sign in; confirm the Teams-like left rail (Map/Chat, Fluent icons + labels), brandkit logo top-left, and that switching the header **language** (EN/DE/FR/IT) re-translates all views. Confirm the airport dropdown shows **ZRH** and a disabled **GVA — coming soon**.
+1. **Shell:** sign in; confirm the Teams-like left rail (Map/Chat, Fluent icons + labels), brandkit logo top-left, and that switching the header **language** (EN/DE/FR/IT) re-translates all views. Confirm the airport dropdown lists **all Swiss airports** (full scope, 21 in `data/airports.ts`) with **ZRH** as the default anchor.
 2. **Map view:** the ZRH Azure Map renders live FR24-sandbox flights in one view; the refresh cadence control (default 5 s) is present; clicking an aircraft selects it and updates the real-time selected-flight header; with nothing selected the advisory shows.
 3. **Chat view:** the selected flight arms the chat; the ATC (left) / Pilot (right) columns show role-tagged transcribed turns; the synthetic-voice disclosure (`DP-16`) is visible. (Live speech-to-speech requires the Foundry agent publish — §5.2.)
+
+### 7.2.1 Validation record — 2026-07-20 (SIT)
+
+Validated end-to-end against SIT (`rg-atcsim-sit`, web host `atcsim-web-tnaephc6ssguk`). Automated
+Playwright (Google Chrome, headed) drove the signed-in journey after manual Entra sign-in.
+
+| Check | Evidence | Result |
+| --- | --- | --- |
+| Local gate — backend xUnit | VoiceAgent **12/12**, FlightData **5/5** | Pass |
+| Local gate — frontend Vitest + build | **36/36** + `vite build` succeeds | Pass |
+| Local gate — Bicep compile | `infra/main.bicep` + `infra/shared/main.bicep` | Pass |
+| §2 SIT smoke | `verify-environment.ps1` → *All environment checks passed* (5/5) | Pass |
+| §3.4 Aircraft API | `/api/aircraft` (ZRH bbox) → 20 live FR24-sandbox aircraft | Pass |
+| §5.1 Voice respond (mock) | `/api/voice/respond` → non-empty `answerText` | Pass |
+| §7.2 Shell + i18n | app rail, brandkit logo, EN↔DE re-translation of all views | Pass |
+| §7.2 Airport picker | **all 21 Swiss airports** listed, ZRH default (full scope) | Pass |
+| §7.2 Map + selection | 20 live markers; click selects → live selected-flight header | Pass |
+| §7.2 Chat disclosure | ATC/Pilot columns + synthetic-voice disclosure (`DP-16`) | Pass |
+| §5.2 Live Voice Live speech-to-speech | Pending Foundry agent publish + `VoiceLive__AgentId`/`VoiceLive__ProjectId` | Not yet run |
 
 ### 7.3 Shared platform checks (after DNS delegation + Front Door go-live)
 
