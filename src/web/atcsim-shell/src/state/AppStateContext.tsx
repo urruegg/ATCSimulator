@@ -7,6 +7,7 @@
   type ReactNode,
 } from 'react';
 import { DEFAULT_AIRPORT_CODE, findAirport, type Airport } from '../data/airports';
+import type { ScenarioSummary } from '../features/simulator/types';
 
 /**
  * A flight selected by the trainee/instructor for the ZRH real-flight scenario.
@@ -44,12 +45,14 @@ export interface AppState {
   airport: string;
   selectedAirport: Airport;
   selectedFlight: SelectedFlight | null;
+  selectedScenario: ScenarioSummary | null;
   language: string;
   themeMode: ThemeMode;
   railExpanded: boolean;
   flightsUpdatedAt: Date | null;
   setAirport: (code: string) => void;
   setSelectedFlight: (flight: SelectedFlight | null) => void;
+  setSelectedScenario: (s: ScenarioSummary | null) => void;
   setLanguage: (lang: string) => void;
   setThemeMode: (mode: ThemeMode) => void;
   toggleThemeMode: () => void;
@@ -92,6 +95,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     return findAirport(stored) ? stored : DEFAULT_AIRPORT_CODE;
   });
   const [selectedFlight, setSelectedFlightState] = useState<SelectedFlight | null>(null);
+  const [selectedScenario, setSelectedScenarioState] = useState<ScenarioSummary | null>(null);
   const [language, setLanguageState] = useState<string>(() =>
     readStoredString(STORAGE_KEYS.language, DEFAULT_LANGUAGE),
   );
@@ -108,6 +112,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setAirportState((current) => {
       if (current === code) return current;
       setSelectedFlightState(null); // reset selection when the airport changes
+      setSelectedScenarioState(null); // reset scenario when the airport changes
       writeStored(STORAGE_KEYS.airport, code);
       return code;
     });
@@ -115,6 +120,13 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const setSelectedFlight = useCallback((flight: SelectedFlight | null) => {
     setSelectedFlightState(flight);
+    if (flight === null) {
+      setSelectedScenarioState(null); // reset scenario when flight is cleared
+    }
+  }, []);
+
+  const setSelectedScenario = useCallback((s: ScenarioSummary | null) => {
+    setSelectedScenarioState(s);
   }, []);
 
   const setLanguage = useCallback((lang: string) => {
@@ -160,12 +172,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       airport,
       selectedAirport,
       selectedFlight,
+      selectedScenario,
       language,
       themeMode,
       railExpanded,
       flightsUpdatedAt,
       setAirport,
       setSelectedFlight,
+      setSelectedScenario,
       setLanguage,
       setThemeMode,
       toggleThemeMode,
@@ -177,12 +191,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       airport,
       selectedAirport,
       selectedFlight,
+      selectedScenario,
       language,
       themeMode,
       railExpanded,
       flightsUpdatedAt,
       setAirport,
       setSelectedFlight,
+      setSelectedScenario,
       setLanguage,
       setThemeMode,
       toggleThemeMode,

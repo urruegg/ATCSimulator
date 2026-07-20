@@ -59,4 +59,13 @@ describe('AppStateContext', () => {
     act(() => result.current.setFlightsUpdatedAt(now));
     expect(result.current.flightsUpdatedAt).toBe(now);
   });
+
+  it('holds and resets the selected scenario', () => {
+    const { result } = renderHook(() => useAppState(), { wrapper });
+    act(() => result.current.setSelectedScenario({ id: 'EX-01', title: { en: 'x' }, aircraftClass: 'airliner', expectedCommands: [] }));
+    expect(result.current.selectedScenario?.id).toBe('EX-01');
+    // Changing the airport clears the scenario (gating reset).
+    act(() => result.current.setAirport('GVA'));
+    expect(result.current.selectedScenario).toBeNull();
+  });
 });
