@@ -35,7 +35,11 @@
     "pilot": "Pilota",
     "talk": "Parla",
     "syntheticDisclosure": "La voce del pilota virtuale è sintetica (generata dall'IA).",
-    "waiting": "In attesa di radiotelefonia…"
+    "waiting": "In attesa di radiotelefonia…",
+    "selectScenarioFirst": "Seleziona un aereo e uno scenario per iniziare"
+  },
+  "voice": {
+    "engineLive": "Motore vocale live (anteprima)"
   },
   "settings": {
     "refresh": "Aggiorna"

@@ -35,7 +35,11 @@
     "pilot": "Pilot",
     "talk": "Talk",
     "syntheticDisclosure": "The virtual pilot voice is synthetic (AI-generated).",
-    "waiting": "Waiting for R/T…"
+    "waiting": "Waiting for R/T…",
+    "selectScenarioFirst": "Select an aircraft and a scenario to begin"
+  },
+  "voice": {
+    "engineLive": "Live voice engine (preview)"
   },
   "settings": {
     "refresh": "Refresh"
