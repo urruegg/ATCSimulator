@@ -344,6 +344,80 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Transcript" }
         "404": { $ref: "#/components/responses/NotFound" }
+  /api/voice/capabilities:
+    get:
+      tags: [audio]
+      summary: Voice engine capabilities check
+      description: >-
+        Reports which voice engines are available: liveAvailable (true when Voice
+        Live AgentId AND ProjectId are configured) and mockAvailable (always true
+        for the deterministic mock scenario path). Drives the mock/live UI toggle
+        in the client.
+      operationId: getVoiceCapabilities
+      responses:
+        "200":
+          description: Voice engine availability
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VoiceCapabilities" }
+  /api/voice/scenarios:
+    get:
+      tags: [scenarios]
+      summary: List available voice scenarios
+      description: >-
+        Returns the scenario catalog for mock voice exercises (four seeded examples
+        EX-01..EX-04). Each scenario carries localized title, aircraft class, and
+        expected command set. Public/synthetic data only; personalData: false.
+      operationId: getVoiceScenarios
+      responses:
+        "200":
+          description: Scenario catalog
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ScenarioSummary" }
+  /api/voice/speech/token:
+    get:
+      tags: [audio]
+      summary: Mint a short-lived Azure AI Speech authorization token
+      description: >-
+        Returns a short-lived authorization token for Azure AI Speech (STT + TTS)
+        minted server-side via the broker's Managed Identity. Region is Switzerland
+        North. The token enables the browser to use Azure AI Speech without exposing
+        keys. personalData: false; audio processed in-country.
+      operationId: getSpeechToken
+      responses:
+        "200":
+          description: Speech token and region
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SpeechTokenResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /api/voice/scenario/turn:
+    post:
+      tags: [scenarios, instructions]
+      summary: Process a mock scenario turn (ATC transcript → command + read-back)
+      description: >-
+        Processes a single turn in a mock scenario exercise: accepts the scenarioId
+        and ATC transcript, runs the deterministic SimCommandValidator +
+        FunctionCallHandler/MockSimulatorAdapter boundary, and returns the command
+        result + grounded read-back text + phraseology flags. Publishes ATC and
+        Pilot transcript events server-side. No LLM; demo scope; no persistence.
+      operationId: submitScenarioTurn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ScenarioTurnRequest" }
+      responses:
+        "200":
+          description: Turn processed; command result and read-back returned
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScenarioTurnResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 components:
   securitySchemes:
     entraOAuth2:
@@ -560,6 +634,82 @@ components:
               startMs: { type: integer }
               endMs: { type: integer }
               timestampUtc: { type: string, format: date-time }
+    VoiceCapabilities:
+      type: object
+      required: [liveAvailable, mockAvailable]
+      properties:
+        liveAvailable:
+          type: boolean
+          description: True when Voice Live AgentId AND ProjectId are configured
+          example: false
+        mockAvailable:
+          type: boolean
+          description: Always true for the deterministic mock scenario path
+          example: true
+    ScenarioSummary:
+      type: object
+      required: [id, title, aircraftClass, expectedCommands]
+      properties:
+        id: { type: string, example: EX-01 }
+        title:
+          type: object
+          description: Localized scenario titles
+          properties:
+            en: { type: string, example: "Airliner instruction" }
+            de: { type: string, example: "Anweisung an Verkehrsflugzeug" }
+            fr: { type: string }
+            it: { type: string }
+        aircraftClass: { type: string, example: airliner }
+        expectedCommands:
+          type: array
+          description: Command types expected in this scenario
+          items: { type: string, enum: [SET_HEADING, SET_FLIGHT_LEVEL, SET_ALTITUDE, SET_SPEED, SET_QNH, REPORT_POINT, TRAFFIC_INFO] }
+          example: [SET_HEADING, SET_FLIGHT_LEVEL]
+        scope: { type: string, enum: [demo], default: demo }
+        personalData: { type: boolean, default: false }
+    SpeechTokenResponse:
+      type: object
+      required: [token, region]
+      properties:
+        token:
+          type: string
+          description: Short-lived Azure AI Speech authorization token minted via Managed Identity
+        region:
+          type: string
+          description: Azure AI Speech region (Switzerland North for in-country processing)
+          example: switzerlandnorth
+        scope: { type: string, enum: [demo, production], default: demo }
+        personalData: { type: boolean, default: false }
+    ScenarioTurnRequest:
+      type: object
+      required: [scenarioId, atcTranscript]
+      properties:
+        scenarioId: { type: string, example: EX-01 }
+        atcTranscript:
+          type: string
+          description: Recognized ATC instruction text
+          example: "Swiss 456, turn right heading 270 degrees and climb flight level 370."
+    ScenarioTurnResponse:
+      type: object
+      required: [accepted, readBackText]
+      properties:
+        accepted: { type: boolean, example: true }
+        command:
+          type: string
+          description: The mapped command type (null if rejected)
+          example: SET_HEADING
+          nullable: true
+        readBackText:
+          type: string
+          description: Grounded virtual-pilot read-back for the accepted command
+          example: "Turning right heading 270 degrees and climbing to flight level 370, Swiss 456."
+        phraseologyFlags:
+          type: array
+          description: Phraseology deviation flags (empty if valid)
+          items: { type: string }
+          example: []
+        scope: { type: string, enum: [demo], default: demo }
+        personalData: { type: boolean, default: false }
     Error:
       type: object
       required: [code, message]
