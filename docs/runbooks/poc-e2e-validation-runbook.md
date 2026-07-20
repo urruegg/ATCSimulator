@@ -192,6 +192,49 @@ Playwright (Google Chrome, headed) drove the signed-in journey after manual Entr
 | §7.2 Chat disclosure | ATC/Pilot columns + synthetic-voice disclosure (`DP-16`) | Pass |
 | §5.2 Live Voice Live speech-to-speech | Pending Foundry agent publish + `VoiceLive__AgentId`/`VoiceLive__ProjectId` | Not yet run |
 
+## 7.4. Simulator scenarios + mock voice loop (sprint #8)
+
+Validates the one-shot Switzerland-wide flight load, manual refresh, scenario selection, and mock voice exercise with Azure AI Speech.
+
+### 7.4.1 One-shot flight load + manual refresh
+
+1. **Startup load:** open the signed-in shell, navigate to Map. Expected: all aircraft within Switzerland load in a single request (no interval timer); the bottom ribbon shows **"Last updated HH:MM:SS"** instead of a polling-cadence control.
+2. **Manual refresh:** click the **refresh** button in the bottom-right control group. Expected: the button is disabled while the load is in flight; all Switzerland aircraft reload on completion; the "Last updated" timestamp updates.
+3. **Airport dropdown:** select a different airport from the header dropdown. Expected: the map **re-centers and zooms** to the new airport; **no refetch** occurs (aircraft stay from the last load).
+
+### 7.4.2 Scenario selection + gating
+
+1. **Gating order (aircraft → scenario → mic):** with no aircraft selected, navigate to Chat. Expected: the scenario picker is present between the selected-flight header and the mic control; the mic is **disabled**.
+2. **Select aircraft:** return to Map, select an aircraft. Return to Chat. Expected: the scenario picker is **enabled** (aircraft selected); the mic is still **disabled** (no scenario).
+3. **Select scenario:** open the scenario picker (searchable Combobox), select **EX-01** (Anweisung an Verkehrsflugzeug). Expected: the mic is now **enabled** (both aircraft and scenario selected).
+
+### 7.4.3 Mock voice capabilities + toggle
+
+1. **Capabilities check:** inspect `GET /api/voice/capabilities` (via browser DevTools or curl). Expected: `{ "liveAvailable": false, "mockAvailable": true }` (live requires Foundry agent publish + app settings).
+2. **UI toggle:** the voice-engine toggle control in the Chat view shows **Mock** as available and selected; **Live** is disabled/grayed.
+
+### 7.4.4 Mock voice exercise (Azure AI Speech STT/TTS, deterministic pilot)
+
+This validates the full mock scenario voice loop: browser → Azure AI Speech STT → broker deterministic command boundary → scripted read-back → Azure AI Speech TTS → browser, with both ATC and Pilot sides transcribed in the chat.
+
+**Prerequisites:** microphone permission granted; EX-01 scenario selected; mic enabled.
+
+1. **Start exercise:** click the mic control to start. Expected: the mic turns active; the synthetic-voice disclosure (`DP-16`) is visible.
+2. **Speak a valid instruction** (e.g., *"Swiss four five six, turn right heading two seven zero and climb flight level three seven zero."*). Expected:
+   - The ATC transcript appears in the **left (ATC)** column.
+   - The broker runs `POST /api/voice/scenario/turn` → `SimCommandValidator` → `FunctionCallHandler` → `MockSimulatorAdapter`.
+   - The Pilot read-back transcript appears in the **right (Pilot)** column: *"Turning right heading 270 degrees and climbing to flight level 370, Swiss 456."*
+   - The browser TTS speaks the read-back audio (Azure AI Speech, Switzerland North).
+3. **Speak an out-of-range instruction** (e.g., *"…turn right heading four zero zero."*). Expected: the deterministic validator **rejects** the out-of-range heading (heading 0–360); **no read-back** of the invalid value; the chat shows the rejection or a "say again" style response.
+4. **Phraseology flags:** speak an instruction with a phraseology deviation. Expected: the `phraseologyFlags` array in the response is non-empty; the chat or a debrief view flags the deviation.
+
+**Evidence:** screen recording showing:
+
+- The one-shot Switzerland load + manual refresh working correctly.
+- The aircraft → scenario → mic gating order.
+- The mock voice exercise with a valid instruction transcribed on both sides + TTS read-back audio.
+- An out-of-range instruction rejected (no read-back of the invalid value).
+
 ### 7.3 Shared platform checks (after DNS delegation + Front Door go-live)
 
 1. **DNS delegation:** `Resolve-DnsName -Type NS swissshub.com` returns the Azure name servers (after the GoDaddy NS change).

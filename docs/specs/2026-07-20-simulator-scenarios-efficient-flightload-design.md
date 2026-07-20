@@ -14,7 +14,7 @@
 | Subscription | `75102af9-fc92-45d4-99a8-5510a24b5421` (ME-MngEnvMCAP164444-urruegg-2) |
 | Region | Azure AI Speech mock plane → **Switzerland North**; live Voice Live → **Sweden Central** (EU) |
 
-**Related documents:** [SD.md](../SD.md) · [AI.md](../AI.md) · [DATA.md](../DATA.md) · [SECURITY.md](../SECURITY.md) · [BOM.md](../BOM.md) · [BACKLOG.md](../BACKLOG.md) · [ADR-0002 Agnostic API](../adr/ADR-0002-agnostic-api-facade.md) · [ADR-0004 Voice Live + Foundry](../adr/ADR-0004-voice-live-foundry-agent.md) · proposed **ADR-0007** (mock scenario voice loop) · [PoC E2E validation runbook](../runbooks/poc-e2e-validation-runbook.md) · [sample scenario](../../data/scenarios/sample-scenario.json) · [../../api/openapi.yaml](../../api/openapi.yaml) · ZRH design [2026-07-16](./2026-07-16-zrh-realflight-ux-shared-platform-design.md)
+**Related documents:** [SD.md](../SD.md) · [AI.md](../AI.md) · [DATA.md](../DATA.md) · [SECURITY.md](../SECURITY.md) · [BOM.md](../BOM.md) · [BACKLOG.md](../BACKLOG.md) · [ADR-0002 Agnostic API](../adr/ADR-0002-agnostic-api-facade.md) · [ADR-0004 Voice Live + Foundry](../adr/ADR-0004-voice-live-foundry-agent.md) · [ADR-0007 Mock Scenario Voice Loop](../adr/ADR-0007-mock-scenario-voice-loop.md) (Accepted) · [PoC E2E validation runbook](../runbooks/poc-e2e-validation-runbook.md) · [sample scenario](../../data/scenarios/sample-scenario.json) · [../../api/openapi.yaml](../../api/openapi.yaml) · ZRH design [2026-07-16](./2026-07-16-zrh-realflight-ux-shared-platform-design.md) · [Implementation plan](../plans/2026-07-20-simulator-scenarios-efficient-flightload-plan.md)
 
 ---
 
@@ -123,7 +123,7 @@ New services in `AtcSim.VoiceAgentApi`: `MockScenarioService` (scenario catalog 
 - `CON-01` no operational-ATC path; `CON-03` public/synthetic only, **no personal data**; nothing persisted (D6).
 - **Residency (DP-18):** classic Azure AI Speech STT/TTS → **Switzerland North**; live real-time speech-to-speech → Sweden Central (EU). Region availability "as of Jul 2026 — verify at design time" ([BOM.md](../BOM.md)).
 - Deterministic disposer preserved; **golden-phraseology / command-mapping regressions must not merge**.
-- New architecture decision captured as **proposed ADR-0007** (mock scenario voice loop via Azure AI Speech + deterministic engine).
+- New architecture decision captured as [ADR-0007](../adr/ADR-0007-mock-scenario-voice-loop.md) (Accepted) — mock scenario voice loop via Azure AI Speech + deterministic engine.
 
 ## 7. Traceability
 
