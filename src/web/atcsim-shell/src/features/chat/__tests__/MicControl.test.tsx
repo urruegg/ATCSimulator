@@ -146,4 +146,26 @@ describe('MicControl', () => {
     await screen.findByText('idle');
     expect(stopMock).toHaveBeenCalledTimes(1);
   });
+
+  it('stops an active live session when the engine is switched back to mock', async () => {
+    renderWithProviders(true);
+
+    const switchControl = await waitFor(() => {
+      const sw = screen.getByRole('switch', { name: /Live voice engine/i });
+      expect(sw).not.toBeDisabled();
+      return sw;
+    });
+
+    // Turn live on and start a session
+    fireEvent.click(switchControl);
+    const button = screen.getByRole('button', { name: /Talk/i });
+    fireEvent.click(button);
+    await screen.findByText('connected');
+    expect(startVoiceSessionMock).toHaveBeenCalledTimes(1);
+
+    // Flip the engine back to mock while the session is active
+    fireEvent.click(switchControl);
+    await screen.findByText('idle');
+    expect(stopMock).toHaveBeenCalledTimes(1);
+  });
 });

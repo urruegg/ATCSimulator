@@ -89,7 +89,16 @@ export function MicControl({ brokerBaseUrl = DEFAULT_BROKER_BASE_URL }: MicContr
         label={t('voice.engineLive')}
         checked={useLive}
         disabled={!liveAvailable}
-        onChange={(_, d) => setUseLive(d.checked)}
+        onChange={(_, d) => {
+          // Tear down an active live session when switching back to mock so the
+          // mic/connection don't leak (the mock path never calls session.stop()).
+          if (!d.checked && session) {
+            session.stop();
+            setSession(null);
+            setStatus('idle');
+          }
+          setUseLive(d.checked);
+        }}
       />
       <Button
         appearance="primary"
