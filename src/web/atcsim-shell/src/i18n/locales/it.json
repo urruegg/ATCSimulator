@@ -22,6 +22,7 @@
     "recenter": "Ricentra sull'aeroporto",
     "zoomIn": "Ingrandisci",
     "zoomOut": "Riduci",
+    "refresh": "Aggiorna voli",
     "feedError": "Feed voli in tempo reale non disponibile (limite di frequenza) — nuovo tentativo…"
   },
   "chat": {

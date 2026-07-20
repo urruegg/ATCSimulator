@@ -2,13 +2,13 @@ import { useEffect, useRef } from 'react';
 import * as atlas from 'azure-maps-control';
 import 'azure-maps-control/dist/atlas.min.css';
 import { Button, Text, makeStyles, tokens } from '@fluentui/react-components';
-import { Add24Regular, Subtract24Regular, Target24Regular } from '@fluentui/react-icons';
+import { Add24Regular, ArrowClockwise24Regular, Subtract24Regular, Target24Regular } from '@fluentui/react-icons';
 import { useTranslation } from 'react-i18next';
 import { useAppState } from '../../state/AppStateContext';
 import { fetchMapsToken } from './mapAuth';
-import { useFlightPolling } from './useFlightPolling';
+import { useFlightData } from './useFlightData';
+import { SWITZERLAND_BOUNDS } from '../../data/switzerland';
 import { SelectedFlightHeader } from './SelectedFlightHeader';
-import { airportBounds } from '../../data/airports';
 
 // Runway-level zoom so the selected airport and its runways are in view.
 const AIRPORT_ZOOM = 14;
@@ -65,12 +65,12 @@ const useStyles = makeStyles({
 export function AircraftMapPage() {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { setSelectedFlight, refreshCadenceSec, selectedAirport } = useAppState();
+  const { setSelectedFlight, selectedAirport } = useAppState();
 
   const mapHostRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<atlas.Map | null>(null);
 
-  const { aircraft, error } = useFlightPolling(airportBounds(selectedAirport), refreshCadenceSec);
+  const { aircraft, error, loading, refresh } = useFlightData(SWITZERLAND_BOUNDS);
 
   // Create the Azure Maps instance once. The SDK needs a real DOM host + WebGL,
   // so under jsdom it is mocked (see the test); the host guard keeps init a
@@ -184,6 +184,15 @@ export function AircraftMapPage() {
             icon={<Subtract24Regular />}
             aria-label={t('map.zoomOut')}
             onClick={zoomOut}
+          />
+          <Button
+            appearance="subtle"
+            icon={<ArrowClockwise24Regular />}
+            aria-label={t('map.refresh')}
+            disabled={loading}
+            onClick={() => {
+              void refresh();
+            }}
           />
         </div>
       </div>

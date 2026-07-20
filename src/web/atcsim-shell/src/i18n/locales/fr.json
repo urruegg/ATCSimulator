@@ -22,6 +22,7 @@
     "recenter": "Recentrer sur l'aéroport",
     "zoomIn": "Zoom avant",
     "zoomOut": "Zoom arrière",
+    "refresh": "Actualiser les vols",
     "feedError": "Flux de vols en direct indisponible (limite de débit) — nouvelle tentative…"
   },
   "chat": {

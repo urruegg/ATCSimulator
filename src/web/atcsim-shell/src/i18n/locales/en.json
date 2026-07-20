@@ -22,6 +22,7 @@
     "recenter": "Recenter on airport",
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
+    "refresh": "Refresh flights",
     "feedError": "Live flight feed unavailable (rate-limited) — retrying…"
   },
   "chat": {
