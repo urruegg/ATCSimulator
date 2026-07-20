@@ -9,12 +9,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<MockKnowledgeTool>();
 builder.Services.Configure<VoiceLiveOptions>(builder.Configuration.GetSection("VoiceLive"));
+builder.Services.Configure<SpeechOptions>(builder.Configuration.GetSection("Speech"));
 builder.Services.AddSingleton<SimCommandValidator>();
 builder.Services.AddSingleton<MockSimulatorAdapter>();
 builder.Services.AddSingleton<FunctionCallHandler>();
 builder.Services.AddSingleton<VoiceLiveControlChannel>();
 builder.Services.AddSingleton<TranscriptHub>();
 builder.Services.AddSingleton<MockScenarioService>();
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<Azure.Core.TokenCredential>(_ => new Azure.Identity.DefaultAzureCredential());
+builder.Services.AddSingleton<ISpeechStsClient, AadSpeechStsClient>();
+builder.Services.AddSingleton<SpeechTokenService>();
 
 var webOrigin = builder.Configuration["Web:Origin"];
 builder.Services.AddCors(options =>
@@ -93,6 +98,12 @@ app.MapGet("/api/voice/capabilities", (Microsoft.Extensions.Options.IOptions<Voi
         var o = voiceLive.Value;
         var liveAvailable = !string.IsNullOrWhiteSpace(o.AgentId) && !string.IsNullOrWhiteSpace(o.ProjectId);
         return Results.Ok(new { liveAvailable, mockAvailable = true });
+});
+
+app.MapGet("/api/voice/speech/token", async (SpeechTokenService svc, CancellationToken ct) =>
+{
+    var t = await svc.IssueAsync(ct);
+    return Results.Ok(new { token = t.Token, region = t.Region });
 });
 
 app.Run();
