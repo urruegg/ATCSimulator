@@ -41,7 +41,7 @@ resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@20
 
 // Storage Blob Data Contributor for the flight-data identity: read + write the
 // Parquet snapshots that keep the demo alive when FR24 credit is exhausted.
-var storageBlobDataContributor = 'ba92f5b4-2d11-450d-9d4c-8f76a4a1e9c8'
+var storageBlobDataContributor = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 resource roleAssign 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(storage.id, writerPrincipalId, storageBlobDataContributor)
   scope: storage
