@@ -39,6 +39,8 @@ vi.mock('azure-maps-control/dist/atlas.min.css', () => ({}));
 vi.mock('../useFlightData', () => ({
   useFlightData: () => ({
     aircraft: [],
+    source: 'live',
+    snapshotAt: null,
     error: null,
     loading: false,
     lastUpdated: mockLastUpdated,

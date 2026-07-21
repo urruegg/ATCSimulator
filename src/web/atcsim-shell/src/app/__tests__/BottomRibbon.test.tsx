@@ -1,9 +1,14 @@
 import { render, screen } from '@testing-library/react';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { AppStateProvider } from '../../state/AppStateContext';
 import { BottomRibbon } from '../BottomRibbon';
 import '../../i18n';
+
+vi.mock('../../features/flight-data/flightFeedApi', () => ({
+  fetchFeedStatus: vi.fn().mockResolvedValue({ state: 'connected', checkedAt: '2026-07-21T10:30:00Z' }),
+  fetchSnapshots: vi.fn().mockResolvedValue([]),
+}));
 
 beforeAll(() => {
   // Fluent UI v9 popovers/listboxes position via floating-ui, which needs these browser APIs.
@@ -39,7 +44,7 @@ beforeAll(() => {
 });
 
 describe('BottomRibbon', () => {
-  it('shows the last-updated time when flights have loaded', () => {
+  it('shows the last-updated time when flights have loaded', async () => {
     render(
       <FluentProvider theme={webLightTheme}>
         <AppStateProvider>
@@ -48,6 +53,19 @@ describe('BottomRibbon', () => {
       </FluentProvider>,
     );
     // With no load yet, shows the dash placeholder.
-    expect(screen.getByText(/last updated/i)).toBeInTheDocument();
+    expect(await screen.findByText(/last updated/i)).toBeInTheDocument();
+    // Let the async feed-status poll settle to avoid act() warnings.
+    await screen.findByText(/feed connected/i);
+  });
+
+  it('renders the feed status indicator', async () => {
+    render(
+      <FluentProvider theme={webLightTheme}>
+        <AppStateProvider>
+          <BottomRibbon />
+        </AppStateProvider>
+      </FluentProvider>,
+    );
+    expect(await screen.findByText(/feed connected/i)).toBeInTheDocument();
   });
 });
