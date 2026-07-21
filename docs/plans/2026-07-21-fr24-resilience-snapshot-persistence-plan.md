@@ -87,6 +87,17 @@ public record AircraftResponse(
 
 // Options/Fr24Options.cs (existing)
 public sealed class Fr24Options { public string Token {get;set;}=""; public string ApiVersion {get;set;}="v1"; }
+
+// Services/Fr24FlightFeedService.cs (existing) — ALREADY implements this interface:
+public interface IFlightFeedService {
+    Task<IReadOnlyList<AircraftResponse>> GetAircraftAsync(string bounds, CancellationToken ct);
+}
+// FlightFeedRateLimitedException lives in Services namespace (same file). Put the new
+// FlightFeedCreditExhaustedException in the SAME namespace (AtcSim.FlightDataApi.Services),
+// NOT a new Exceptions namespace.
+// Program.cs registers: AddHttpClient<IFlightFeedService, Fr24FlightFeedService>(base=fr24 /api/),
+// and AddSingleton<TokenCredential>(new DefaultAzureCredential()). REUSE that TokenCredential.
+// /api/aircraft takes `string bounds` as a REQUIRED query-string param (not config).
 ```
 
 ```ts
@@ -495,7 +506,8 @@ public sealed class AdlsSnapshotStore : ISnapshotStore
 
 ## Task 5 — FR24 402 exception + service mapping — TDD
 
-**Files:** `Exceptions/FlightFeedCreditExhaustedException.cs`,
+**Files:** `Services/FlightFeedCreditExhaustedException.cs` (Services namespace,
+matching the existing `FlightFeedRateLimitedException`),
 `Services/Fr24FlightFeedService.cs` (edit),
 `tests/.../Fr24CreditExhaustionTests.cs`.
 
@@ -505,7 +517,6 @@ but allow a configurable status code):
 ```csharp
 using System.Net;
 using System.Text;
-using AtcSim.FlightDataApi.Exceptions;
 using AtcSim.FlightDataApi.Options;
 using AtcSim.FlightDataApi.Services;
 using Xunit;
@@ -535,10 +546,10 @@ public class Fr24CreditExhaustionTests
 }
 ```
 
-**GREEN** — `Exceptions/FlightFeedCreditExhaustedException.cs`:
+**GREEN** — `Services/FlightFeedCreditExhaustedException.cs`:
 
 ```csharp
-namespace AtcSim.FlightDataApi.Exceptions;
+namespace AtcSim.FlightDataApi.Services;
 
 public sealed class FlightFeedCreditExhaustedException : Exception
 {
@@ -724,7 +735,6 @@ Behaviour:
 
 ```csharp
 using AtcSim.FlightDataApi.Contracts;
-using AtcSim.FlightDataApi.Exceptions;
 using AtcSim.FlightDataApi.Services;
 using Xunit;
 
@@ -805,7 +815,6 @@ public class AircraftQueryServiceTests
 
 ```csharp
 using AtcSim.FlightDataApi.Contracts;
-using AtcSim.FlightDataApi.Exceptions;
 
 namespace AtcSim.FlightDataApi.Services;
 
