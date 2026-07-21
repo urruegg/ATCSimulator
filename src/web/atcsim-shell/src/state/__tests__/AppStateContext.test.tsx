@@ -60,6 +60,15 @@ describe('AppStateContext', () => {
     expect(result.current.flightsUpdatedAt).toBe(now);
   });
 
+  it('holds and clears the selected snapshot id', () => {
+    const { result } = renderHook(() => useAppState(), { wrapper });
+    expect(result.current.selectedSnapshotId).toBeNull();
+    act(() => result.current.setSelectedSnapshotId('dt=2026-07-21/10-30-05'));
+    expect(result.current.selectedSnapshotId).toBe('dt=2026-07-21/10-30-05');
+    act(() => result.current.setSelectedSnapshotId(null));
+    expect(result.current.selectedSnapshotId).toBeNull();
+  });
+
   it('holds and resets the selected scenario', () => {
     const { result } = renderHook(() => useAppState(), { wrapper });
     act(() => result.current.setSelectedScenario({ id: 'EX-01', title: { en: 'x' }, aircraftClass: 'airliner', expectedCommands: [] }));

@@ -1,4 +1,4 @@
-import type { Aircraft } from './types';
+import type { AircraftFeed } from './types';
 
 /** Error thrown when the flight feed request fails. `rateLimited` is true when
  * the upstream (FR24) is throttling (surfaced by the API as 429/503). */
@@ -12,9 +12,11 @@ export class FlightFeedError extends Error {
   }
 }
 
-export async function fetchAircraft(bounds: string): Promise<Aircraft[]> {
+export async function fetchAircraft(bounds: string, snapshotId?: string | null): Promise<AircraftFeed> {
   const baseUrl = (import.meta.env.VITE_FLIGHT_API_BASE_URL ?? '').replace(/\/$/, '');
-  const response = await fetch(`${baseUrl}/api/aircraft?bounds=${encodeURIComponent(bounds)}`, {
+  const params = new URLSearchParams({ bounds });
+  if (snapshotId) params.set('snapshot', snapshotId);
+  const response = await fetch(`${baseUrl}/api/aircraft?${params.toString()}`, {
     credentials: 'include',
   });
 

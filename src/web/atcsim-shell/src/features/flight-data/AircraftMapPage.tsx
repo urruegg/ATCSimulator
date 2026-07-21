@@ -65,17 +65,28 @@ const useStyles = makeStyles({
 export function AircraftMapPage() {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { setSelectedFlight, selectedAirport, setFlightsUpdatedAt } = useAppState();
+  const { setSelectedFlight, selectedAirport, setFlightsUpdatedAt, selectedSnapshotId, setFeedSource } =
+    useAppState();
 
   const mapHostRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<atlas.Map | null>(null);
 
-  const { aircraft, error, loading, lastUpdated, refresh } = useFlightData(SWITZERLAND_BOUNDS);
+  const { aircraft, source, error, loading, lastUpdated, refresh } = useFlightData(
+    SWITZERLAND_BOUNDS,
+    selectedSnapshotId,
+  );
 
   // Publish the last-updated time to AppState so BottomRibbon can display it.
   useEffect(() => {
     if (lastUpdated) setFlightsUpdatedAt(lastUpdated);
   }, [lastUpdated, setFlightsUpdatedAt]);
+
+  // Publish the feed source (live vs snapshot) so the ribbon can reveal the
+  // snapshot selector only when we are in fallback. `source` is a primitive so
+  // this effect cannot cause a render loop.
+  useEffect(() => {
+    setFeedSource(source);
+  }, [source, setFeedSource]);
 
   // Create the Azure Maps instance once. The SDK needs a real DOM host + WebGL,
   // so under jsdom it is mocked (see the test); the host guard keeps init a

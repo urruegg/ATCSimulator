@@ -21,6 +21,11 @@ public sealed class Fr24FlightFeedService(HttpClient httpClient, IOptions<Fr24Op
             throw new FlightFeedRateLimitedException();
         }
 
+        if ((int)response.StatusCode == 402)
+        {
+            throw new FlightFeedCreditExhaustedException("FR24 credit limit reached.");
+        }
+
         response.EnsureSuccessStatusCode();
 
         await using var content = await response.Content.ReadAsStreamAsync(cancellationToken);

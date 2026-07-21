@@ -8,6 +8,7 @@
 } from 'react';
 import { DEFAULT_AIRPORT_CODE, findAirport, type Airport } from '../data/airports';
 import type { ScenarioSummary } from '../features/simulator/types';
+import type { FeedSource } from '../features/flight-data/types';
 
 /**
  * A flight selected by the trainee/instructor for the ZRH real-flight scenario.
@@ -50,6 +51,8 @@ export interface AppState {
   themeMode: ThemeMode;
   railExpanded: boolean;
   flightsUpdatedAt: Date | null;
+  selectedSnapshotId: string | null;
+  feedSource: FeedSource;
   setAirport: (code: string) => void;
   setSelectedFlight: (flight: SelectedFlight | null) => void;
   setSelectedScenario: (s: ScenarioSummary | null) => void;
@@ -59,6 +62,8 @@ export interface AppState {
   setRailExpanded: (expanded: boolean) => void;
   toggleRail: () => void;
   setFlightsUpdatedAt: (d: Date) => void;
+  setSelectedSnapshotId: (id: string | null) => void;
+  setFeedSource: (s: FeedSource) => void;
 }
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
@@ -106,6 +111,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     readStoredBoolean(STORAGE_KEYS.railExpanded, false),
   );
   const [flightsUpdatedAt, setFlightsUpdatedAtState] = useState<Date | null>(null);
+  const [selectedSnapshotId, setSelectedSnapshotIdState] = useState<string | null>(null);
+  const [feedSource, setFeedSourceState] = useState<FeedSource>('live');
 
   const setAirport = useCallback((code: string) => {
     if (!findAirport(code)) return; // reject unknown airports
@@ -162,6 +169,13 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const setFlightsUpdatedAt = useCallback((d: Date) => setFlightsUpdatedAtState(d), []);
 
+  const setSelectedSnapshotId = useCallback(
+    (id: string | null) => setSelectedSnapshotIdState(id),
+    [],
+  );
+
+  const setFeedSource = useCallback((s: FeedSource) => setFeedSourceState(s), []);
+
   const selectedAirport = useMemo<Airport>(
     () => findAirport(airport) ?? findAirport(DEFAULT_AIRPORT_CODE)!,
     [airport],
@@ -177,6 +191,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       themeMode,
       railExpanded,
       flightsUpdatedAt,
+      selectedSnapshotId,
+      feedSource,
       setAirport,
       setSelectedFlight,
       setSelectedScenario,
@@ -186,6 +202,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setRailExpanded,
       toggleRail,
       setFlightsUpdatedAt,
+      setSelectedSnapshotId,
+      setFeedSource,
     }),
     [
       airport,
@@ -196,6 +214,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       themeMode,
       railExpanded,
       flightsUpdatedAt,
+      selectedSnapshotId,
+      feedSource,
       setAirport,
       setSelectedFlight,
       setSelectedScenario,
@@ -205,6 +225,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setRailExpanded,
       toggleRail,
       setFlightsUpdatedAt,
+      setSelectedSnapshotId,
+      setFeedSource,
     ],
   );
 

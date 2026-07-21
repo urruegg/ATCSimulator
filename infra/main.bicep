@@ -22,6 +22,12 @@ var speechName = take('${prefix}spch${resourceToken}', 24)
 // broker can be configured without a circular module reference (mirrors the
 // foundryEndpoint pattern). Entra auth requires this host, not the regional one.
 var speechEndpoint = 'https://${speechName}.cognitiveservices.azure.com/'
+// ADLS Gen2 snapshot store. Name + DFS endpoint are derived from the
+// deterministic account name so the flight app setting can be wired without a
+// circular module reference (mirrors the speechEndpoint pattern).
+var storageName = take('${prefix}st${resourceToken}', 24)
+var storageDfsEndpoint = 'https://${storageName}.dfs.${environment().suffixes.storage}'
+var snapshotFileSystem = 'flight-snapshots'
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: '${prefix}-law-${resourceToken}'
@@ -82,7 +88,30 @@ module flightDataApi './modules/apiapp.bicep' = {
         name: 'Maps__AccountName'
         value: mapsName
       }
+      {
+        name: 'Storage__AccountUrl'
+        value: storageDfsEndpoint
+      }
+      {
+        name: 'Storage__FileSystem'
+        value: snapshotFileSystem
+      }
+      {
+        name: 'Storage__Region'
+        value: 'ch'
+      }
     ]
+  }
+}
+
+module storage './modules/storage.bicep' = {
+  name: 'storage'
+  params: {
+    name: storageName
+    location: location
+    tags: tags
+    fileSystemName: snapshotFileSystem
+    writerPrincipalId: flightDataApi.outputs.principalId
   }
 }
 
@@ -181,3 +210,5 @@ output mapsClientId string = maps.outputs.clientId
 output speechAccountName string = speech.outputs.name
 output speechRegion string = 'switzerlandnorth'
 output speechEndpoint string = speech.outputs.endpoint
+output storageAccountName string = storage.outputs.name
+output storageDfsEndpoint string = storageDfsEndpoint

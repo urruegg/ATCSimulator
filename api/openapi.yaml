@@ -37,6 +37,11 @@ tags:
     description: ATC instruction submission and virtual-pilot read-back
   - name: transcript
     description: Conversation transcript retrieval
+  - name: feed
+    description: >-
+      Flight-feed resilience: live FR24 envelope, saved snapshot fallback, and
+      tri-state feed status (Sprint 3). Keeps the demo working when the FR24
+      account is out of credit.
 security:
   - entraOAuth2: []
 paths:
@@ -418,6 +423,85 @@ paths:
               schema: { $ref: "#/components/schemas/ScenarioTurnResponse" }
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+  /api/aircraft:
+    get:
+      tags: [feed]
+      summary: Aircraft feed envelope (live FR24 or snapshot fallback)
+      description: >-
+        Returns all aircraft within `bounds` wrapped in an envelope that names
+        the data `source` (`live` or `snapshot`) and, for snapshots, the capture
+        time. On a successful live FR24 fetch the result is persisted as a
+        Parquet snapshot to ADLS Gen2. When FR24 returns 402 (credit exhausted)
+        the API transparently falls back to the latest saved snapshot. Pass
+        `?snapshot={id}` to pin a specific stored snapshot. Public/non-personal
+        data only.
+      operationId: getAircraftFeed
+      parameters:
+        - name: bounds
+          in: query
+          required: true
+          description: "lat1,lon1,lat2,lon2 geographic filter (Switzerland by default)"
+          schema: { type: string, example: "45.8,5.9,47.8,10.5" }
+        - name: snapshot
+          in: query
+          required: false
+          description: >-
+            Snapshot id to pin (archive path without the `region=<r>/` prefix and
+            without the `.parquet` suffix, e.g. `dt=2026-07-21/10-30-05`). When
+            omitted the API serves live data, or the latest snapshot on fallback.
+          schema: { type: string, example: "dt=2026-07-21/10-30-05" }
+      responses:
+        "200":
+          description: Aircraft feed envelope (live or snapshot fallback)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AircraftFeedEnvelope" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404":
+          description: The requested `?snapshot={id}` does not exist
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "503":
+          description: Feed unavailable and no snapshot to fall back to
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /api/flight-snapshots:
+    get:
+      tags: [feed]
+      summary: List saved flight snapshots
+      description: >-
+        Returns the most recent saved snapshots (up to 10), newest first, from
+        ADLS Gen2. Drives the footer snapshot selector shown when the feed is in
+        fallback.
+      operationId: listFlightSnapshots
+      responses:
+        "200":
+          description: Saved snapshots (newest first)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SnapshotInfo" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /api/flight-feed/status:
+    get:
+      tags: [feed]
+      summary: Tri-state flight-feed status
+      description: >-
+        Reports the health of the FR24 feed for the footer indicator:
+        `connected` (green, live data streaming), `no_credit` (yellow, FR24
+        credit exhausted — serving snapshots), or `offline` (red, the feed
+        service is unreachable). Polled by the client every 60s.
+      operationId: getFlightFeedStatus
+      responses:
+        "200":
+          description: Feed status
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FeedStatus" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 components:
   securitySchemes:
     entraOAuth2:
@@ -717,3 +801,65 @@ components:
         code: { type: string, example: AMBIGUOUS_INSTRUCTION }
         message: { type: string, example: "Instruction could not be mapped to a valid command; virtual pilot requested 'say again'." }
         correlationId: { type: string, format: uuid }
+    FeedAircraft:
+      type: object
+      description: >-
+        Flat aircraft projection returned by the `/api/aircraft` envelope
+        (implementation shape; distinct from the richer design `Aircraft`).
+      required: [callsign, latitude, longitude]
+      properties:
+        callsign: { type: string, example: SWR456 }
+        aircraftType: { type: string, example: A320 }
+        registration: { type: string, nullable: true, example: HB-IJW }
+        latitude: { type: number, format: double, example: 47.46 }
+        longitude: { type: number, format: double, example: 8.55 }
+        altitudeFt: { type: integer, example: 6000 }
+        headingDeg: { type: integer, minimum: 0, maximum: 360, example: 275 }
+        groundSpeedKt: { type: integer, example: 220 }
+    AircraftFeedEnvelope:
+      type: object
+      required: [source, aircraft]
+      properties:
+        source:
+          type: string
+          enum: [live, snapshot]
+          description: Whether the aircraft came from a live FR24 fetch or a saved snapshot.
+          example: live
+        snapshotAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Capture time when `source` is `snapshot`; null for live data.
+          example: "2026-07-21T10:30:05Z"
+        aircraft:
+          type: array
+          items: { $ref: "#/components/schemas/FeedAircraft" }
+    SnapshotInfo:
+      type: object
+      required: [id, capturedAt]
+      properties:
+        id:
+          type: string
+          description: >-
+            Snapshot id = archive path without the `region=<r>/` prefix and
+            without the `.parquet` suffix.
+          example: "dt=2026-07-21/10-30-05"
+        capturedAt:
+          type: string
+          format: date-time
+          example: "2026-07-21T10:30:05Z"
+    FeedStatus:
+      type: object
+      required: [state, checkedAt]
+      properties:
+        state:
+          type: string
+          enum: [connected, no_credit, offline]
+          description: >-
+            connected = live FR24 streaming; no_credit = FR24 reachable but
+            out of credit (serving snapshots); offline = feed service unreachable.
+          example: connected
+        checkedAt:
+          type: string
+          format: date-time
+          example: "2026-07-21T10:30:00Z"

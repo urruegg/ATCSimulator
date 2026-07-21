@@ -43,5 +43,23 @@
   },
   "settings": {
     "refresh": "Aggiorna"
+  },
+  "feed": {
+    "status": {
+      "connected": "Feed connesso",
+      "noCredit": "Nessun credito FR24",
+      "offline": "Feed offline",
+      "label": "Feed dati di volo"
+    },
+    "tooltip": {
+      "connected": "I dati FlightRadar24 in tempo reale vengono trasmessi normalmente.",
+      "noCredit": "Credito FlightRadar24 esaurito — visualizzazione dell'ultima istantanea salvata.",
+      "offline": "Il servizio dati di volo non è raggiungibile — visualizzazione dell'ultima istantanea salvata, se disponibile."
+    },
+    "snapshot": {
+      "label": "Istantanea",
+      "placeholder": "Seleziona un'istantanea salvata…",
+      "none": "Nessuna istantanea salvata disponibile"
+    }
   }
 }

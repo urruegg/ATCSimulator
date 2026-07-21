@@ -43,5 +43,23 @@
   },
   "settings": {
     "refresh": "Aktualisieren"
+  },
+  "feed": {
+    "status": {
+      "connected": "Feed verbunden",
+      "noCredit": "Kein FR24-Guthaben",
+      "offline": "Feed offline",
+      "label": "Flugdaten-Feed"
+    },
+    "tooltip": {
+      "connected": "Live-FlightRadar24-Daten werden normal übertragen.",
+      "noCredit": "FlightRadar24-Guthaben aufgebraucht — es wird der letzte gespeicherte Snapshot angezeigt.",
+      "offline": "Der Flugdaten-Dienst ist nicht erreichbar — es wird, falls vorhanden, der letzte gespeicherte Snapshot angezeigt."
+    },
+    "snapshot": {
+      "label": "Snapshot",
+      "placeholder": "Gespeicherten Snapshot auswählen…",
+      "none": "Keine gespeicherten Snapshots verfügbar"
+    }
   }
 }

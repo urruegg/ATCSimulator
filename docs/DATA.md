@@ -269,6 +269,77 @@ Response (ScenarioTurnResponse):
 
 > The OpenAPI stub at [`../api/openapi.yaml`](../api/openapi.yaml) is the authoritative interface definition; keep this section and the stub in sync.
 
+### 5.4 Flight-feed resilience contracts (Sprint 3)
+
+Three endpoints on the FlightDataApi keep the demo working when the FR24 account is out of credit. See [ADR-0008](./adr/ADR-0008-fr24-resilience-snapshots.md).
+
+**`GET /api/aircraft?bounds={lat1,lon1,lat2,lon2}` → Aircraft feed envelope.**
+
+```json
+{
+  "source": "live",
+  "snapshotAt": null,
+  "aircraft": [
+    {
+      "callsign": "SWR456",
+      "aircraftType": "A320",
+      "registration": "HB-IJW",
+      "latitude": 47.46,
+      "longitude": 8.55,
+      "altitudeFt": 6000,
+      "headingDeg": 275,
+      "groundSpeedKt": 220
+    }
+  ]
+}
+```
+
+- `source` is `live` (fresh FR24 fetch) or `snapshot` (served from ADLS Gen2 fallback).
+- `snapshotAt` is the capture time when `source` is `snapshot`; `null` for live.
+- Every successful live fetch is persisted as a Parquet snapshot (write-through).
+- On FR24 **402** (credit exhausted) the API transparently returns the latest snapshot.
+- Any other feed failure (**429 / 5xx / network / auth**) also falls back to the latest snapshot (offline). If **no snapshot exists**, the API returns **503**.
+- `?snapshot={id}` pins a specific stored snapshot (id format below); a missing id returns **404**.
+
+**`GET /api/flight-snapshots` → Saved snapshots (newest first, max 10).**
+
+```json
+[
+  { "id": "dt=2026-07-21/10-30-05", "capturedAt": "2026-07-21T10:30:05Z" }
+]
+```
+
+- The `id` is the archive path without the `region=<r>/` prefix and without the `.parquet` suffix.
+
+**`GET /api/flight-feed/status` → Tri-state feed status (polled every 60s).**
+
+```json
+{ "state": "connected", "checkedAt": "2026-07-21T10:30:00Z" }
+```
+
+- `connected` (green) = live FR24 streaming; `no_credit` (yellow) = FR24 reachable but out of credit (serving snapshots); `offline` (red) = feed service unreachable.
+
+#### Snapshot storage layout (ADLS Gen2)
+
+- **Account:** StorageV2 with hierarchical namespace (`isHnsEnabled: true`), Sweden Central, TLS 1.2, no public blob access, Entra-only (managed identity, no account keys). See [`../infra/modules/storage.bicep`](../infra/modules/storage.bicep).
+- **Container / filesystem:** `flight-snapshots`.
+- **Path:** `region=<r>/dt=<yyyy-MM-dd>/<HH-mm-ss>.parquet` (region `ch` for Switzerland). The snapshot **id** drops the `region=<r>/` prefix and the `.parquet` suffix.
+- **Format:** Parquet (via Parquet.Net). One row per aircraft.
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `snapshotAt` | `timestamp (UTC)` | Capture time; stored as UTC `DateTime` (Parquet.Net does not round-trip `DateTimeOffset`). |
+| `callsign` | `string` | |
+| `aircraftType` | `string` | |
+| `registration` | `string` (nullable) | |
+| `latitude` | `double` | |
+| `longitude` | `double` | |
+| `altitudeFt` | `int` | |
+| `headingDeg` | `int` | |
+| `groundSpeedKt` | `int` | |
+
+- **Personal data:** none — public aircraft state only (`personalData: false`); same envelope as §6.
+
 ---
 
 ## 6. Demo data
