@@ -55,6 +55,11 @@
       "connected": "Les données FlightRadar24 en direct sont diffusées normalement.",
       "noCredit": "Crédit FlightRadar24 épuisé — affichage du dernier instantané enregistré.",
       "offline": "Le service de données de vol est injoignable — affichage du dernier instantané enregistré, le cas échéant."
+    },
+    "snapshot": {
+      "label": "Instantané",
+      "placeholder": "Sélectionner un instantané enregistré…",
+      "none": "Aucun instantané enregistré disponible"
     }
   }
 }

@@ -55,6 +55,11 @@
       "connected": "Live FlightRadar24 data is streaming normally.",
       "noCredit": "FlightRadar24 credit is exhausted — showing the latest saved snapshot.",
       "offline": "The flight feed service is unreachable — showing the latest saved snapshot if available."
+    },
+    "snapshot": {
+      "label": "Snapshot",
+      "placeholder": "Select a saved snapshot…",
+      "none": "No saved snapshots available"
     }
   }
 }
