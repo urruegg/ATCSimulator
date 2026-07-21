@@ -32,9 +32,15 @@ Test-Endpoint 'voice-agent /health' {
     if ($r.StatusCode -ne 200) { throw "status $($r.StatusCode)" }
 }
 
-Test-Endpoint 'aircraft returns live data' {
+Test-Endpoint 'aircraft feed serves live or snapshot data' {
     $r = Invoke-RestMethod "$FlightApiUrl/api/aircraft?bounds=$([uri]::EscapeDataString($Bounds))" -TimeoutSec 60
-    if (-not $r -or $r.Count -lt 1) { throw 'no aircraft returned' }
+    # Sprint 3: the endpoint returns an envelope { source, snapshotAt, aircraft[] }.
+    # The demo is healthy when it serves live data OR a saved snapshot (FR24
+    # credit exhausted is a degraded-but-functional state, not a failure).
+    if (-not $r.PSObject.Properties['source']) { throw 'malformed envelope: missing source' }
+    if ($r.source -ne 'live' -and $r.source -ne 'snapshot') { throw "unexpected source '$($r.source)'" }
+    if ($null -eq $r.aircraft) { throw 'malformed envelope: missing aircraft array' }
+    if (@($r.aircraft).Count -lt 1) { throw "no aircraft returned (source=$($r.source))" }
 }
 
 Test-Endpoint 'voice respond (mock)' {
