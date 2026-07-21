@@ -12,7 +12,7 @@ public sealed class AircraftQueryService(
             var pinned = await store.LoadAsync(snapshotId, ct);
             return pinned is { } p
                 ? new AircraftFeedResponse("snapshot", p.CapturedAt, p.Aircraft)
-                : new AircraftFeedResponse("snapshot", null, Array.Empty<AircraftResponse>());
+                : throw new SnapshotNotFoundException(snapshotId);
         }
 
         try
@@ -24,13 +24,29 @@ public sealed class AircraftQueryService(
             catch { /* snapshotting is best-effort; never fail a good live response */ }
             return new AircraftFeedResponse("live", null, live);
         }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw; // caller went away / shutdown — not a feed failure, don't mask it
+        }
         catch (FlightFeedCreditExhaustedException)
         {
+            // FR24 402: out of credit — serve the latest snapshot (yellow / no_credit).
             status.MarkNoCredit();
-            var latest = await store.LoadLatestAsync(ct);
-            return latest is { } l
-                ? new AircraftFeedResponse("snapshot", l.CapturedAt, l.Aircraft)
-                : new AircraftFeedResponse("snapshot", null, Array.Empty<AircraftResponse>());
+            return await FallbackToLatestAsync(ct);
         }
+        catch
+        {
+            // 429 / 5xx / network / auth / timeout: serve the latest snapshot so the
+            // demo keeps working (red / offline). Status is derived by the probe.
+            return await FallbackToLatestAsync(ct);
+        }
+    }
+
+    private async Task<AircraftFeedResponse> FallbackToLatestAsync(CancellationToken ct)
+    {
+        var latest = await store.LoadLatestAsync(ct);
+        return latest is { } l
+            ? new AircraftFeedResponse("snapshot", l.CapturedAt, l.Aircraft)
+            : throw new SnapshotUnavailableException();
     }
 }

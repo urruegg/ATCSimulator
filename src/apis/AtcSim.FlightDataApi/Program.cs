@@ -71,10 +71,15 @@ app.MapGet("/api/aircraft", async (string bounds, string? snapshot, AircraftQuer
         var result = await query.GetAsync(snapshot, bounds, ct);
         return Results.Ok(result);
     }
-    catch (FlightFeedRateLimitedException)
+    catch (SnapshotNotFoundException)
     {
-        loggerFactory.CreateLogger("FlightData").LogWarning("FR24 rate limited (429); returning 503.");
-        return Results.Json(new { error = "rate_limited" }, statusCode: StatusCodes.Status503ServiceUnavailable);
+        return Results.Json(new { error = "snapshot_not_found" }, statusCode: StatusCodes.Status404NotFound);
+    }
+    catch (SnapshotUnavailableException)
+    {
+        loggerFactory.CreateLogger("FlightData")
+            .LogWarning("Flight feed unavailable and no snapshot to serve; returning 503.");
+        return Results.Json(new { error = "feed_unavailable" }, statusCode: StatusCodes.Status503ServiceUnavailable);
     }
 });
 app.MapGet("/api/flight-snapshots", async (ISnapshotStore store, CancellationToken ct) =>

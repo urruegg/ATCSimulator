@@ -81,18 +81,41 @@ public class AircraftQueryServiceTests
     }
 
     [Fact]
-    public async Task Credit_exhausted_with_no_snapshot_returns_empty_snapshot_envelope()
+    public async Task Credit_exhausted_with_no_snapshot_throws_snapshot_unavailable()
     {
         var store = new FakeStore { Latest = null };
         var sut = new AircraftQueryService(
             new FakeFeed(() => throw new FlightFeedCreditExhaustedException("no credit")),
             store, new FakeStatus(), TimeProvider.System);
 
+        await Assert.ThrowsAsync<SnapshotUnavailableException>(
+            () => sut.GetAsync(null, "b", CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Feed_failure_falls_back_to_latest_snapshot()
+    {
+        var store = new FakeStore { Latest = new SnapshotContent(new DateTimeOffset(2026,7,21,7,0,0,TimeSpan.Zero), Sample) };
+        var sut = new AircraftQueryService(
+            new FakeFeed(() => throw new HttpRequestException("upstream 503")),
+            store, new FakeStatus(), TimeProvider.System);
+
         var result = await sut.GetAsync(null, "b", CancellationToken.None);
 
         Assert.Equal("snapshot", result.Source);
-        Assert.Null(result.SnapshotAt);
-        Assert.Empty(result.Aircraft);
+        Assert.Equal(7, result.SnapshotAt!.Value.Hour);
+    }
+
+    [Fact]
+    public async Task Feed_failure_with_no_snapshot_throws_snapshot_unavailable()
+    {
+        var store = new FakeStore { Latest = null };
+        var sut = new AircraftQueryService(
+            new FakeFeed(() => throw new HttpRequestException("upstream 503")),
+            store, new FakeStatus(), TimeProvider.System);
+
+        await Assert.ThrowsAsync<SnapshotUnavailableException>(
+            () => sut.GetAsync(null, "b", CancellationToken.None));
     }
 
     [Fact]
@@ -108,12 +131,26 @@ public class AircraftQueryServiceTests
     }
 
     [Fact]
-    public async Task Rate_limited_propagates()
+    public async Task Explicit_snapshot_id_that_is_missing_throws_not_found()
     {
+        var store = new FakeStore { Latest = null }; // LoadAsync returns null
+        var sut = new AircraftQueryService(new FakeFeed(() => Task.FromResult(Sample)), store, new FakeStatus(), TimeProvider.System);
+
+        await Assert.ThrowsAsync<SnapshotNotFoundException>(
+            () => sut.GetAsync("dt=2026-07-21/99-99-99", "b", CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Rate_limited_falls_back_to_latest_snapshot()
+    {
+        var store = new FakeStore { Latest = new SnapshotContent(new DateTimeOffset(2026,7,21,6,0,0,TimeSpan.Zero), Sample) };
         var sut = new AircraftQueryService(
             new FakeFeed(() => throw new FlightFeedRateLimitedException()),
-            new FakeStore(), new FakeStatus(), TimeProvider.System);
+            store, new FakeStatus(), TimeProvider.System);
 
-        await Assert.ThrowsAsync<FlightFeedRateLimitedException>(() => sut.GetAsync(null, "b", CancellationToken.None));
+        var result = await sut.GetAsync(null, "b", CancellationToken.None);
+
+        Assert.Equal("snapshot", result.Source);
+        Assert.Equal(6, result.SnapshotAt!.Value.Hour);
     }
 }

@@ -298,7 +298,8 @@ Three endpoints on the FlightDataApi keep the demo working when the FR24 account
 - `snapshotAt` is the capture time when `source` is `snapshot`; `null` for live.
 - Every successful live fetch is persisted as a Parquet snapshot (write-through).
 - On FR24 **402** (credit exhausted) the API transparently returns the latest snapshot.
-- `?snapshot={id}` pins a specific stored snapshot (id format below).
+- Any other feed failure (**429 / 5xx / network / auth**) also falls back to the latest snapshot (offline). If **no snapshot exists**, the API returns **503**.
+- `?snapshot={id}` pins a specific stored snapshot (id format below); a missing id returns **404**.
 
 **`GET /api/flight-snapshots` → Saved snapshots (newest first, max 10).**
 
