@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchAircraft } from './aircraftApi';
-import type { Aircraft } from './types';
+import type { Aircraft, FeedSource } from './types';
 
 export interface FlightData {
   aircraft: Aircraft[];
+  source: FeedSource;
+  snapshotAt: string | null;
   error: Error | null;
   loading: boolean;
   lastUpdated: Date | null;
@@ -16,8 +18,10 @@ export interface FlightData {
  * cuts third-party feed consumption. The last-known aircraft set is kept on
  * error (e.g. FR24 429) so the map never goes blank.
  */
-export function useFlightData(bounds: string): FlightData {
+export function useFlightData(bounds: string, selectedSnapshotId: string | null = null): FlightData {
   const [aircraft, setAircraft] = useState<Aircraft[]>([]);
+  const [source, setSource] = useState<FeedSource>('live');
+  const [snapshotAt, setSnapshotAt] = useState<string | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -28,8 +32,10 @@ export function useFlightData(bounds: string): FlightData {
     inFlight.current = true;
     setLoading(true);
     try {
-      const data = await fetchAircraft(bounds);
-      setAircraft(data);
+      const feed = await fetchAircraft(bounds, selectedSnapshotId);
+      setAircraft(feed.aircraft);
+      setSource(feed.source);
+      setSnapshotAt(feed.snapshotAt);
       setError(null);
       setLastUpdated(new Date());
     } catch (e) {
@@ -38,11 +44,11 @@ export function useFlightData(bounds: string): FlightData {
       setLoading(false);
       inFlight.current = false;
     }
-  }, [bounds]);
+  }, [bounds, selectedSnapshotId]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  return { aircraft, error, loading, lastUpdated, refresh: load };
+  return { aircraft, source, snapshotAt, error, loading, lastUpdated, refresh: load };
 }

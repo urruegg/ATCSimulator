@@ -8,3 +8,11 @@ export interface Aircraft {
   headingDeg: number;
   groundSpeedKt: number;
 }
+
+export type FeedSource = 'live' | 'snapshot';
+
+export interface AircraftFeed {
+  source: FeedSource;
+  snapshotAt: string | null;
+  aircraft: Aircraft[];
+}
