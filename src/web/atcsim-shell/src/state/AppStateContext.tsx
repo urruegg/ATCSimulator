@@ -50,6 +50,7 @@ export interface AppState {
   themeMode: ThemeMode;
   railExpanded: boolean;
   flightsUpdatedAt: Date | null;
+  selectedSnapshotId: string | null;
   setAirport: (code: string) => void;
   setSelectedFlight: (flight: SelectedFlight | null) => void;
   setSelectedScenario: (s: ScenarioSummary | null) => void;
@@ -59,6 +60,7 @@ export interface AppState {
   setRailExpanded: (expanded: boolean) => void;
   toggleRail: () => void;
   setFlightsUpdatedAt: (d: Date) => void;
+  setSelectedSnapshotId: (id: string | null) => void;
 }
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
@@ -106,6 +108,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     readStoredBoolean(STORAGE_KEYS.railExpanded, false),
   );
   const [flightsUpdatedAt, setFlightsUpdatedAtState] = useState<Date | null>(null);
+  const [selectedSnapshotId, setSelectedSnapshotIdState] = useState<string | null>(null);
 
   const setAirport = useCallback((code: string) => {
     if (!findAirport(code)) return; // reject unknown airports
@@ -162,6 +165,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const setFlightsUpdatedAt = useCallback((d: Date) => setFlightsUpdatedAtState(d), []);
 
+  const setSelectedSnapshotId = useCallback(
+    (id: string | null) => setSelectedSnapshotIdState(id),
+    [],
+  );
+
   const selectedAirport = useMemo<Airport>(
     () => findAirport(airport) ?? findAirport(DEFAULT_AIRPORT_CODE)!,
     [airport],
@@ -177,6 +185,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       themeMode,
       railExpanded,
       flightsUpdatedAt,
+      selectedSnapshotId,
       setAirport,
       setSelectedFlight,
       setSelectedScenario,
@@ -186,6 +195,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setRailExpanded,
       toggleRail,
       setFlightsUpdatedAt,
+      setSelectedSnapshotId,
     }),
     [
       airport,
@@ -196,6 +206,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       themeMode,
       railExpanded,
       flightsUpdatedAt,
+      selectedSnapshotId,
       setAirport,
       setSelectedFlight,
       setSelectedScenario,
@@ -205,6 +216,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setRailExpanded,
       toggleRail,
       setFlightsUpdatedAt,
+      setSelectedSnapshotId,
     ],
   );
 
