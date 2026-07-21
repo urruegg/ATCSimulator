@@ -2,7 +2,7 @@ namespace AtcSim.FlightDataApi.Contracts;
 
 public sealed class SnapshotRow
 {
-    public DateTimeOffset SnapshotAt { get; set; }
+    public DateTime SnapshotAt { get; set; }
     public string Callsign { get; set; } = "";
     public string AircraftType { get; set; } = "";
     public string? Registration { get; set; }
