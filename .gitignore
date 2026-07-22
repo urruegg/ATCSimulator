@@ -8,6 +8,11 @@ node_modules/
 __pycache__/
 *.pyc
 .venv/
+# Playwright E2E outputs
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
 # Secrets — never commit
 *.env
 .env*
