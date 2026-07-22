@@ -76,6 +76,7 @@ Pick the custom agent that matches the task (see `../AGENTS.md` and `./agents/`)
 - **SecDevOps** (`AG-E-04`, `agents/secdevops.agent.md`) — CI/CD, GHAS, IaC scanning, policy-as-code, secrets, supply chain.
 - **ATC Domain Expert** (`AG-E-05`, `agents/atc-domain-expert.agent.md`) — ICAO/R-T phraseology correctness, Swiss toponyms/dialect, golden-set authoring.
 - **Responsible-AI & Compliance** (`AG-E-06`, `agents/responsible-ai-officer.agent.md`) — RAI/Content Safety, evaluations, residency & data-protection review; **RAI review gate**.
+- **Operations / SRE** (`AG-E-07`, `agents/operations.agent.md`) — monitors the deployed solution via Application Insights/Log Analytics; intakes signals, triages, and drafts bug/feat issues + spec + plan ready for a review-gated PR. Read-only to prod; proposes only; never merges.
 
 **Delivery agents (execution mode, complement the role agents):** `agents/feature.agent.md`, `agents/test.agent.md`, `agents/infra.agent.md`, `agents/docs.agent.md`, `agents/release.agent.md`. They execute the delegated workflow and defer to the role agents and human gates.
 

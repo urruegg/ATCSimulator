@@ -181,7 +181,7 @@ Which agents may perform which side effects. **✔ = permitted (with the stated 
 
 ---
 
-## 4. Engineering / build-time agents (`AG-E-01…06`) — GitHub Copilot custom agents
+## 4. Engineering / build-time agents (`AG-E-01…07`) — GitHub Copilot custom agents
 
 Custom agents that accelerate the **build**. Each is a drop-in `.agent.md` under [./.github/agents/](./.github/agents/), usable with GitHub Copilot. The legacy `.github/chatmodes/` folder remains as template/source material; the supported runtime entry point is `.github/agents/`. Full role, operating principles, quality gates, guardrails, and handoffs are inside each file.
 
@@ -193,6 +193,7 @@ Custom agents that accelerate the **build**. Each is a drop-in `.agent.md` under
 | **AG-E-04 SecDevOps** | Owns CI/CD (GitHub Actions), GitHub Advanced Security, Defender, secrets, IaC scanning, Zero Trust, and release gates. | [./.github/agents/secdevops.agent.md](./.github/agents/secdevops.agent.md) |
 | **AG-E-05 ATC Domain Expert** | ICAO/R-T phraseology SME; Swiss dialect/place-name nuance; validates read-backs; builds golden phraseology fixtures. | [./.github/agents/atc-domain-expert.agent.md](./.github/agents/atc-domain-expert.agent.md) |
 | **AG-E-06 Responsible-AI & Compliance Officer** | RAI six principles, Transparency Notes, DPIA prompts, content safety, fairness/dialect-bias evaluation. | [./.github/agents/responsible-ai-officer.agent.md](./.github/agents/responsible-ai-officer.agent.md) |
+| **AG-E-07 Operations / SRE** | Monitors the deployed solution via Application Insights / Log Analytics; intakes signals, triages against the platform, and drafts bug/feat issues + spec + plan ready for a review-gated PR. **Read-only to prod; proposes only; never merges.** | [./.github/agents/operations.agent.md](./.github/agents/operations.agent.md) |
 
 ### 4.1 Delivery agents (execution mode) and process docs
 
