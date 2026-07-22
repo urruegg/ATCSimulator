@@ -30,6 +30,7 @@ builder.Services.AddSingleton(sp =>
 });
 builder.Services.AddSingleton<ISnapshotStore, AdlsSnapshotStore>();
 builder.Services.AddSingleton<IFlightFeedStatusProvider, FlightFeedStatusProvider>();
+builder.Services.AddSingleton<IColdStartSnapshotProvider, OpenSkyColdStartSnapshotProvider>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<AircraftQueryService>();
 

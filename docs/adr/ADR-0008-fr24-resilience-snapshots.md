@@ -48,6 +48,7 @@ The approved decisions:
 | D6 | Storage format | **Parquet** (columnar) in ADLS Gen2, analytics-ready |
 | D7 | Architecture | **Extend `AtcSim.FlightDataApi`** (no new compute); ADLS via **managed identity**; add `ISnapshotStore` + status provider |
 | D8 | Cold-start seed | **One-shot OpenSky ZRH seed** — anonymous public endpoint, ZRH TMA box, idempotent latest overwrite + dated archive |
+| D9 | Automatic cold-start fallback | **Bundled ZRH fixture served in-process** by the API when no live feed and no stored snapshot exist, so a fresh environment always has data and a store-read failure degrades to `503`, never `500` |
 
 ### Behaviour
 
@@ -58,12 +59,14 @@ The approved decisions:
 | **200** | Best-effort write snapshot; cache `credit=ok` | `source: "live"` |
 | **402** (credit) | Cache `credit=no_credit`; read latest snapshot | `source: "snapshot"`, state `no_credit` |
 | **429 / 5xx / network / auth** | Read latest snapshot | `source: "snapshot"`, state `offline` |
-| any of the above but **no snapshot exists** | — | `503` |
+| any of the above but **no stored snapshot** | Serve the **bundled cold-start ZRH seed** (best-effort persist to ADLS) | `source: "snapshot"` |
+| no live, no stored snapshot **and** no bundled seed | — | `503` |
 
 - `GET /api/aircraft?snapshot={id}` pins a specific archived snapshot.
 - `GET /api/flight-snapshots` lists the last 10 snapshots (newest first).
 - `GET /api/flight-feed/status` returns `{ state, checkedAt }` where `state ∈ connected | no_credit | offline`, derived from a **cheap FR24 `/api/usage` probe** (does not burn a data credit) plus the cached credit state. Polled by the client every 60 s.
 - `scripts\seed-zrh-snapshot.ps1` can seed `latest.parquet` and the archive from the OpenSky ZRH box (`47.20,8.20,47.75,8.95` by default) or from the checked-in deterministic fixture at `data\flight-feed\opensky-zrh-sample.json`.
+- **Automatic in-process cold-start seed:** when there is no live feed **and** no stored snapshot (fresh environment, or the store is momentarily unreachable), the API serves a **bundled** public ZRH fixture (`Seed/opensky-zrh-cold-start.json`, linked from `data\flight-feed\opensky-zrh-sample.json`) as a `source: "snapshot"` response and best-effort persists it via the app's managed identity. So `GET /api/aircraft` returns data on a brand-new environment **without any manual seeding or CI storage access**; a snapshot-store read failure degrades to the seed (or a clean `503`) rather than an unhandled `500`.
 
 ### Storage & access
 

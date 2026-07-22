@@ -11,4 +11,13 @@
     <PackageReference Include="Microsoft.Identity.Web" Version="2.20.0" />
     <PackageReference Include="Parquet.Net" Version="5.0.2" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Public ZRH fixture bundled with the API for cold-start fallback when no
+         live feed and no stored snapshot exist yet (single source of truth in
+         data/flight-feed). Public flight data only (CON-03). -->
+    <None Include="..\..\..\data\flight-feed\opensky-zrh-sample.json" Link="Seed\opensky-zrh-cold-start.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
 </Project>
