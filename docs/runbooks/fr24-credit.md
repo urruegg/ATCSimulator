@@ -48,14 +48,20 @@ searchable **snapshot selector** appears so the user can pick any of the last
 - **Auto-fallback:** on FR24 **402** (credit exhausted) or any feed failure, the
   API transparently returns the **latest** snapshot as
   `{ "source": "snapshot", ... }` instead of erroring.
+- **Cold-start seed (automatic):** on a **fresh** environment with no stored
+  snapshot yet, the API serves a **bundled** public ZRH fixture
+  (`Seed/opensky-zrh-cold-start.json`) as a `source: "snapshot"` response and
+  best-effort persists it. So the demo works from the very first request without
+  any manual seeding.
 - **Result:** aircraft selection keeps working with the last-known traffic
-  picture even with **zero** FR24 credit. The demo only truly fails if there is
-  **no snapshot at all** (fresh environment, never loaded live) — in that case
-  `GET /api/aircraft` returns `503`.
+  picture even with **zero** FR24 credit. `GET /api/aircraft` returns `503` only
+  in the unlikely case that there is **no** stored snapshot **and** the bundled
+  cold-start fixture is missing.
 
-> To pre-seed a brand-new environment, load the app once while FR24 has credit
-> (or call `GET /api/aircraft?bounds=45.8,5.9,47.8,10.5`) so at least one
-> snapshot exists before a credit-less demo.
+> To pre-seed a brand-new environment with **real** traffic, load the app once
+> while FR24 has credit (or call
+> `GET /api/aircraft?bounds=45.8,5.9,47.8,10.5`) so a live snapshot replaces the
+> bundled cold-start seed.
 
 ## 3. How to top up / restore FR24 credit
 
@@ -116,7 +122,7 @@ Expect `PASS: aircraft feed serves live or snapshot data`.
 
 | Symptom | Likely cause | Action |
 | --- | --- | --- |
-| Ribbon 🔴 red, `/api/aircraft` → 503 | No snapshot exists yet | Load once with FR24 credit to seed a snapshot (§2) |
+| Ribbon 🔴 red, `/api/aircraft` → 503 | No stored snapshot **and** bundled cold-start fixture missing | Confirm `Seed/opensky-zrh-cold-start.json` shipped in the deploy; load once with FR24 credit to seed a live snapshot (§2) |
 | Ribbon 🟡 yellow persists after top-up | Credit added but cached state stale | Wait one status poll (≤60 s) or trigger a live `/api/aircraft` call |
 | Ribbon 🔴 red but FR24 has credit | Token misconfigured / 401-403, or network | Check `Fr24__ApiToken` app setting; inspect flight-data-api logs |
 | Snapshot writes not appearing | MI missing role on storage | Confirm **Storage Blob Data Contributor** on the flight-data MI (see storage.bicep) |
