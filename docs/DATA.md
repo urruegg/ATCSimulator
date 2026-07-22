@@ -271,7 +271,7 @@ Response (ScenarioTurnResponse):
 
 ### 5.4 Flight-feed resilience contracts (Sprint 3)
 
-Three endpoints on the FlightDataApi keep the demo working when the FR24 account is out of credit. See [ADR-0008](./adr/ADR-0008-fr24-resilience-snapshots.md).
+Three endpoints on the FlightDataApi keep the demo working when the FR24 account is out of credit. See [ADR-0008](./adr/ADR-0008-fr24-resilience-snapshots.md). New environments can be seeded with a ZRH cold-start snapshot from the anonymous OpenSky public API; see the [ZRH cold-start snapshot seed runbook](./runbooks/zrh-cold-start-snapshot-seed.md).
 
 **`GET /api/aircraft?bounds={lat1,lon1,lat2,lon2}` → Aircraft feed envelope.**
 
@@ -297,6 +297,7 @@ Three endpoints on the FlightDataApi keep the demo working when the FR24 account
 - `source` is `live` (fresh FR24 fetch) or `snapshot` (served from ADLS Gen2 fallback).
 - `snapshotAt` is the capture time when `source` is `snapshot`; `null` for live.
 - Every successful live fetch is persisted as a Parquet snapshot (write-through).
+- A one-shot ZRH cold-start seed can write the same schema before the first FR24 success.
 - On FR24 **402** (credit exhausted) the API transparently returns the latest snapshot.
 - Any other feed failure (**429 / 5xx / network / auth**) also falls back to the latest snapshot (offline). If **no snapshot exists**, the API returns **503**.
 - `?snapshot={id}` pins a specific stored snapshot (id format below); a missing id returns **404**.
@@ -325,6 +326,7 @@ Three endpoints on the FlightDataApi keep the demo working when the FR24 account
 - **Container / filesystem:** `flight-snapshots`.
 - **Path:** `region=<r>/dt=<yyyy-MM-dd>/<HH-mm-ss>.parquet` (region `ch` for Switzerland). The snapshot **id** drops the `region=<r>/` prefix and the `.parquet` suffix.
 - **Format:** Parquet (via Parquet.Net). One row per aircraft.
+- **Cold-start seed source:** anonymous OpenSky state vectors for the ZRH box (`47.20,8.20,47.75,8.95` by default), mapped to the same `AircraftResponse` columns before serialization.
 
 | Column | Type | Notes |
 | --- | --- | --- |

@@ -10,7 +10,7 @@
 | Status | Accepted |
 | Classification | Public — anonymized demo |
 
-**Related documents:** [../DATA.md](../DATA.md) §5.4 · [../SECURITY.md](../SECURITY.md) · [../BOM.md](../BOM.md) · [../../api/openapi.yaml](../../api/openapi.yaml) · [../../infra/modules/storage.bicep](../../infra/modules/storage.bicep) · [ADR-0003-split-plane-data-residency.md](./ADR-0003-split-plane-data-residency.md) · [ADR-0006-azure-maps-keyless-auth.md](./ADR-0006-azure-maps-keyless-auth.md) · [spec](../specs/2026-07-21-fr24-resilience-snapshot-persistence-design.md) · [plan](../plans/2026-07-21-fr24-resilience-snapshot-persistence-plan.md) · [FR24 credit runbook](../runbooks/fr24-credit.md)
+**Related documents:** [../DATA.md](../DATA.md) §5.4 · [../SECURITY.md](../SECURITY.md) · [../BOM.md](../BOM.md) · [../../api/openapi.yaml](../../api/openapi.yaml) · [../../infra/modules/storage.bicep](../../infra/modules/storage.bicep) · [ADR-0003-split-plane-data-residency.md](./ADR-0003-split-plane-data-residency.md) · [ADR-0006-azure-maps-keyless-auth.md](./ADR-0006-azure-maps-keyless-auth.md) · [spec](../specs/2026-07-21-fr24-resilience-snapshot-persistence-design.md) · [plan](../plans/2026-07-21-fr24-resilience-snapshot-persistence-plan.md) · [FR24 credit runbook](../runbooks/fr24-credit.md) · [ZRH cold-start seed runbook](../runbooks/zrh-cold-start-snapshot-seed.md)
 **Related IDs:** `CON-01`, `CON-03` · `DP-11`, `DP-18` · Sprint issue [#10](https://github.com/urruegg/ATCSimulator/issues/10)
 
 ---
@@ -34,7 +34,9 @@ Requirements:
 
 ## Decision
 
-Persist every successful Switzerland-wide live load as **Parquet** to **ADLS Gen2** and **auto-fall back** to the latest snapshot when FR24 is out of credit or unreachable, with a **tri-state feed status** shown in the footer and a **snapshot selector** available in fallback. The approved decisions:
+Persist every successful Switzerland-wide live load as **Parquet** to **ADLS Gen2** and **auto-fall back** to the latest snapshot when FR24 is out of credit or unreachable, with a **tri-state feed status** shown in the footer and a **snapshot selector** available in fallback. Add a one-shot **ZRH cold-start seed** sourced from the anonymous OpenSky Network public API so `latest.parquet` can exist before the first successful FR24 capture. The seed uses the existing `SnapshotSerializer` / `ISnapshotStore` path, so its schema is identical to live snapshots.
+
+The approved decisions:
 
 | # | Decision | Choice |
 | --- | --- | --- |
@@ -45,6 +47,7 @@ Persist every successful Switzerland-wide live load as **Parquet** to **ADLS Gen
 | D5 | Status presentation | Footer ribbon **left**: colored dot + localized label (`Connected` / `No credits` / `Offline`) + hover tooltip with detail |
 | D6 | Storage format | **Parquet** (columnar) in ADLS Gen2, analytics-ready |
 | D7 | Architecture | **Extend `AtcSim.FlightDataApi`** (no new compute); ADLS via **managed identity**; add `ISnapshotStore` + status provider |
+| D8 | Cold-start seed | **One-shot OpenSky ZRH seed** — anonymous public endpoint, ZRH TMA box, idempotent latest overwrite + dated archive |
 
 ### Behaviour
 
@@ -60,6 +63,7 @@ Persist every successful Switzerland-wide live load as **Parquet** to **ADLS Gen
 - `GET /api/aircraft?snapshot={id}` pins a specific archived snapshot.
 - `GET /api/flight-snapshots` lists the last 10 snapshots (newest first).
 - `GET /api/flight-feed/status` returns `{ state, checkedAt }` where `state ∈ connected | no_credit | offline`, derived from a **cheap FR24 `/api/usage` probe** (does not burn a data credit) plus the cached credit state. Polled by the client every 60 s.
+- `scripts\seed-zrh-snapshot.ps1` can seed `latest.parquet` and the archive from the OpenSky ZRH box (`47.20,8.20,47.75,8.95` by default) or from the checked-in deterministic fixture at `data\flight-feed\opensky-zrh-sample.json`.
 
 ### Storage & access
 
@@ -99,6 +103,7 @@ Persist every successful Switzerland-wide live load as **Parquet** to **ADLS Gen
 - [Plan](../plans/2026-07-21-fr24-resilience-snapshot-persistence-plan.md) — Implementation plan (19 TDD tasks)
 - [DATA.md §5.4](../DATA.md) — Flight-feed resilience contracts and snapshot storage layout
 - [FR24 credit runbook](../runbooks/fr24-credit.md) — Operating the feed (green/yellow/red, top-up, snapshot inspection)
+- [ZRH cold-start seed runbook](../runbooks/zrh-cold-start-snapshot-seed.md) — OpenSky seed command and offline fixture dry run
 - [ADR-0003](./ADR-0003-split-plane-data-residency.md) — Split-plane residency
 - [ADR-0006](./ADR-0006-azure-maps-keyless-auth.md) — Keyless managed-identity access
 - [`../../infra/modules/storage.bicep`](../../infra/modules/storage.bicep) — ADLS Gen2 module + role assignment
