@@ -24,6 +24,7 @@
     "zoomOut": "Zoom out",
     "refresh": "Refresh flights",
     "feedError": "Live flight feed unavailable (rate-limited) — retrying…",
+    "configError": "Azure Maps client ID is not configured. Rebuild the web app with VITE_MAPS_CLIENT_ID.",
     "lastUpdated": "Last updated {{time}}"
   },
   "scenario": {

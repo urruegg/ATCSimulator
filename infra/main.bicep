@@ -202,11 +202,17 @@ output keyVaultName string = keyVault.outputs.name
 output webHostName string = web.outputs.defaultHostName
 output flightDataApiHostName string = flightDataApi.outputs.defaultHostName
 output voiceAgentApiHostName string = voiceAgentApi.outputs.defaultHostName
+// azd captures Bicep outputs into the environment before packaging services.
+// Expose the Vite-prefixed names so the web App Service bundle has the
+// compile-time API and Azure Maps settings required to render the map.
+output VITE_FLIGHT_API_BASE_URL string = 'https://${flightDataApi.outputs.defaultHostName}'
+output VITE_VOICE_API_BASE_URL string = 'https://${voiceAgentApi.outputs.defaultHostName}'
 output applicationInsightsName string = appInsights.outputs.name
 output foundryName string = foundry.outputs.name
 output foundryEndpoint string = foundryEndpoint
 output mapsAccountName string = maps.outputs.name
 output mapsClientId string = maps.outputs.clientId
+output VITE_MAPS_CLIENT_ID string = maps.outputs.clientId
 output speechAccountName string = speech.outputs.name
 output speechRegion string = 'switzerlandnorth'
 output speechEndpoint string = speech.outputs.endpoint

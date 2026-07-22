@@ -1,12 +1,19 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { AppStateProvider } from '../../../state/AppStateContext';
 import { AircraftMapPage } from '../AircraftMapPage';
 import '../../../i18n';
 
 // Shared camera spies so tests can assert recenter/zoom behaviour.
-const { setCamera, getCamera } = vi.hoisted(() => ({
+const { mapCtor, setCamera, getCamera } = vi.hoisted(() => ({
+  mapCtor: vi.fn(() => ({
+    events: { add: vi.fn() },
+    markers: { add: vi.fn(), clear: vi.fn() },
+    setCamera: vi.fn(),
+    getCamera: vi.fn(() => ({ zoom: 14 })),
+    dispose: vi.fn(),
+  })),
   setCamera: vi.fn(),
   getCamera: vi.fn(() => ({ zoom: 14 })),
 }));
@@ -22,13 +29,7 @@ const { mockLastUpdated } = vi.hoisted(() => ({
 // Azure Maps needs WebGL + a real DOM host, neither of which exists under
 // jsdom, so the SDK (and its CSS side-effect import) are mocked.
 vi.mock('azure-maps-control', () => ({
-  Map: vi.fn(() => ({
-    events: { add: vi.fn() },
-    markers: { add: vi.fn(), clear: vi.fn() },
-    setCamera,
-    getCamera,
-    dispose: vi.fn(),
-  })),
+  Map: mapCtor,
   HtmlMarker: vi.fn(() => ({})),
   control: {},
   data: {},
@@ -81,6 +82,20 @@ beforeAll(() => {
   }
 });
 
+beforeEach(() => {
+  vi.stubEnv('VITE_MAPS_CLIENT_ID', 'test-maps-client-id');
+  mapCtor.mockClear();
+  setCamera.mockClear();
+  getCamera.mockClear();
+  mapCtor.mockImplementation(() => ({
+    events: { add: vi.fn() },
+    markers: { add: vi.fn(), clear: vi.fn() },
+    setCamera,
+    getCamera,
+    dispose: vi.fn(),
+  }));
+});
+
 function renderPage() {
   return render(
     <FluentProvider theme={webLightTheme}>
@@ -95,6 +110,28 @@ describe('AircraftMapPage', () => {
   it('mounts the Azure Maps host element', () => {
     const { container } = renderPage();
     expect(container.querySelector('#azure-map-host')).toBeInTheDocument();
+  });
+
+  it('passes the configured Azure Maps account client id to anonymous auth', () => {
+    renderPage();
+    expect(mapCtor).toHaveBeenCalledWith(
+      expect.any(HTMLDivElement),
+      expect.objectContaining({
+        authOptions: expect.objectContaining({
+          authType: 'anonymous',
+          clientId: 'test-maps-client-id',
+        }),
+      }),
+    );
+  });
+
+  it('does not initialize a blank map when the Azure Maps client id is missing', () => {
+    vi.stubEnv('VITE_MAPS_CLIENT_ID', '');
+
+    renderPage();
+
+    expect(mapCtor).not.toHaveBeenCalled();
+    expect(screen.getByRole('alert')).toHaveTextContent(/azure maps client id/i);
   });
 
   it('shows the advisory selected-flight header while nothing is selected', () => {

@@ -77,7 +77,7 @@ This is the same gate CD runs after every SIT deploy — capture the console out
 ## 3. PoC 1 — aircraft selection (manual UI, `FR-01/02`)
 
 1. Open `$web` in a browser and **sign in** with the test user (Entra/MSAL). Expected: the sign-in redirect completes and the shell loads (no "Sign in" button remaining).
-2. Open the aircraft map page. Expected: the Azure Maps canvas renders and aircraft markers appear over the Swiss bounds.
+2. Open the aircraft map page. Expected: the Azure Maps canvas renders and aircraft markers appear over the Swiss bounds. If the shell shows "Azure Maps client ID is not configured", the web bundle was built without `VITE_MAPS_CLIENT_ID`; rerun the environment deploy so `infra/main.bicep` outputs are captured before web packaging.
 3. **Select an aircraft.** Expected: its details (callsign, type, registration, altitude, heading, ground speed) are shown.
 4. Direct API cross-check (public data only):
 

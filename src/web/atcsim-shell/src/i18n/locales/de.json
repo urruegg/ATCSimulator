@@ -24,6 +24,7 @@
     "zoomOut": "Verkleinern",
     "refresh": "Flüge aktualisieren",
     "feedError": "Live-Flugdaten nicht verfügbar (Ratenlimit) – erneuter Versuch…",
+    "configError": "Die Azure Maps-Client-ID ist nicht konfiguriert. Erstellen Sie die Web-App mit VITE_MAPS_CLIENT_ID neu.",
     "lastUpdated": "Zuletzt aktualisiert {{time}}"
   },
   "scenario": {

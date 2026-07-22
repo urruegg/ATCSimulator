@@ -24,6 +24,7 @@
     "zoomOut": "Zoom arrière",
     "refresh": "Actualiser les vols",
     "feedError": "Flux de vols en direct indisponible (limite de débit) — nouvelle tentative…",
+    "configError": "L’ID client Azure Maps n’est pas configuré. Recompilez l’application web avec VITE_MAPS_CLIENT_ID.",
     "lastUpdated": "Dernière mise à jour {{time}}"
   },
   "scenario": {
