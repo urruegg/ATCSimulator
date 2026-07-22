@@ -17,4 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\apis\AtcSim.FlightDataApi\AtcSim.FlightDataApi.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\data\flight-feed\opensky-zrh-sample.json" Link="Fixtures\opensky-zrh-sample.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

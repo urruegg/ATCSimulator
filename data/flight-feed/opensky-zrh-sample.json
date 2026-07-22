@@ -1,0 +1,29 @@
+{
+  "time": 1784710800,
+  "states": [
+    ["4b1805", "SWR14U", "Switzerland", 1784710798, 1784710799, 8.5634, 47.4582, 1828.8, false, 128.6, 270.4, 0.0, null, 1859.3, "1000", false, 0],
+    ["4b1a2c", "EDW24", "Switzerland", 1784710795, 1784710796, 8.7342, 47.3621, 3962.4, false, 206.0, 83.2, -2.1, null, 4023.4, null, false, 0]
+  ],
+  "expectedAircraft": [
+    {
+      "callsign": "SWR14U",
+      "aircraftType": "UNKNOWN",
+      "registration": null,
+      "latitude": 47.4582,
+      "longitude": 8.5634,
+      "altitudeFt": 6000,
+      "headingDeg": 270,
+      "groundSpeedKt": 250
+    },
+    {
+      "callsign": "EDW24",
+      "aircraftType": "UNKNOWN",
+      "registration": null,
+      "latitude": 47.3621,
+      "longitude": 8.7342,
+      "altitudeFt": 13000,
+      "headingDeg": 83,
+      "groundSpeedKt": 400
+    }
+  ]
+}
