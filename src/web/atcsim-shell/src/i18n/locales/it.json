@@ -24,6 +24,7 @@
     "zoomOut": "Riduci",
     "refresh": "Aggiorna voli",
     "feedError": "Feed voli in tempo reale non disponibile (limite di frequenza) — nuovo tentativo…",
+    "configError": "L'ID client di Azure Maps non è configurato. Ricompila l'app Web con VITE_MAPS_CLIENT_ID.",
     "lastUpdated": "Ultimo aggiornamento {{time}}"
   },
   "scenario": {
