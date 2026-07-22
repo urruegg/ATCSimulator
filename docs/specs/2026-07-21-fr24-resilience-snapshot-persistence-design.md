@@ -133,7 +133,7 @@ New i18n keys: `feed.status.connected`, `feed.status.noCredit`, `feed.status.off
 | Change | Detail |
 | --- | --- |
 | `infra/modules/storage.bicep` (**new**) | ADLS Gen2 account `StorageV2`, `isHnsEnabled=true`, `minimumTlsVersion=TLS1_2`, `allowBlobPublicAccess=false`; filesystem `flight-snapshots`; deterministic name (`atcsimstg{token}`, ≤24 lc-alnum) mirroring existing modules |
-| `infra/main.bicep` | Instantiate storage; pass `Storage__AccountUrl` (`https://{name}.dfs.core.windows.net/`) + `Storage__Filesystem` app settings to `flightDataApi`; assign **Storage Blob Data Contributor** (`ba92f5b4-2d11-450d-9d4c-8f76a4a1e9c8`) to the flight-API MI on the storage scope |
+| `infra/main.bicep` | Instantiate storage; pass `Storage__AccountUrl` (`https://{name}.dfs.core.windows.net/`) + `Storage__Filesystem` app settings to `flightDataApi`; assign **Storage Blob Data Contributor** (`ba92f5b4-2d11-453d-a403-e96b0029c9fe`) to the flight-API MI on the storage scope |
 
 Derive the storage endpoint statically from the deterministic name to avoid a circular dependency (mirrors the Sprint 2 Speech pattern). `az bicep build --file infra/main.bicep` must be clean; the generated `main.json` is not committed.
 

@@ -44,7 +44,7 @@ ADLS Gen2 (StorageV2, HNS) filesystem `flight-snapshots`
   `Azure.Storage.Files.DataLake`. Existing: `Azure.Identity` 1.13.0.
 - Storage access: `DataLakeServiceClient` + `DefaultAzureCredential` (managed
   identity in Azure, developer identity locally). Role **Storage Blob Data
-  Contributor** (`ba92f5b4-2d11-450d-9d4c-8f76a4a1e9c8`) on the account.
+  Contributor** (`ba92f5b4-2d11-453d-a403-e96b0029c9fe`) on the account.
 - Frontend: React + Fluent UI, i18next (4 locales en/de/fr/it).
 - Tests: xUnit (backend), vitest (frontend).
 
@@ -1077,7 +1077,7 @@ options when in fallback; onSelect fires with id.
 `isHnsEnabled: true`, Sweden Central, TLS1_2, `allowBlobPublicAccess: false`;
 a `blobServices/containers` child named `flight-snapshots`; output the DFS
 endpoint. Add a role assignment of **Storage Blob Data Contributor**
-(`ba92f5b4-2d11-450d-9d4c-8f76a4a1e9c8`) to the flight API's managed identity
+(`ba92f5b4-2d11-453d-a403-e96b0029c9fe`) to the flight API's managed identity
 principalId.
 
 `main.bicep`: instantiate the module; set the flight app setting
