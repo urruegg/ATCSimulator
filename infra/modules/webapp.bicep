@@ -47,5 +47,6 @@ resource site 'Microsoft.Web/sites@2023-12-01' = {
 }
 
 output name string = site.name
+output id string = site.id
 output defaultHostName string = site.properties.defaultHostName
 output principalId string = site.identity.principalId

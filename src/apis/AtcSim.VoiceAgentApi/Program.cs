@@ -4,8 +4,21 @@ using System.Text.Json;
 using AtcSim.VoiceAgentApi.Contracts;
 using AtcSim.VoiceAgentApi.Options;
 using AtcSim.VoiceAgentApi.Services;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var openTelemetry = builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("voice-agent-api"))
+    .WithTracing(tracing => tracing.AddSource(VoiceLoopTelemetry.ActivitySourceName))
+    .WithMetrics(metrics => metrics.AddMeter(VoiceLoopTelemetry.MeterName));
+if (!string.IsNullOrWhiteSpace(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+{
+    openTelemetry.UseAzureMonitor();
+}
 
 builder.Services.AddSingleton<MockKnowledgeTool>();
 builder.Services.Configure<VoiceLiveOptions>(builder.Configuration.GetSection("VoiceLive"));
@@ -16,6 +29,7 @@ builder.Services.AddSingleton<FunctionCallHandler>();
 builder.Services.AddSingleton<VoiceLiveControlChannel>();
 builder.Services.AddSingleton<TranscriptHub>();
 builder.Services.AddSingleton<MockScenarioService>();
+builder.Services.AddSingleton<IVoiceLoopTelemetry, VoiceLoopTelemetry>();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Azure.Core.TokenCredential>(_ => new Azure.Identity.DefaultAzureCredential());
 builder.Services.AddSingleton<ISpeechStsClient, AadSpeechStsClient>();
@@ -44,11 +58,19 @@ if (string.IsNullOrWhiteSpace(webOrigin))
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "voice-agent-api" }));
 
-app.MapPost("/api/voice/respond", async (VoiceSessionRequest request, MockKnowledgeTool tool, CancellationToken ct) =>
+app.MapPost("/api/voice/respond", async (
+    VoiceSessionRequest request,
+    MockKnowledgeTool tool,
+    IVoiceLoopTelemetry telemetry,
+    CancellationToken ct) =>
 {
     var started = Stopwatch.GetTimestamp();
     var answer = await tool.ResolveAsync(request.Transcript, ct);
     var elapsed = (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+    telemetry.TrackStageLatency("stt", 0);
+    telemetry.TrackStageLatency("intent", elapsed);
+    telemetry.TrackStageLatency("read_back", elapsed);
+    telemetry.TrackStageLatency("tts", elapsed);
 
     return Results.Ok(new VoiceSessionResponse(
         request.Transcript,
