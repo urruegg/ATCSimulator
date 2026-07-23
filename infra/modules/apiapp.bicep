@@ -70,5 +70,6 @@ resource keyVaultSecretsUser 'Microsoft.Authorization/roleAssignments@2022-04-01
 }
 
 output name string = site.name
+output id string = site.id
 output defaultHostName string = site.properties.defaultHostName
 output principalId string = site.identity.principalId

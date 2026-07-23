@@ -56,5 +56,6 @@ resource roleAssign 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 }
 
 output name string = storage.name
+output id string = storage.id
 output dfsEndpoint string = storage.properties.primaryEndpoints.dfs
 output fileSystemName string = fileSystemName

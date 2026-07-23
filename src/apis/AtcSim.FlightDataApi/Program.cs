@@ -1,11 +1,24 @@
 using AtcSim.FlightDataApi.Contracts;
 using AtcSim.FlightDataApi.Options;
 using AtcSim.FlightDataApi.Services;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Azure.Core;
 using Azure.Storage.Files.DataLake;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var openTelemetry = builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("flight-data-api"))
+    .WithTracing(tracing => tracing.AddSource(FlightDataTelemetry.ActivitySourceName))
+    .WithMetrics(metrics => metrics.AddMeter(FlightDataTelemetry.MeterName));
+if (!string.IsNullOrWhiteSpace(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+{
+    openTelemetry.UseAzureMonitor();
+}
 
 builder.Services.Configure<Fr24Options>(builder.Configuration.GetSection("Fr24"));
 builder.Services.AddHttpClient<IFlightFeedService, Fr24FlightFeedService>(client =>
@@ -32,6 +45,7 @@ builder.Services.AddSingleton<ISnapshotStore, AdlsSnapshotStore>();
 builder.Services.AddSingleton<IFlightFeedStatusProvider, FlightFeedStatusProvider>();
 builder.Services.AddSingleton<IColdStartSnapshotProvider, OpenSkyColdStartSnapshotProvider>();
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<IFlightDataTelemetry, FlightDataTelemetry>();
 builder.Services.AddScoped<AircraftQueryService>();
 
 builder.Services.AddHttpClient<IFr24UsageProbe, Fr24UsageProbe>((sp, client) =>
