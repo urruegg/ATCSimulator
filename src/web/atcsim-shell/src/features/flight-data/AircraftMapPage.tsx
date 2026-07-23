@@ -60,6 +60,16 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorStatusWarningBackground2,
     color: tokens.colorStatusWarningForeground2,
   },
+  configError: {
+    position: 'absolute',
+    inset: tokens.spacingVerticalM,
+    zIndex: 2,
+    pointerEvents: 'auto',
+    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM}`,
+    borderRadius: tokens.borderRadiusMedium,
+    backgroundColor: tokens.colorStatusDangerBackground2,
+    color: tokens.colorStatusDangerForeground2,
+  },
 });
 
 export function AircraftMapPage() {
@@ -67,6 +77,7 @@ export function AircraftMapPage() {
   const { t } = useTranslation();
   const { setSelectedFlight, selectedAirport, setFlightsUpdatedAt, selectedSnapshotId, setFeedSource } =
     useAppState();
+  const mapsClientId = import.meta.env.VITE_MAPS_CLIENT_ID?.trim() ?? '';
 
   const mapHostRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<atlas.Map | null>(null);
@@ -93,7 +104,7 @@ export function AircraftMapPage() {
   // no-op when there is no element to mount into.
   useEffect(() => {
     const host = mapHostRef.current;
-    if (!host) return;
+    if (!host || !mapsClientId) return;
 
     const map = new atlas.Map(host, {
       center: [selectedAirport.lon, selectedAirport.lat],
@@ -102,7 +113,7 @@ export function AircraftMapPage() {
         // String is erased to the enum member at build; runtime stays a plain
         // string so the mocked SDK (no AuthenticationType export) still works.
         authType: 'anonymous' as atlas.AuthenticationType,
-        clientId: import.meta.env.VITE_MAPS_CLIENT_ID,
+        clientId: mapsClientId,
         getToken: async (resolve, reject) => {
           try {
             resolve(await fetchMapsToken(flightBase));
@@ -118,7 +129,7 @@ export function AircraftMapPage() {
       map.dispose();
       mapRef.current = null;
     };
-  }, []);
+  }, [mapsClientId, selectedAirport.lat, selectedAirport.lon]);
 
   // Refresh HTML markers whenever the live aircraft set changes. Selecting a
   // marker is advisory only — it never commands the simulator directly.
@@ -171,6 +182,11 @@ export function AircraftMapPage() {
   return (
     <div className={styles.root}>
       <div id="azure-map-host" ref={mapHostRef} style={{ position: 'absolute', inset: 0 }} />
+      {!mapsClientId && (
+        <Text role="alert" className={styles.configError}>
+          {t('map.configError')}
+        </Text>
+      )}
 
       <div className={styles.overlayTop}>
         <SelectedFlightHeader />
